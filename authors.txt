@@ -1,6 +1,0 @@
-#All authors to BrickGraphics must be listed in this file (authors.txt).
-#The list should be sorted lexicographically by last name, first name (ascending)
-#Entries are listed as "name / e-mail". Both name and e-mail will be published so use a screen name and free e-mail account if you prefer to remain annonymous.
-#
-Lasse Deleuran / lassedeleuran@gmail.com
-

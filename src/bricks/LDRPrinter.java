@@ -3,11 +3,18 @@ package bricks;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.io.*;
-
-import mosaic.ui.bricked.*;
+import mosaic.controllers.MagnifierController;
+import mosaic.ui.BrickedView;
+import mosaic.ui.menu.ToBricksTools;
 import colors.*;
 import transforms.*;
 
+/**
+ * Class responsible for outputting to LDR file. 
+ * This is a very simple LDR "printer".
+ * @author ld
+ *
+ */
 public class LDRPrinter {
 	private ToBricksTransform tbt;
 	private ToBricksType type;
@@ -15,10 +22,10 @@ public class LDRPrinter {
 	
 	public LDRPrinter(BrickedView brickedView) {
 		tbt = brickedView.getToBricksTransform();
-		ToBricksToolBar toolBar = brickedView.getToolBar();
+		ToBricksTools toolBar = brickedView.getToolBar();
 		type = toolBar.getToBricksType();
-		Magnifier magnifier = brickedView.getMagnifier();
-		blockSize = magnifier.getBlockSize();
+		MagnifierController magnifier = brickedView.getMagnifierController();
+		blockSize = magnifier.getSizeInMosaicBlocks();
 		size = brickedView.getBrickedSize();
 	}
 	
@@ -38,17 +45,17 @@ public class LDRPrinter {
 		out.println("0 ROTSTEP 0 30 0 REL");
 		
 		switch(type) {
-		case stud:
-			buildStud(out);
+		case STUD_FROM_TOP:
+			buildWithStuds(out);
 			break;
-		case plate:
-			buildPlate(out);
+		case PLATE_FROM_SIDE:
+			buildWithPlates(out);
 			break;
-		case snot:
+		case SNOT_IN_2_BY_2:
 			buildSnot(out);
 			break;
-		case brick:
-			buildBrick(out);
+		case BRICK_FROM_SIDE:
+			buildWidthBricks(out);
 			break;
 		default: 
 			throw new IllegalStateException("Enum broken: " + type);
@@ -60,20 +67,25 @@ public class LDRPrinter {
 		outStream.close();
 	}
 	
+	public interface LDRBuilder {
+		void addSideways(int xPlateIndent, int yPlateIndent, LEGOColor color);
+		void add(int x, int y, LEGOColor color);
+	}
+	
 	private void buildSnot(final PrintWriter out) {
 		LDRBuilder builder = new LDRBuilder() {
 			public void add(int x, int y, LEGOColor color) {
 				String part = "3024.DAT";
 				if(y%5==0)
 					part = "3070B.DAT";
-				out.printf("1 %d 0 %d %d 0 0 -1 0 1 0 1 0 0 %s\n", color.id_LDraw, 8*y, 20*x, part);
+				out.printf("1 %d 0 %d %d 0 0 -1 0 1 0 1 0 0 %s\n", color.getFirstIDLDraw(), 8*y, 20*x, part);
 			}
 
 			public void addSideways(int x, int y, LEGOColor color) {
 				String part = "3024.DAT";
 				if(x%5==4)
 					part = "3070B.DAT";
-				out.printf("1 %d 0 %d %d -1 0 0 0 0 -1 0 -1 0 %s\n", color.id_LDraw, 10+20*y, -2+8*x, part);
+				out.printf("1 %d 0 %d %d -1 0 0 0 0 -1 0 -1 0 %s\n", color.getFirstIDLDraw(), 10+20*y, -2+8*x, part);
 			}
 		};
 		
@@ -85,22 +97,19 @@ public class LDRPrinter {
 		}
 	}
 	
-	private void buildStud(PrintWriter out) {
-		build(out, 20, 0, 20, 0, "0 -1 0 0 0 -1 1 0 0 3024.DAT"); 
+	private void buildWithStuds(PrintWriter out) {
+		build(out, 20, 20, "0 -1 0 0 0 -1 1 0 0 3024.DAT"); 
 	}
 
-	private void buildPlate(PrintWriter out) {
-		build(out, 20, 0, 8, 0, "0 0 -1 0 1 0 1 0 0 3024.DAT");
+	private void buildWithPlates(PrintWriter out) {
+		build(out, 20, 8, "0 0 -1 0 1 0 1 0 0 3024.DAT");
 	}
 	
-	private void buildBrick(PrintWriter out) {
-		build(out, 20, 0, 8*3, 0, "0 0 -1 0 1 0 1 0 0 3005.DAT");
+	private void buildWidthBricks(PrintWriter out) {
+		build(out, 20, 8*3, "0 0 -1 0 1 0 1 0 0 3005.DAT");
 	}
 	
-	private void build(PrintWriter out, 
-			int xMult, int xOffset, 
-			int yMult, int yOffset, 
-			String orientAndDat) {
+	private void build(PrintWriter out, int xMult, int yMult, String orientAndDat) {
 		LEGOColor[][] instructions = tbt.getMainTransform().lastInstructions();
 		int w = instructions.length;
 		int h = instructions[0].length;
@@ -112,8 +121,8 @@ public class LDRPrinter {
 					for(int j = 0; j < jMax; j++) {
 						int x = bx+i;
 						int y = by+j;
-						int color = instructions[x][y].id_LDraw;
-						out.printf("1 %d 0 %d %d %s\n", color, yMult*y+yOffset, xMult*x+xOffset, orientAndDat);
+						int color = instructions[x][y].getFirstIDLDraw();
+						out.printf("1 %d 0 %d %d %s\n", color, yMult*y, xMult*x, orientAndDat);
 					}
 				}
 				out.println("0 STEP");

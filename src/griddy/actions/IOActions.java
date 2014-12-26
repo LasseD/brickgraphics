@@ -182,7 +182,6 @@ public class IOActions {
 			private static final long serialVersionUID = -208104007018089L;
 
 			public void actionPerformed(ActionEvent e) {
-				currentModel.save();
 				File file = (File)currentModel.get(GriddyState.Image);
 				file = ensureSuffix(file, GRIDDY_SUFFIX);
 				try {
@@ -225,7 +224,6 @@ public class IOActions {
 			private static final long serialVersionUID = -48023768855816648L;
 
 			public void actionPerformed(ActionEvent e) {
-				currentModel.save();
 				fileChooser.setSelectedFile(ensureSuffix((File)currentModel.get(GriddyState.Image), GRIDDY_SUFFIX));
 				int retVal = fileChooser.showSaveDialog(parent);
 				if(retVal == JFileChooser.APPROVE_OPTION) {

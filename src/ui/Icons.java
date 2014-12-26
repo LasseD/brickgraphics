@@ -4,35 +4,35 @@ import java.awt.*;
 import java.awt.geom.*;
 import javax.swing.*;
 import java.io.*;
+import java.util.Random;
+
 import colors.*;
+import mosaic.controllers.ColorController;
 import mosaic.ui.prepare.*;
 
 public class Icons {
 	public static final int SIZE_LARGE = 32;
 	public static final int SIZE_SMALL = 16;
+	public static final Color DISABLED_COLOR = Color.LIGHT_GRAY;
+	private static ColorGroup[] colorGroups = ColorGroup.generateBackupColorGroups();;
 
-	private static ColorGroup[] colorGroups;
-	static {
-		try {
-			colorGroups = ColorGroup.generateColorGroups();
-		}
-		catch(IOException e) {
-			colorGroups = ColorGroup.generateBackupColorGroups();
-		}
+	public static void colorControllerLoaded(ColorController cc) {
+		colorGroups = cc.getColorGroupsFromDisk();			
 	}
 	
 	public static ImageIcon get(int size, String image) {
 		String fileName = "icons" + File.separator + size + "x" + size + File.separator + image + ".png";
-		return new ImageIcon(fileName);
+		ImageIcon icon = new ImageIcon(fileName);
+		return icon;
 	}
 
 	private static Color randomColor(Object... seeds) {
 		int hash = 0;
 		for(Object o : seeds)
 			hash += o.hashCode();
-		ColorGroup group = colorGroups[hash % colorGroups.length];
+		ColorGroup group = colorGroups[Math.abs(hash) % colorGroups.length];
 		LEGOColor[] colors = group.getColors();
-		return colors[hash % colors.length].rgb;
+		return colors[Math.abs(hash) % colors.length].getRGB();
 	}
 
 	public static Icon colors(int size) {
@@ -42,7 +42,7 @@ public class Icons {
 				for(int y = 0; w*y < Math.min(colorGroups.length*w, size); y++) {
 					LEGOColor[] colors = colorGroups[y].getColors();
 					for(int x = 0; w*x < Math.min(colors.length*w, size); x++) {
-						g2.setColor(colors[x].rgb);
+						g2.setColor(colors[x].getRGB());
 						g2.fillRect(w*x, w*y, w, w);
 						g2.setColor(Color.WHITE);
 						g2.fillRect(w*x+w/4, w*y+w/4, w/2, w/2);
@@ -54,15 +54,97 @@ public class Icons {
 		};
 	}
 	
+	public static Icon dividerTriangles(int size) {
+		return new HalfWidthIcon(size) {
+			public void paint(Graphics2D g2) {
+				g2.setColor(Color.BLACK);
+				// Left triangle:
+				int[] xs = new int[]{0, size/2, size/2};
+				int[] ys = new int[]{size/4, 0, size/2};
+				g2.fillPolygon(xs,  ys, 3);
+				
+				// Right triangle:
+				xs = new int[]{0, 0, size/2};
+				ys = new int[]{size, size/2, size*3/4};
+				g2.fillPolygon(xs,  ys, 3);
+			}
+		};				
+	}
+	
+	public static Icon leftTriangle(int size) {
+		return new NormalIcon(size) {
+			public void paint(Graphics2D g2) {
+				g2.setColor(Color.BLACK);
+				int[] xs = new int[]{0, size, size};
+				int[] ys = new int[]{size/2, 0, size};
+				g2.fillPolygon(xs,  ys, 3);
+			}
+		};		
+	}
+	
+	public static Icon rightTriangle(int size) {
+		return new NormalIcon(size) {
+			public void paint(Graphics2D g2) {
+				g2.setColor(Color.BLACK);
+				int[] xs = new int[]{0, 0, size};
+				int[] ys = new int[]{0, size, size/2};
+				g2.fillPolygon(xs,  ys, 3);
+			}
+		};		
+	}
+	
+	public static Icon exit(int size) {
+		return new NormalIcon(size) {
+			public void paint(Graphics2D g2) {
+				g2.setColor(Color.RED);
+				g2.fillRect(0,  0, size, size);
+				g2.setColor(Color.BLACK);
+				g2.drawRect(0,  0, size, size);
+				int xMin = size*2/10;
+				int xMax = size-xMin;
+				g2.drawLine(xMin, xMin, xMax, xMax);
+				g2.drawLine(xMin, xMax, xMax, xMin);
+			}
+		};		
+	}
+	
+	public static Icon prepareFiltersEnable(int size) {
+		return new NormalIcon(size) {
+			public void paint(Graphics2D g2) {
+				g2.translate(size/2, 0);
+				sharpness(size/2).paint(g2);
+				g2.translate(0, size/2);
+				plus(size/2).paint(g2);
+				g2.translate(-size/2, 0);
+				gamma(size/2).paint(g2);
+				g2.translate(0, -size/2);
+			}
+		};				
+	}
+	
 	public static Icon showColors(int size) {
 		return new NormalIcon(size) {
 			public void paint(Graphics2D g2) {
-				int w = size/4;
+				g2.setColor(Color.WHITE);
+				g2.fillRect(0,  0, size, size);
+				
+				final int ROWS = 4;
+				int w = size/ROWS;
 				for(int y = 0; w*y < size; y++) {
-					for(int x = 0; w*x < size; x++) {
-						g2.setColor(randomColor(getClass(), y, 2*x));
+					for(int x = 0; x < ROWS-y-1; x++) {
+						g2.setColor(randomColor(getClass(), 2*y, x));
 						g2.fillRect(w*x, w*y, w, w);
 						g2.setColor(Color.BLACK);
+						g2.drawRect(w*x, w*y, w, w);						
+					}
+					g2.setColor(randomColor(getClass(), y));
+					g2.fillPolygon(new int[]{w*(ROWS-y-1), w*(ROWS-y-1), w*(ROWS-y)}, new int[]{w*(y+1), w*y, w*y}, 3);
+				}
+				// draw black lines:
+				g2.setColor(Color.BLACK);
+				g2.drawLine(0,  size, size, 0);
+				for(int y = 0; w*y < size; y++) {
+					for(int x = 0; w*x < size; x++) {
 						g2.drawRect(w*x, w*y, w, w);						
 					}
 				}
@@ -102,10 +184,13 @@ public class Icons {
 		};
 	}
 
-	public static Icon brick(int size) {
+	public static Icon brickFromSide(int size, final boolean enabled) {
 		return new NormalIcon(size) {
 			public void paint(Graphics2D g2) {
-				g2.setColor(randomColor(getClass()));
+				if(enabled)
+					g2.setColor(Color.RED);
+				else
+					g2.setColor(DISABLED_COLOR);
 				// brick:
 				g2.fillRect(mid-brick_width/2, stud_height, brick_width, size-stud_height);
 				// stud:
@@ -120,10 +205,13 @@ public class Icons {
 		};
 	}
 
-	public static Icon plate(int size) {
+	public static Icon plateFromSide(int size, final boolean enabled) {
 		return new NormalIcon(size) {
 			public void paint(Graphics2D g2) {
-				g2.setColor(randomColor(getClass()));
+				if(enabled)
+					g2.setColor(Color.RED);
+				else
+					g2.setColor(DISABLED_COLOR);
 				// plate:
 				g2.fillRect(mid-brick_width/2, size-plate_height, brick_width, plate_height);
 				// stud:
@@ -138,10 +226,13 @@ public class Icons {
 		};
 	}
 
-	public static Icon tile(int size) {
+	public static Icon tileFromTop(int size, final boolean enabled) {
 		return new NormalIcon(size) {
 			public void paint(Graphics2D g2) {
-				g2.setColor(randomColor(getClass()));
+				if(enabled)
+					g2.setColor(Color.RED);
+				else
+					g2.setColor(DISABLED_COLOR);
 				g2.fillRect(mid-brick_width/2, mid-brick_width/2, brick_width, brick_width);
 				g2.setColor(Color.BLACK);
 				g2.drawRect(mid-brick_width/2, mid-brick_width/2, brick_width, brick_width);
@@ -149,28 +240,42 @@ public class Icons {
 		};
 	}
 
-	public static Icon stud(int size) {
+	public static Icon studFromTop(int size, final int bricksWide, final boolean enabled) {
 		return new NormalIcon(size) {
 			public void paint(Graphics2D g2) {
-				g2.setColor(randomColor(getClass()));
+				if(enabled)
+					g2.setColor(Color.RED);
+				else
+					g2.setColor(DISABLED_COLOR);
 				g2.fillRect(mid-brick_width/2, mid-brick_width/2, brick_width, brick_width);
-				g2.fillOval(mid-stud_width/2, mid-stud_width/2, stud_width, stud_width);
 				g2.setColor(Color.BLACK);
 				g2.drawRect(mid-brick_width/2, mid-brick_width/2, brick_width, brick_width);
-				g2.drawOval(mid-stud_width/2, mid-stud_width/2, stud_width, stud_width);
+				
+				int realStudWidth = stud_width/bricksWide;
+				int smallBrickWidth = brick_width/bricksWide;
+				for(int x = 0; x < bricksWide; ++x) {
+					int indentX = mid-brick_width/2 + x*smallBrickWidth + (smallBrickWidth-realStudWidth)/2;
+					for(int y = 0; y < bricksWide; ++y) {
+						int indentY = mid-brick_width/2 + y*smallBrickWidth + (smallBrickWidth-realStudWidth)/2;
+						g2.drawOval(indentX, indentY, realStudWidth, realStudWidth);
+					}
+				}
 			}
 		};
 	}
 
-	public static Icon snot(int size) {
+	public static Icon snot(int size, final boolean enabled) {
 		return new NormalIcon(size) {
 			public void paint(Graphics2D g2) {
-				g2.setColor(randomColor(getClass()));
+				if(enabled)
+					g2.setColor(Color.RED);
+				else
+					g2.setColor(DISABLED_COLOR);
 				// bottom plate
 				g2.fillRect(0, size-plate_height, size, plate_height);
 				// sideways plates:
 				for(int i = 0; i < 3; i++) {
-					g2.setColor(randomColor(i*getClass().hashCode()));
+					g2.setColor(enabled ? (i % 2 == 0 ? Color.RED : Color.BLUE) : DISABLED_COLOR);
 					g2.fillRect(i*size/3, 0, size/3, size-plate_height);				
 					g2.setColor(Color.BLACK);
 					g2.drawRect(i*size/3, 0, size/3, size-plate_height);
@@ -183,7 +288,7 @@ public class Icons {
 	public static Icon plateHeight(int size) {
 		return new NormalIcon(size) {
 			public void paint(Graphics2D g2) {
-				g2.setColor(randomColor(getClass()));
+				g2.setColor(Color.BLUE);
 				// plate:
 				g2.fillRect(0, size-plate_height, brick_width, plate_height);
 				// stud:
@@ -210,7 +315,7 @@ public class Icons {
 	public static Icon brickHeight(int size) {
 		return new NormalIcon(size) {
 			public void paint(Graphics2D g2) {
-				g2.setColor(randomColor(getClass()));
+				g2.setColor(Color.BLUE);
 				// plate:
 				g2.fillRect(0, stud_height, brick_width, brick_height);
 				// stud:
@@ -237,7 +342,7 @@ public class Icons {
 	public static Icon brickWidth(int size) {
 		return new NormalIcon(size) {
 			public void paint(Graphics2D g2) {
-				g2.setColor(randomColor(getClass()));
+				g2.setColor(Color.RED);
 				g2.fillRect(mid-brick_width/2, size-brick_width, brick_width, brick_width);
 				g2.fillOval(mid-stud_width/2, size-brick_width+(brick_width-stud_width)/2, stud_width, stud_width);
 				g2.setColor(Color.BLACK);
@@ -259,8 +364,6 @@ public class Icons {
 	public static Icon crop(int size) {
 		return new NormalIcon(size) {
 			public void paint(Graphics2D g2) {
-				g2.setColor(randomColor(getClass()));
-				g2.fillRect(0, 0, size-1, size-1);
 				Cropper.drawCropHighlight(g2, new Rectangle(3, 4, size-8, size-9));
 			}
 		};
@@ -273,20 +376,21 @@ public class Icons {
 				int w = 8;
 				for(int y = 0; w*y < Math.min(colorGroups.length*w, size); y++) {
 					LEGOColor[] colors = colorGroups[y].getColors();
-					LEGOColor color = colors[colors.length/2];
-					g2.setColor(color.rgb);
+					LEGOColor color = colors.length > 0 ? colors[0] : LEGOColor.WHITE;
+					g2.setColor(color.getRGB());
 					g2.fillRect(0, w*y, w, w);
 					g2.setColor(Color.BLACK);
 					g2.drawRect(0, w*y, w, w);
-					g2.setFont(LEGOColor.makeFont(g2, size - w - 2, w, color));
-					g2.drawString(color.getShortIdentifier(), w + 2, y*w+w);
+					// draw "text":
+					g2.setColor(Color.LIGHT_GRAY);
+					g2.fillRect(w + 4, w*y + w/3 + 1, size-w-4, w/2);
 				}
 				g2.setFont(origFont);
 			}
 		};
 	}
 	
-	public static Icon plus(int size) {
+	public static NormalIcon plus(int size) {
 		return new NormalIcon(size) {
 			public void paint(Graphics2D g2) {
 				g2.setColor(Color.BLACK);
@@ -355,6 +459,62 @@ public class Icons {
 		};
 	}
 
+	public static Icon treshold(int size) {
+		return new NormalIcon(size) {
+			public void paint(Graphics2D g2) {
+				// draw left side:
+				Paint p = g2.getPaint();
+				Paint gradient = new LinearGradientPaint(0, 0, 0, size-1, new float[]{0,1}, new Color[]{Color.RED, Color.BLUE});
+				g2.setPaint(gradient);
+				g2.fillArc(0, 0, size, size, 90, 180); 
+				g2.setPaint(p);
+				
+				// draw transformed side:
+				g2.setColor(Color.RED);
+				g2.fillArc(0, 0, size, size, 0, 90); 
+				g2.setColor(Color.BLUE);
+				g2.fillArc(0, 0, size, size, 0, -90); 
+				
+				g2.setColor(Color.BLACK);
+				g2.drawOval(0, 0, size-1, size-1);
+				g2.drawLine(size/2, 0, size/2, size-1);
+			}
+		};
+	}	
+	
+	public static Icon floydSteinberg(int size) {
+		return new NormalIcon(size) {
+			public void paint(Graphics2D g2) {
+				final Random rand = new Random(10937);
+				// draw left side:
+				Paint p = g2.getPaint();
+				Paint gradient = new LinearGradientPaint(0, 0, 0, size-1, new float[]{0,1}, new Color[]{Color.RED, Color.BLUE});
+				g2.setPaint(gradient);
+				g2.fillArc(0, 0, size, size, 90, 180); 
+				g2.setPaint(p);
+				
+				// draw transformed side:
+				g2.setColor(Color.RED);
+				g2.fillArc(0, 0, size, size, -90, 180); 
+
+				g2.setColor(Color.BLUE);
+				final int BLOCK_SIZE = 1;
+				for(int y = 0; y < size; y+=BLOCK_SIZE) {
+					float partBlue = y /(float)size;
+					int d = size/2-y;
+					int width = (int)Math.sqrt(size*size/4 - d*d);
+					for(int x = size/2; x < size/2+width; x+=BLOCK_SIZE) {
+						if(rand.nextFloat() < partBlue)
+  						  g2.fillRect(x, y, BLOCK_SIZE, BLOCK_SIZE);
+					}
+				}
+				
+				g2.setColor(Color.BLACK);
+				g2.drawOval(0, 0, size-1, size-1);
+				g2.drawLine(size/2, 0, size/2, size-1);
+			}
+		};
+	}	
 	
 	public static Icon saturation(int size) {
 		return new NormalIcon(size) {
@@ -380,7 +540,7 @@ public class Icons {
 			}
 		};
 	}
-	public static Icon gamma(int size) {
+	public static NormalIcon gamma(int size) {
 		return new NormalIcon(size) {
 			public void paint(Graphics2D g2) {
 				g2.setColor(Color.BLACK);
@@ -409,7 +569,7 @@ public class Icons {
 			}
 		};
 	}
-	public static Icon sharpness(int size) {
+	public static NormalIcon sharpness(int size) {
 		return new NormalIcon(size) {
 			public void paint(Graphics2D g2) {
 				g2.setColor(Color.WHITE);
@@ -457,4 +617,28 @@ public class Icons {
 
 		abstract void paint(Graphics2D g2);
 	}
-}
+	private abstract static class HalfWidthIcon implements Icon {
+		int size;
+		
+		HalfWidthIcon(int size) {
+			this.size = size;
+		}		
+
+		public int getIconHeight() {
+			return size;
+		}
+
+		public int getIconWidth() {
+			return size/2;
+		}		
+
+		public void paintIcon(Component c, Graphics g, int x, int y) {
+			Graphics2D g2 = (Graphics2D)g;
+			g2.translate(x, y);
+			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+			paint(g2);
+			g2.translate(-x, -y);			
+		}
+
+		abstract void paint(Graphics2D g2);
+	}}

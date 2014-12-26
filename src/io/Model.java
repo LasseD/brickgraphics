@@ -7,10 +7,8 @@ import java.util.List;
 public class Model<S extends ModelState> {
 	private String modelFile;
 	private Map<S, Object> map;
-	private Map<S, List<ModelChangeListener>> changeListeners;
 	private List<ModelSaver<S>> modelSavers;
 	private Class<S> modelStateClass;
-	private boolean isSaving;
 	
 	public boolean modelFileExists() {
 		return new File(modelFile).exists();
@@ -20,7 +18,6 @@ public class Model<S extends ModelState> {
 		this.modelStateClass = modelStateEnumClass;
 		this.modelFile = modelFile;
 		modelSavers = new LinkedList<ModelSaver<S>>();
-		changeListeners = new HashMap<S, List<ModelChangeListener>>();
 		try {
 			FileInputStream fis = new FileInputStream(modelFile);
 	        ObjectInputStream ois = new ObjectInputStream(fis);
@@ -59,14 +56,6 @@ public class Model<S extends ModelState> {
         	if(!readKeys.contains(s))
         		throw new InvalidObjectException("State " + s + " not read!");
         }
-        for(S s : map.keySet()) {
-        	List<ModelChangeListener> listeners = changeListeners.get(s);
-        	if(listeners == null)
-        		continue;
-        	for(ModelChangeListener l : listeners) {
-        		l.modelChanged(get(s));
-        	}
-        }
 	}
 	
 	public Object get(S state) {
@@ -81,24 +70,6 @@ public class Model<S extends ModelState> {
 			if(value.getClass() != state.getType())
 				throw new IllegalArgumentException("Wrong type: " + state.getType() + "!=" + value.getClass());
 		map.put(state, value);
-		if(isSaving)
-			return;
-		List<ModelChangeListener> listeners = changeListeners.get(state);
-    	if(listeners == null)
-    		return;
-    	for(ModelChangeListener l : listeners) {
-			Object o = get(state);
-			l.modelChanged(o);
-		}
-	}
-	
-	public void addModelChangeListener(ModelChangeListener c, S state) {
-		List<ModelChangeListener> l = changeListeners.get(state);
-		if(l == null) {
-			l = new LinkedList<ModelChangeListener>();
-			changeListeners.put(state, l);
-		}
-		l.add(c);
 	}
 
 	/**
@@ -116,12 +87,10 @@ public class Model<S extends ModelState> {
 		modelSavers.add(modelSaver);
 	}
 	
-	public void save() {
-		isSaving = true;
+	private void save() {
 		for(ModelSaver<S> modelSaver : modelSavers) {
 			modelSaver.save(this);
 		}
-		isSaving = false;
 	}
 	
 	public void saveToFile() throws IOException {

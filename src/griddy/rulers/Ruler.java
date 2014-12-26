@@ -124,13 +124,7 @@ public class Ruler implements DisplayComponent, MouseListener, MouseMotionListen
 				if(p2 == null)
 					p2 = new Point2D.Double(tmp.x, tmp.y);
 				
-				if(p2 == null) {
-					setText(formatPoint(p1));
-					return;					
-				}
-				// report positions and dist:
-				Point2D.Double dist = new Point2D.Double(p2.x-p1.x,p2.y-p1.y);
-				setText(formatPoint(p1) + "->" + formatPoint(p2) + ": " + formatPoint(dist));
+				setText(formatPoint(p1));
 			}			
 		}
 	}

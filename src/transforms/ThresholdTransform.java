@@ -1,17 +1,14 @@
 package transforms;
 
 import java.awt.image.*;
+
+import mosaic.controllers.ColorController;
+
 import colors.*;
 
-/**
- * 2x5 = 10x10
- */
 public class ThresholdTransform extends BufferedLEGOColorTransform {
-	private LEGOColorApproximator colorApproximator;
-	
-	public ThresholdTransform(LEGOColorApproximator ca) {
-		super(1);
-		colorApproximator = ca;
+	public ThresholdTransform(ColorController cc) {
+		super(1, cc);
 	}
 	
 	@Override
@@ -25,8 +22,7 @@ public class ThresholdTransform extends BufferedLEGOColorTransform {
 
 		for(int y = 0, i = 0; y < h; y++) {
 			for(int x = 0; x < w; x++, i++) {
-				int index = colorApproximator.getNearestIndex(iPixels[i]);
-				pixels[x][y] = colorApproximator.getLEGOColor(index);
+				pixels[x][y] = LEGOColorLookUp.lookUp(iPixels[i]);
 			}
 		}
 	    return pixels;

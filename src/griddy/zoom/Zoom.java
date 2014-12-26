@@ -15,7 +15,6 @@ public class Zoom implements ModelSaver<GriddyState>, ModelChangeListener {
 	public Zoom(Model<GriddyState> model) {
 		zoom = (Double)model.get(GriddyState.Zoom);
 		listeners = new LinkedList<ZoomListener>();
-		model.addModelChangeListener(this, GriddyState.Zoom);
 		model.addModelSaver(this);
 	}
 	
@@ -41,7 +40,7 @@ public class Zoom implements ModelSaver<GriddyState>, ModelChangeListener {
 		model.set(GriddyState.Zoom, zoom);
 	}
 	
-	private class WellBehaveComboBox extends JComboBox {
+	private class WellBehaveComboBox extends JComboBox<String> {
 		private static final long serialVersionUID = -5402008932718013L;
 		private boolean ignoreActions;
 		private List<ActionListener> actionListeners;

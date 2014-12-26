@@ -1,0 +1,17 @@
+Software: LD Digital Mosaic Creator (LDDMC)
+Version: 0.9.1
+
+Created by Lasse Deleuran (lassedeleuran@gmail.com)
+License: Creative Commons CC BY-SA 2.5: creativecommons.org/licenses/by-sa/2.5/
+
+WrapLayout taken from Rob Camick (tips4java.wordpress.com)
+
+Colors taken from Rebrickable (rebrickable.com)
+
+rgb2lab taken from Bruce Justin Lindbloom (info@brucelindbloom.com)
+
+CIELab implementation by finnw on stackoverflow (http://stackoverflow.com/users/12048/finnw)
+CIELab implementation license: Creative Commons CC BY-SA 2.5
+CIELab implementation was slightly changed to fit into the framework of LDDMC.
+
+The source of this software is included in the /src folder.

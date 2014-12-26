@@ -7,6 +7,7 @@ import java.io.*;
 import java.util.*;
 import java.util.List;
 import javax.swing.*;
+
 import griddy.*;
 import griddy.zoom.*;
 
@@ -180,7 +181,7 @@ public class BorderRuler implements Serializable, BorderRulerListener, ZoomListe
 		};
 	}
 	
-	private class WellBehaveComboBox extends JComboBox {
+	private class WellBehaveComboBox extends JComboBox<LengthType> {
 		private static final long serialVersionUID = -540200893271836013L;
 		private boolean ignoreActions;
 		private List<ActionListener> actionListeners;
@@ -198,9 +199,10 @@ public class BorderRuler implements Serializable, BorderRulerListener, ZoomListe
 						l.actionPerformed(e);
 				}
 			});
-			setRenderer(new ListCellRenderer() {				
+			setRenderer(new ListCellRenderer<LengthType>() {				
 				@Override
-				public Component getListCellRendererComponent(JList list, Object value,
+				public Component getListCellRendererComponent(
+						JList<? extends LengthType> list, LengthType value,
 						int index, boolean isSelected, boolean cellHasFocus) {
 					JComponent component = ((LengthType)value).makeDisplayComponent();
 					int width = Math.max(component.getPreferredSize().width, 32);

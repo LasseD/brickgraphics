@@ -1,53 +1,69 @@
 package mosaic.ui;
 
 import io.*;
-
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.*;
-import java.util.Set;
 import javax.swing.*;
 import javax.swing.event.*;
-
 import ui.Icons;
-
-import mosaic.io.BrickGraphicsState;
-import mosaic.io.MosaicIO;
-import mosaic.ui.bricked.*;
+import mosaic.controllers.*;
+import mosaic.io.*;
+import mosaic.ui.menu.*;
 import mosaic.ui.prepare.*;
 
 /**
- * Java Hints: 142,355 sec.
- * First own impl: 1-3 sec. (Use this...)
- *
- * Left: Size, crop, (sharpness, gamma, brightness, contrast, saturation)
- *		 file:
- *		 v open 
- *		 s save (brickType, widthType, width, heightType, height, colors)
- *		 - print instructions
- *		 Magnifier:
- *		 v show
- *		 v set size
- *		 v color codes
- *		 help:
- *		 s Manual (Open link)
- *		 s about (JDialog w. JLabel w. text)
+ * @author ld
  */
-public class MainWindow extends JFrame implements ChangeListener, ModelSaver<BrickGraphicsState>, Dialogs.DialogListener, WindowListener {
+public class MainWindow extends JFrame implements ChangeListener, ModelSaver<BrickGraphicsState> {
 	private static final long serialVersionUID = 4819662761398560128L;
-	private BrickedView brickedView;
+	
+	public static final String APP_NAME = "LD Digital Mosaic Creator";
+	public static final String APP_VERSION = "0.9.1";
+	public static final String HELP_URL = "http://c-mt.dk/software/lddmc/help";
+	
 	private ImagePreparingView imagePreparingView;
+	private BrickedView brickedView;
 	private BufferedImage image;
 	private JSplitPane splitPane;
 	private Model<BrickGraphicsState> model;
 
+	private MagnifierController magnifierController;
+	private ColorController colorController;
+
 	public MainWindow() {
-		super("Brick Graphics Mosaic");
+		super(APP_NAME);
+		long startTime = System.currentTimeMillis();
 		System.out.println("Initiating components");
-		setIconImage(Icons.get(32, "icon").getImage());
-		model = new Model<BrickGraphicsState>("BrickGraphics.state", BrickGraphicsState.class);
-		addWindowListener(this);
+		model = new Model<BrickGraphicsState>("lddmc.state", BrickGraphicsState.class);
+		model.addModelSaver(this);
+		
+		colorController = ColorController.instance(model);
+		magnifierController = new MagnifierController(model);
+
+		System.out.println("Created controllers after " + (System.currentTimeMillis()-startTime) + "ms.");
+
+		imagePreparingView = new ImagePreparingView(model);		
+		imagePreparingView.addChangeListener(this);
+		System.out.println("Created left view after " + (System.currentTimeMillis()-startTime) + "ms.");
+		
+		brickedView = new BrickedView(this, model, magnifierController, colorController);
+		System.out.println("Created right view after " + (System.currentTimeMillis()-startTime) + "ms.");
+
+		addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				try {
+					model.saveToFile();
+				}
+				catch (IOException e2) {
+					e2.printStackTrace();
+				}
+				System.exit(0);
+			}
+		});
 		getContentPane().addHierarchyBoundsListener(new HierarchyBoundsListener(){
 			public void ancestorMoved(HierarchyEvent e) {
 				updateModel();				
@@ -74,87 +90,49 @@ public class MainWindow extends JFrame implements ChangeListener, ModelSaver<Bri
 				}
 			}
 		});
-		Action openAction = MosaicIO.createOpenAction(model, this);
-		Action saveAction = MosaicIO.createSaveAction(model, this);
-		Action saveAsAction = MosaicIO.createSaveAsAction(model, this);
-		Action exportAction = MosaicIO.createExportAction(model, this);
 
-		// components:
-		try {
-			File file = (File)model.get(BrickGraphicsState.Image);
-			MosaicIO.load(this, model, file);
-		}
-		catch (IOException e) {
-			openAction.actionPerformed(null);
-		} catch (ClassCastException e) {
-			e.printStackTrace();
-			openAction.actionPerformed(null);
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-			openAction.actionPerformed(null);
-		}
-		imagePreparingView.addChangeListener(this);
-		model.addModelSaver(this);
-		
 		// in split pane:
 		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, imagePreparingView, brickedView);
-
-		final JTabbedPane tabbedPane = new JTabbedPane();
-		tabbedPane.addTab(null, Icons.get(32, "image_w"), null);
-		tabbedPane.add(splitPane, Icons.get(32, "image_c"));
-		tabbedPane.addTab(null, Icons.get(32, "image_e"), null);
-		tabbedPane.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				int index = tabbedPane.getSelectedIndex();
-				switch(index) {
-				case 0:
-					imagePreparingView.setVisible(true);
-					brickedView.setVisible(false);					
-					break;
-				case 1:
-					splitPane.setDividerLocation(0.6);
-					imagePreparingView.setVisible(true);
-					brickedView.setVisible(true);
-					break;
-				case 2:
-					imagePreparingView.setVisible(false);
-					brickedView.setVisible(true);
-					break;
-				default:
-					throw new IllegalStateException("Pane " + index + " selected.");
-				}
+		splitPane.setOneTouchExpandable(true);
+		splitPane.setDividerSize(16);
+		splitPane.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY, new PropertyChangeListener() {			
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				imagePreparingView.setVisible(splitPane.getDividerLocation() >= getMinDividerLocation());
+				brickedView.setVisible(splitPane.getDividerLocation() <= getMaxDividerLocation());
+				brickedView.getToolBar().update();
 			}
 		});
-		tabbedPane.setSelectedIndex(1);
-	
+
 		setLayout(new BorderLayout());
-		add(tabbedPane, BorderLayout.CENTER);
-		add(Log.makeStatusBar(), BorderLayout.SOUTH);
+		add(splitPane, BorderLayout.CENTER);
+		//add(Log.makeStatusBar(), BorderLayout.SOUTH);
 
-		// file menu:
-		JMenu fileMenu = new JMenu("File");
-		fileMenu.setDisplayedMnemonicIndex(0);
-		fileMenu.setMnemonic('F');
-		fileMenu.add(openAction);
-		fileMenu.add(saveAction);
-		fileMenu.add(saveAsAction);
-		fileMenu.add(exportAction);
-		// View menu:
-		JMenu viewMenu = new JMenu("View");
-		viewMenu.setDisplayedMnemonicIndex(0);
-		viewMenu.setMnemonic('V');
-		viewMenu.add(new JCheckBoxMenuItem(brickedView.getToolBar().getColorChooser().getOnOffAction()));
-		viewMenu.add(new JCheckBoxMenuItem(brickedView.getColorLegend().getOnOffAction()));
-		viewMenu.add(new JCheckBoxMenuItem(imagePreparingView.getCropEnabledAction()));
-		viewMenu.add(new Dialogs(this).makeShowOptionsDialogAction(model, this));
-		// menu bar:
-		JMenuBar menuBar = new JMenuBar();
-		menuBar.add(fileMenu);
-		menuBar.add(viewMenu);
-		menuBar.add(new MagnifierFileMenu(brickedView.getMagnifier()));
-		this.setJMenuBar(menuBar);
+		SwingUtilities.invokeLater(new Runnable() {			
+			@Override
+			public void run() {
+				ColorSettingsDialog csd = new ColorSettingsDialog(MainWindow.this, colorController);
+
+				Ribbon ribbon = new Ribbon(MainWindow.this);
+				brickedView.getToolBar().addComponents(ribbon, true);		
+				add(ribbon, BorderLayout.NORTH);
+				setJMenuBar(new MainMenu(MainWindow.this, model, csd));				
+				setIconImage(Icons.get(32, "icon").getImage());
+				new MagnifierWindow(MainWindow.this, magnifierController, colorController); // Do your own thing little window.
+			}
+		});
+
+		System.out.println("LDDMC main window operational after " + (System.currentTimeMillis()-startTime) + "ms.");
 	}
-
+	
+	public int getMinDividerLocation() {
+		return Math.max(32, imagePreparingView.getPreferredSize().width);
+	}
+	
+	public int getMaxDividerLocation() {
+		return splitPane.getSize().width - splitPane.getDividerSize() - Math.max(32, brickedView.getPreferredSize().width) - 2;
+	}
+	
 	public static void main(String[] args) {
 		SwingUtilities.invokeLater(new Thread() {
 			public void run() {
@@ -163,18 +141,27 @@ public class MainWindow extends JFrame implements ChangeListener, ModelSaver<Bri
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-				newWindow();
+				MainWindow mw = newWindow();
+				Action openAction = MosaicIO.createOpenAction(mw.model, mw);
+				try {
+					File file = (File)mw.model.get(BrickGraphicsState.Image);
+					MosaicIO.load(mw, mw.model, file);
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+					openAction.actionPerformed(null);
+				} 			
 			}
 		});
 	}
 	
-	private static void newWindow() {
+	private static MainWindow newWindow() {
 		MainWindow mw = new MainWindow();
 		Rectangle placement = (Rectangle)mw.model.get(BrickGraphicsState.MainWindowPlacement);
 		mw.setBounds(placement);
 		mw.setVisible(true);
 		mw.splitPane.setDividerLocation((Integer)mw.model.get(BrickGraphicsState.MainWindowDividerLocation));
-		mw.brickedView.getColorLegend().propertyChange(null);
+		return mw;
 	}
 	
 	public void softReset() {
@@ -193,91 +180,61 @@ public class MainWindow extends JFrame implements ChangeListener, ModelSaver<Bri
 	}
 
 	public void mosaicLoaded(BufferedImage image) {
-		if(image == null)
-			throw new IllegalArgumentException("image is null");
-		
 		this.image = image;
-		if(imagePreparingView == null)
-			imagePreparingView = new ImagePreparingView(image, model);
-		else {
-			imagePreparingView.loadModel(model);
-			imagePreparingView.setImage(image);				
-		}
+		imagePreparingView.loadModel(model);
+		imagePreparingView.setImage(image);				
+		
 		BufferedImage toBrick = imagePreparingView.getFullyPreparredImage();
 
-		if(brickedView == null) {
-			brickedView = new BrickedView(this, model);			
-		}
-		else {
-			brickedView.reloadModel(model);
-		}
+		brickedView.reloadModel(model);
 		brickedView.setImage(toBrick);
 
 		if(splitPane != null)
 			repaint();
 	}
 
-	public void stateChanged(ChangeEvent e) {
-		File file = (File)model.get(BrickGraphicsState.Image);
-		setTitle("Brick Graphics Mosaic - " + file.getName());
-		BufferedImage toBrick = imagePreparingView.getFullyPreparredImage();
-		brickedView.setImage(toBrick);
-		repaint();
-	}
-	
 	public BufferedImage getInImage() {
 		return image;
 	}
 	
 	public BrickedView getBrickedView() {
+		if(brickedView == null)
+			throw new IllegalStateException();		
 		return brickedView;
 	}
 	
+	public ImagePreparingView getImagePreparingView() {
+		if(imagePreparingView == null)
+			throw new IllegalStateException();
+		return imagePreparingView;
+	}
+	
+	public JSplitPane getSplitPane() {
+		if(splitPane == null)
+			throw new IllegalStateException();
+		return splitPane;
+	}
+	
 	public BufferedImage getFinalImage() {
-		return brickedView.getMagnifier().getShownImage();
+		return brickedView.getMagnifierController().getCoreImage();
+	}
+	
+	public ColorController getColorController() {
+		return colorController;
 	}
 
+	public void stateChanged(ChangeEvent e) {
+		File file = (File)model.get(BrickGraphicsState.Image);
+		setTitle(APP_NAME + " - " + file.getName());
+		if(image == null)
+			return;
+		BufferedImage toBrick = imagePreparingView.getFullyPreparredImage();
+		brickedView.setImage(toBrick);
+		repaint();
+	}
+	
 	public void save(Model<BrickGraphicsState> model) {
 		model.set(BrickGraphicsState.MainWindowDividerLocation, splitPane.getDividerLocation());
+		model.set(BrickGraphicsState.MainWindowPlacement, new Rectangle(getLocation().x, getLocation().y, getWidth(), getHeight()));
 	}
-
-	public void okPressed(Set<BrickGraphicsState> changed) {
-		boolean prepareReloaded = false;
-		for(BrickGraphicsState state : changed) {
-			switch(state) {
-			case AnnoyingQuestions:
-				// volatile state.
-				break;
-			case ImageRestriction:
-			case ImageRestrictionEnabled:
-				if(!prepareReloaded)
-					imagePreparingView.loadModel(model);
-				prepareReloaded = true;
-				break;
-			case Language:
-				softReset();
-				return;
-			default: 
-				throw new IllegalStateException("Enum broken: " + state);
-			}
-		}
-	}
-
-	public void windowActivated(WindowEvent e) {}
-	public void windowClosed(WindowEvent e) {}
-
-	public void windowClosing(WindowEvent e) {
-		try {
-			model.saveToFile();
-		}
-		catch (IOException e2) {
-			e2.printStackTrace();
-		}
-		System.exit(0);
-	}
-
-	public void windowDeactivated(WindowEvent e) {}
-	public void windowDeiconified(WindowEvent e) {}
-	public void windowIconified(WindowEvent e) {}
-	public void windowOpened(WindowEvent e) {}
 }

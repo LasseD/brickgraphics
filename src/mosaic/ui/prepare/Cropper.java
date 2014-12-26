@@ -4,11 +4,8 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.*;
 import java.awt.image.*;
-import javax.swing.*;
 import javax.swing.event.*;
-
 import mosaic.io.*;
-
 import java.util.*;
 import java.util.List;
 import io.*;
@@ -21,19 +18,28 @@ public class Cropper implements MouseListener, MouseMotionListener, ModelSaver<B
 	private Rectangle2D.Double unitRect;
 	private Point lastPress;
 	private List<ChangeListener> listeners;
-	private Action crop;
+	private boolean enabled;
 	
-	public Cropper(Model<BrickGraphicsState> model, Action crop) {
+	public Cropper(Model<BrickGraphicsState> model) {
 		model.addModelSaver(this);
 		state = Drag.NONE;
-		unitRect = (Rectangle2D.Double)model.get(BrickGraphicsState.PrepareCrop);
+		unitRect = (Rectangle2D.Double)model.get(BrickGraphicsState.PrepareCrop);		
+		enabled = (Boolean)model.get(BrickGraphicsState.PrepareCropEnabled);
 		lastPress = null;
 		listeners = new LinkedList<ChangeListener>();
-		this.crop = crop;
 	}
 	
 	public Cursor getCursor() {
 		return state.getCursor();
+	}
+	
+	public boolean isEnabled() {
+		return enabled;
+	}
+	
+	public void switchEnabled() {
+		enabled = !enabled;
+		notifyListeners();
 	}
 	
 	public void addChangeListener(ChangeListener listener) {
@@ -186,9 +192,8 @@ public class Cropper implements MouseListener, MouseMotionListener, ModelSaver<B
 	}
 
 	public void mouseClicked(MouseEvent e) {
-		if(e.getClickCount() > 1) {
-			crop.putValue(Action.SELECTED_KEY, !(Boolean)crop.getValue(Action.SELECTED_KEY));
-			notifyListeners();
+		if(e.getClickCount() > 1) {			
+			switchEnabled();
 		}
 	}
 	
@@ -311,7 +316,6 @@ public class Cropper implements MouseListener, MouseMotionListener, ModelSaver<B
 		p.translate(-2, -2);
 		if(mouseImage != null && state != (state = Drag.intersecting(p, getCrop(mouseImage))))
 			notifyListeners();
-		boolean s = true;
 	}
 
 	public void setMouseImage(BufferedImage image) {
@@ -320,5 +324,6 @@ public class Cropper implements MouseListener, MouseMotionListener, ModelSaver<B
 
 	public void save(Model<BrickGraphicsState> model) {
 		model.set(BrickGraphicsState.PrepareCrop, unitRect);
+		model.set(BrickGraphicsState.PrepareCropEnabled, enabled);
 	}
 }

@@ -11,27 +11,27 @@ public enum SizeType {
 	plate(2, 5) {
 		@Override
 		public Icon icon(int iconSize) {
-			return Icons.plate(iconSize);
+			return Icons.plateFromSide(iconSize, true);
 		}
 	}, brick(6, 5) {
 		@Override
 		public Icon icon(int iconSize) {
-			return Icons.brick(iconSize);
+			return Icons.brickFromSide(iconSize, true);
 		}
 	}, sidewaysPlate(5, 2) {
 		@Override
 		public Icon icon(int iconSize) {
-			return new RotateIcon(Icons.plate(iconSize));
+			return new RotateIcon(Icons.plateFromSide(iconSize, true));
 		}
 	}, sidewaysBrick(5, 6) {
 		@Override
 		public Icon icon(int iconSize) {
-			return new RotateIcon(Icons.brick(iconSize));
+			return new RotateIcon(Icons.brickFromSide(iconSize, true));
 		}
 	}, stud(5, 5) {
 		@Override
 		public Icon icon(int iconSize) {
-			return Icons.stud(iconSize);
+			return Icons.studFromTop(iconSize, 1, true);
 		}
 	};
 	

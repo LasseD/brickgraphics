@@ -10,7 +10,6 @@ import javax.swing.filechooser.FileFilter;
 import io.*;
 import mosaic.ui.*;
 import ui.*;
-import mosaic.ui.bricked.*;
 import bricks.LDRPrinter;
 import java.util.*;
 
@@ -22,8 +21,9 @@ import java.util.*;
  */
 public class MosaicIO {
 	public static final String MOSAIC_SUFFIX = "mosaic";
+	public static final String[] HTML_SUFFIXES = {"htm", "html", "xhtml"};
 	public static final String LDR_SUFFIX = "ldr";
-	public static final String[] IMG_SUFFIXES = ImageIO.getReaderFileSuffixes();
+	private static String[] IMG_SUFFIXES = null;
 
 	public static void saveMosaic(Model<BrickGraphicsState> model, BufferedImage image, File file) throws IOException {
 		if(image == null)
@@ -45,7 +45,6 @@ public class MosaicIO {
 	}
 
 	public static void load(MainWindow parent, Model<BrickGraphicsState> changingModel, File file) throws IOException, ClassCastException, ClassNotFoundException {
-		changingModel.save();
 		FileType fileType = FileType.get(file);
 		switch(fileType) {
 		case mosaic:
@@ -63,7 +62,7 @@ public class MosaicIO {
 			changingModel.set(BrickGraphicsState.Image, file);
 			//changingModel.set(BrickGraphicsState.ImageType, suffix(file));
 			BufferedImage read = ImageIO.read(file);
-			System.out.println(read);
+			//System.out.println(read);
 			if(read.getType() == BufferedImage.TYPE_CUSTOM) {
 				int w = read.getWidth();
 				int h = read.getHeight();
@@ -78,23 +77,30 @@ public class MosaicIO {
 			throw new IllegalStateException("Enum " + FileType.class + " broken: " + fileType);
 		}
 	}
+	
+	private static void ensureIMG_SUFFIXES() {
+		if(IMG_SUFFIXES == null) 
+			IMG_SUFFIXES = ImageIO.getReaderFileSuffixes();		
+	}
 
 	public static Action createOpenAction(final Model<BrickGraphicsState> currentModel, final MainWindow parent) {
-		File currentImage = (File)currentModel.get(BrickGraphicsState.Image);
-		final JFileChooser fileChooser = new JFileChooser(currentImage.getParentFile());
-		List<String> suffixes = new LinkedList<String>();
-		for(String s : IMG_SUFFIXES)
-			suffixes.add(s);
-		suffixes.add(MOSAIC_SUFFIX);
-		
-		FileNameExtensionFilter filter = new FileNameExtensionFilter("Images and mosaics", suffixes.toArray(new String[0]));
-		fileChooser.setFileFilter(filter);
-		fileChooser.setMultiSelectionEnabled(false);
-
+		final JFileChooser fileChooser = new JFileChooser();
 		Action open = new AbstractAction() {
 			private static final long serialVersionUID = -4753100136802594575L;
 
 			public void actionPerformed(ActionEvent e) {
+				File currentImage = (File)currentModel.get(BrickGraphicsState.Image);
+				fileChooser.setCurrentDirectory(currentImage.getParentFile());
+				List<String> suffixes = new LinkedList<String>();
+				ensureIMG_SUFFIXES();
+				for(String s : IMG_SUFFIXES)
+					suffixes.add(s);
+				suffixes.add(MOSAIC_SUFFIX);
+				
+				FileNameExtensionFilter filter = new FileNameExtensionFilter("Images and mosaics", suffixes.toArray(new String[0]));
+				fileChooser.setFileFilter(filter);
+				fileChooser.setMultiSelectionEnabled(false);
+				
 				int retVal = fileChooser.showOpenDialog(parent);
 				if(retVal == JFileChooser.APPROVE_OPTION) {
 					File file = fileChooser.getSelectedFile();
@@ -120,12 +126,33 @@ public class MosaicIO {
 		return open;
 	}
 
+	public static Action createHtmlFileOpenAction(final JDialog parent, final JTextField tf) {
+		final JFileChooser fileChooser = new JFileChooser();
+		Action a = new AbstractAction() {
+			private static final long serialVersionUID = -4753100136802594575L;
+
+			public void actionPerformed(ActionEvent e) {
+				fileChooser.setCurrentDirectory(null);
+				
+				FileNameExtensionFilter filter = new FileNameExtensionFilter("HTML file (website)", HTML_SUFFIXES);
+				fileChooser.setFileFilter(filter);
+				fileChooser.setMultiSelectionEnabled(false);
+				
+				int retVal = fileChooser.showOpenDialog(parent);
+				if(retVal == JFileChooser.APPROVE_OPTION) {
+					tf.setText(fileChooser.getSelectedFile().getAbsolutePath());
+				}
+			}
+		};
+
+		return a;
+	}
+
 	public static Action createSaveAction(final Model<BrickGraphicsState> currentModel, final MainWindow parent) {
 		Action save = new AbstractAction() {
 			private static final long serialVersionUID = -2081040070189800089L;
 
 			public void actionPerformed(ActionEvent e) {
-				currentModel.save();
 				File file = (File)currentModel.get(BrickGraphicsState.Image);
 				file = ensureSuffix(file, MOSAIC_SUFFIX);
 				try {
@@ -169,7 +196,6 @@ public class MosaicIO {
 			private static final long serialVersionUID = -4859023768855816648L;
 
 			public void actionPerformed(ActionEvent e) {
-				currentModel.save();
 				int retVal = fileChooser.showSaveDialog(parent);
 				if(retVal == JFileChooser.APPROVE_OPTION) {
 					File file = ensureSuffix(fileChooser.getSelectedFile(), MOSAIC_SUFFIX);
@@ -202,11 +228,11 @@ public class MosaicIO {
 		
 		for(FileFilter filter : fileChooser.getChoosableFileFilters())
 			fileChooser.removeChoosableFileFilter(filter);
-		for(String imgType : ImageIO.getWriterFileSuffixes()) {
+		/*for(String imgType : ImageIO.getWriterFileSuffixes()) {
 			if(imgType.equals("jpeg"))
 				continue; // confuses when there is both jpeg and jpg.
 			fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("Image, " + imgType, imgType));
-		}
+		}*/
 		fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("Model, ." + LDR_SUFFIX, LDR_SUFFIX));
 
 		fileChooser.setMultiSelectionEnabled(false);
@@ -217,7 +243,7 @@ public class MosaicIO {
 			private static final long serialVersionUID = 6603142727821352661L;
 
 			public void actionPerformed(ActionEvent e) {
-				int retVal = fileChooser.showDialog(parent, "Export");
+				int retVal = fileChooser.showDialog(parent, "Export building instructions");
 				if(retVal == JFileChooser.APPROVE_OPTION) {
 					File file = fileChooser.getSelectedFile();
 					FileNameExtensionFilter fileFilter = (FileNameExtensionFilter)fileChooser.getFileFilter();
@@ -240,12 +266,12 @@ public class MosaicIO {
 			}
 		};
 
-		export.putValue(Action.SHORT_DESCRIPTION, "Export the mosaic.");
+		export.putValue(Action.SHORT_DESCRIPTION, "Export building instructions for the mosaic.");
 		export.putValue(Action.SMALL_ICON, Icons.get(16, "fileexport"));
 		export.putValue(Action.LARGE_ICON_KEY, Icons.get(32, "fileexport"));
-		export.putValue(Action.NAME, "Export");
+		export.putValue(Action.NAME, "Export instructions");
 		export.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_E);
-		export.putValue(Action.DISPLAYED_MNEMONIC_INDEX_KEY, "Export".indexOf('E'));
+		export.putValue(Action.DISPLAYED_MNEMONIC_INDEX_KEY, "Export instructions".indexOf('E'));
 		export.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_E, KeyEvent.CTRL_DOWN_MASK));
 
 		return export;
@@ -271,6 +297,7 @@ public class MosaicIO {
 				return ldr;
 			}
 			else {
+				ensureIMG_SUFFIXES();
 				for(String s : IMG_SUFFIXES) {
 					if(suffix.equals(s)) {
 						return img;

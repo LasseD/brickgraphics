@@ -23,7 +23,6 @@ public class DisplayArea extends JPanel implements ModelSaver<GriddyState>, Zoom
 		zoom.addZoomListener(this);
 		
 		grid = (Grid)model.get(GriddyState.Grid);
-		model.addModelChangeListener(this, GriddyState.Grid); // zoom updates automatically and Griddy handles image.
 		model.addModelSaver(this);
 
 		displayComponents = new LinkedList<DisplayComponent>();

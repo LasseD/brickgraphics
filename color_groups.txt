@@ -1,0 +1,12 @@
+Basic = Black "Dark Bluish Gray" "Light Bluish Gray" White Blue Green Red Yellow 
+Modern = "Bright Light Orange" Orange "Dark Orange" "Reddish Brown" Tan "Dark Tan" "Medium Dark Flesh" Lime
+Old = Brown "Light Gray" "Dark Gray"
+Dark = Dark*
+Medium = Medium*
+Bright = Bright*
+Light = Light*
+Sand = Sand*
+Pearl = Pearl*
+Chrome = Chrome*
+Transparent = *Trans*
+Metallic = *Gold* *Silver* *Copper*

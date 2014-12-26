@@ -1,0 +1,30 @@
+package mosaic.ui.actions;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import javax.swing.AbstractAction;
+import javax.swing.KeyStroke;
+import mosaic.ui.prepare.ImagePreparingView;
+import ui.Icons;
+
+public class ToggleFilters extends AbstractAction {
+	private static final long serialVersionUID = 3048201268030L;
+	public static final String DISPLAY_NAME = "Filters";
+	private ImagePreparingView view;
+	
+	public ToggleFilters(ImagePreparingView view) {
+		this.view = view;
+
+		putValue(SHORT_DESCRIPTION, "Toggle the filters.");
+		putValue(SMALL_ICON, Icons.prepareFiltersEnable(Icons.SIZE_SMALL));
+		putValue(LARGE_ICON_KEY, Icons.prepareFiltersEnable(Icons.SIZE_LARGE));
+		putValue(NAME, DISPLAY_NAME);
+		putValue(MNEMONIC_KEY, (int)'i');
+		putValue(DISPLAYED_MNEMONIC_INDEX_KEY, DISPLAY_NAME.indexOf('i'));
+		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_I, KeyEvent.ALT_DOWN_MASK));	
+	}
+
+	public void actionPerformed(ActionEvent e) {
+		view.switchFiltersEnabled();
+	}
+}

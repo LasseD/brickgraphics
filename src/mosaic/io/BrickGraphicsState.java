@@ -1,31 +1,35 @@
 package mosaic.io;
 
 import io.ModelState;
-import io.Text;
-
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
-import java.util.TreeSet;
-
-import colors.LEGOColor;
+import mosaic.controllers.*;
 
 public enum BrickGraphicsState implements ModelState {
-	MainWindowPlacement(new Rectangle(0, 0, 640, 480)),
-	MainWindowDividerLocation(400),
-	Image(new File("mosaic.jpg")),
-	//ImageType("jpg"),
-	ImageRestriction(new Dimension(800,800)),
-	ImageRestrictionEnabled(false),
-	AnnoyingQuestions(true), 
-	Language(Text.getAvailableLocales()[0]),
+	MainWindowPlacement(new Rectangle(0, 0, 860, 430)),
+	MainWindowDividerLocation(412),
+	Image(new File("mosaic_sample_input.jpg")),
+
+	// How to display colors:
+	ColorsShownNumber(ColorController.ShownID.ID.ordinal()),
+	ColorsShownText(ColorController.ShownName.NAME.ordinal()),
+	ColorsLocalizedFileName("Danish"),
+	ColorsFromYear(1900),
+	ColorsToYear(2100), // Although it would be cool if this code was used so far into the future
+	ColorsShowMetallic(false),
+	ColorsShowTransparent(false),
+	ColorsMinParts(1),
+	ColorsMinSets(100),
+	ColorsLoadURL("http://rebrickable.com/colors"),
+	ColorsLoadFile(""),
 	
 	// Magnifier:
-	MagnifierShow(false),
-	MagnifierShowColors(false),
-	MagnifierBlockSize(new Dimension(4, 4)),
-	MagnifierSize(0.3),
+	//MagnifierShow(false),
+	MagnifierShowLegend(true),
+	MagnifierShowColors(true),
+	MagnifierSize(new Dimension(4, 4)),
 	
 	// Prepare:
 	PrepareSharpness(1.0f),
@@ -40,26 +44,19 @@ public enum BrickGraphicsState implements ModelState {
 	PrepareSaturationRank(4),
 	PrepareCropEnabled(false),
 	PrepareCrop(new Rectangle2D.Double(0.25, 0.25, 0.5, 0.5)),
+	PrepareFiltersEnabled(false),
 
 	// ToBrick:
-	ToBricksWidth(100),
-	ToBricksHeight(100),
-	ToBricksColors(new TreeSet<LEGOColor>()),
-	ToBricksColorGroups(new TreeSet<String>(){
-		private static final long serialVersionUID = -7790837972418502219L;
-
-		{
-			add("Basic");
-		}
-	}),
+	ToBricksWidth(480),
+	ToBricksHeight(160),
+	ToBricksPropagationPercentage(50),
+	SelectedColors(new String[]{}),
+	SelectedColorGroups(new String[]{"Basic", "Modern"}),
 	ToBricksTypeIndex(0),
 	ToBricksHalfToneTypeIndex(0),
 	ToBricksSizeTypeWidthIndex(2),
-	ToBricksSizeTypeHeightIndex(2),
-	ToBricksDirectionIsWidth(true);
-	
-	// TODO: all other stats (menu enable stuff)
-	
+	ToBricksSizeTypeHeightIndex(2);
+		
 	private Object defaultValue;
 	private Class<?> objectType;
 	BrickGraphicsState(Object defaultValue) {

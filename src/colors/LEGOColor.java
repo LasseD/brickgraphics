@@ -2,90 +2,143 @@ package colors;
 
 import java.awt.*;
 import java.io.*;
+import mosaic.controllers.ColorController;
 
 public class LEGOColor implements Comparable<LEGOColor>, Serializable {
 	private static final long serialVersionUID = 6713668277298989578L;
-	public String name_Peeron;
-	public int parts;
-	public String name_BL;
-	public int id_BL;
-	public int id_LDraw;
-	public Color rgb_LDraw;
-	public int id_LEGO;
-	public String name_LEGO;
-	public Color rgb;
-	public String comment;
+	private int id;
+	private String name;
+	private Color rgb;
+	private int[] lab;
+
+	private int parts, sets, from, to;
+	private String namesLEGO, idsLDraw, idsBrickLink, namesPeeron;
 	
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append(name_Peeron);
-		sb.append(", ");
-		sb.append(parts);
-		sb.append(", ");
-		sb.append(name_BL);
-		sb.append(", ");
-		sb.append(id_BL);
-		sb.append(", ");
-		sb.append(id_LDraw);
-		sb.append(", ");
-		sb.append(rgb_LDraw);
-		sb.append(", ");
-		sb.append(id_LEGO);
-		sb.append(", ");
-		sb.append(name_LEGO);
-		sb.append(", ");
-		sb.append(rgb);
-		sb.append(", ");
-		sb.append(comment);
-		return sb.toString();
+	public LEGOColor(int rgb) {
+		id = rgb;
+		name = "Pure RGB #" + rgb;
+		setRGB(new Color(rgb));
 	}
 	
-	public String getToolTipText() {
-		StringBuilder toolTip = new StringBuilder();
-		// name:
-		toolTip.append(name_Peeron);
-		// additional names:
-		boolean appendNameBL = name_BL != null && !name_BL.equals(name_Peeron);
-		boolean appendNameLEGO = name_LEGO != null && !name_Peeron.equals(name_LEGO) && 
-								 !(appendNameBL && name_BL.equals(name_LEGO));
-		if(appendNameBL) {
-			if(appendNameLEGO) {
-				toolTip.append(" (" + name_BL + ", " + name_LEGO + ")");				
-			}
-			else {
-				toolTip.append(" (" + name_BL + ")");				
-			}
-		}
-		else if(appendNameLEGO) {
-			toolTip.append(" (" + name_LEGO + ")");			
-		}
-		// color code:
-		toolTip.append(" #" + Integer.toHexString(rgb.getRGB()));
-		// comment:
-		if(comment != null) {
-			toolTip.append(" " + comment);
-		}
+	private LEGOColor() {}
 		
-		return toolTip.toString();
+	public static LEGOColor parse(String s) {
+		if(s == null)
+			return null;
+		String[] parts = s.split("[|]", -1);
+		if(parts.length != 11) {
+			System.err.println("Expected color line to contain 11 parts. Contained " + parts.length + ": " + s);
+			return null;
+		}
+		for(int i = 0; i < 11; ++i) 
+			parts[i] = parts[i].trim();
+		
+		LEGOColor c = new LEGOColor();
+		c.id = parseInt(parts[0]);
+		c.name = parts[1];
+		if(c.id == BLACK.id)
+			c.setRGB(BLACK.rgb);
+		else if(c.id == WHITE.id)			
+			c.setRGB(WHITE.rgb);
+		else
+			c.setRGB(new Color(parseInt(parts[2])));
+		c.parts = parseInt(parts[3]);
+		c.sets = parseInt(parts[4]);
+		c.from = parseInt(parts[5]);
+		c.to = parseInt(parts[6]);
+		c.namesLEGO = parts[7];
+		c.idsLDraw = parts[8];
+		c.idsBrickLink = parts[9];
+		c.namesPeeron = parts[10];
+		return c;
 	}
 	
-	public String getShortIdentifier() {
-		return "" + id_LEGO;
+	private static int parseInt(String s) {
+		s = s.trim();
+		if(s.length() == 0)
+			return 0;
+		if(s.charAt(0) == '#') {
+			return Integer.parseInt(s.substring(1), 16);
+		}
+		return Integer.parseInt(s);
 	}
 	
+	public int getID() {
+		return id;
+	}
 	public String getName() {
-		if(name_LEGO != null)
-			return name_LEGO;
-		if(name_BL != null)
-			return name_BL;
-		if(name_Peeron != null)
-			return name_Peeron;
-		if(comment != null)
-			return comment;
-		return toString();
+		return name;
+	}
+	public Color getRGB() {
+		return rgb;
+	}
+	public int[] getLAB() {
+		return lab;
+	}
+	public int getParts() {
+		return parts;
+	}
+	public int getSets() {
+		return sets;
+	}
+	public int getFrom() {
+		return from;
+	}
+	public int getTo() {
+		return to;
+	}
+	public String getNamesLEGO() {
+		return namesLEGO;
+	}
+	public String getIDsLDraw() {
+		return idsLDraw;
+	}
+	public int getFirstIDLDraw() {
+		if(idsLDraw == null || idsLDraw.length() == 0)
+			return -1;
+		int commaIndex = idsLDraw.indexOf(',');
+		if(commaIndex >= 0)
+			return Integer.parseInt(idsLDraw.substring(0, commaIndex));
+		return Integer.parseInt(idsLDraw);
+	}
+	public String getIDsBL() {
+		return idsBrickLink;
+	}
+	public int getFirstIDBL() {
+		if(idsBrickLink == null || idsBrickLink.length() == 0)
+			return -1;
+		int commaIndex = idsBrickLink.indexOf(',');
+		if(commaIndex >= 0)
+			return Integer.parseInt(idsBrickLink.substring(0, commaIndex));
+		return Integer.parseInt(idsBrickLink);
+	}
+	public String getNamesPeeron() {
+		return namesPeeron;
 	}
 	
-	public static Font makeFont(Graphics2D g2, int limitWidth, int limitHeight, LEGOColor... colors) {
+	public boolean isTransparent() {
+		return name.toLowerCase().contains("trans");
+	}
+	public boolean isMetallic() {
+		String s = name.toLowerCase();
+		return s.contains("copper") || s.contains("silver") || s.contains("gold") || s.contains("chrome") || s.contains("metallic");
+	}
+	
+	public void setRGB(Color color) {
+		this.rgb = color;
+		updateLAB();
+	}
+	
+	private void updateLAB() {
+		int rgb = this.rgb.getRGB();
+		int r = LEGOColorLookUp.getRed(rgb);
+		int g = LEGOColorLookUp.getGreen(rgb);
+		int b = LEGOColorLookUp.getBlue(rgb);
+		lab = new int[3];
+		CIELab.rgb2lab(r,  g, b, lab);		
+	}
+	
+	public static Font makeFont(Graphics2D g2, int limitWidth, int limitHeight, ColorController cc, LEGOColor.CountingLEGOColor... colors) {
 		if(limitHeight <= 1 || limitWidth <= 1) {
 			return new Font("Monospaced", Font.PLAIN, 1);
 		}
@@ -95,8 +148,8 @@ public class LEGOColor implements Comparable<LEGOColor>, Serializable {
 
 		String maxString = "";
 		int maxLength = 0;
-		for(LEGOColor color : colors) {
-			String id = color.getShortIdentifier();
+		for(LEGOColor.CountingLEGOColor color : colors) {
+			String id = cc.getShortIdentifier(color.c);
 			int length = g2.getFontMetrics(font).stringWidth(id);
 
 			if(maxLength < length) {
@@ -109,40 +162,43 @@ public class LEGOColor implements Comparable<LEGOColor>, Serializable {
 		do {
 			fontSize--;
 			font = new Font("Monospaced", Font.PLAIN, fontSize);
-			maxWidth = g2.getFontMetrics(font).stringWidth(maxString);
-			height = g2.getFontMetrics(font).getHeight();
+			FontMetrics fm = g2.getFontMetrics(font);
+			maxWidth = fm.stringWidth(maxString);
+			height = (fm.getDescent()+fm.getAscent())/2;
 		}
 		while(maxWidth > limitWidth || height > limitHeight);
 		return font;
 	}
 	
-	public static final LEGOColor BLACK = new LEGOColor();
-	public static final LEGOColor WHITE = new LEGOColor();
+	public static final LEGOColor BLACK = new LEGOColor(0x000000);
+	public static final LEGOColor WHITE = new LEGOColor(0xFFFFFF);
 	static {
-		BLACK.name_Peeron = "Completely Black";
+		BLACK.name = "Black";
 		BLACK.rgb = Color.BLACK;
-		BLACK.comment = "This tone is darker than the official LEGO color for black.";
-		BLACK.id_LDraw = 0;
-		BLACK.id_LEGO = 26;
-		WHITE.name_Peeron = "Completely White";
+		BLACK.id = 0;
+
+		WHITE.name = "White";
 		WHITE.rgb = Color.WHITE;
-		WHITE.id_LDraw = 15;
-		WHITE.id_LEGO = 1;
-		WHITE.comment = "This tone is lighter than the official LEGO color for white.";
+		WHITE.id = 15;
 	}
 	public static final LEGOColor[] BW = {BLACK, WHITE};
 
 	@Override
 	public int hashCode() {
-		return name_Peeron.hashCode();
+		return id;
 	}
 	
 	@Override
 	public boolean equals(Object other) {
-		return other instanceof LEGOColor && ((LEGOColor)other).name_Peeron.equals(name_Peeron);
+		return other instanceof LEGOColor && ((LEGOColor)other).id == id;
 	}
 	
 	public int compareTo(LEGOColor other) {
-		return name_Peeron.compareTo(other.name_Peeron);
+		return id < other.id ? -1 : (id == other.id ? 0 : 1);
+	}
+	
+	public static class CountingLEGOColor {
+		public LEGOColor c;
+		public int cnt;
 	}
 }

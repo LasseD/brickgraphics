@@ -55,25 +55,12 @@ public class Griddy extends JFrame implements ModelSaver<GriddyState>, WindowLis
 		scaleToolHorizontal.addScaleListener(displayArea.getGrid(), true);
 		scaleToolHorizontal.addScaleListener(scaleToolVertical, false);
 		scaleToolHorizontal.addScaleListener(displayArea, true);
-		model.addModelChangeListener(new ModelChangeListener() {	
-			@Override
-			public void modelChanged(Object stateValue) {
-				scaleToolHorizontal.conformTo((BorderRuler)stateValue);
-			}
-		}, GriddyState.ScaleToolHorizontal);
 		
 		scaleToolVertical.addScaleListener(displayArea.getGrid(), true);
 		scaleToolVertical.addScaleListener(displayArea, true);
 		scaleToolVertical.addScaleListener(scaleToolHorizontal, false);
-		model.addModelChangeListener(new ModelChangeListener() {	
-			@Override
-			public void modelChanged(Object stateValue) {
-				scaleToolVertical.conformTo((BorderRuler)stateValue);
-			}
-		}, GriddyState.ScaleToolVertical);
 
 		model.addModelSaver(this);
-		model.addModelChangeListener(this, GriddyState.MainWindowPlacement);
 		
 		GridDialog gridDialog = new GridDialog(this, displayArea.getGrid());
 		Action openGridDialogAction = gridDialog.makeShowOptionsDialogAction(this, displayArea.getGrid());

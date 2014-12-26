@@ -3,13 +3,13 @@ package mosaic.ui.actions;
 import java.awt.event.*;
 import javax.swing.*;
 import ui.*;
-import mosaic.ui.bricked.*;
+import mosaic.controllers.MagnifierController;
 
 public class MagnifierWidener extends AbstractAction {
 	private static final long serialVersionUID = 5288481355127856856L;
-	private Magnifier magnifier;
+	private MagnifierController magnifier;
 	
-	public MagnifierWidener(Magnifier magnifier) {
+	public MagnifierWidener(MagnifierController magnifier) {
 		this.magnifier = magnifier;
 
 		putValue(SHORT_DESCRIPTION, "Widen the magnifier.");
@@ -22,6 +22,6 @@ public class MagnifierWidener extends AbstractAction {
 	}
 
 	public void actionPerformed(ActionEvent e) {
-		magnifier.changeBlockSizeWidth(1);
+		magnifier.changeSizeWidthInMosaicBlocks(1);
 	}
 }

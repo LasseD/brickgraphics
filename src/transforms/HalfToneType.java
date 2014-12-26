@@ -4,7 +4,7 @@ import javax.swing.*;
 import ui.*;
 
 public enum HalfToneType {
-	FloydSteinberg(Icons.get(32, "floyd_steinberg")), Threshold(Icons.get(32, "solid_region"));
+	FloydSteinberg(Icons.floydSteinberg(Icons.SIZE_LARGE)), Threshold(Icons.treshold(Icons.SIZE_LARGE));
 	
 	private Icon icon;
 	private HalfToneType(Icon icon) {

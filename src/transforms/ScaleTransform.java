@@ -119,6 +119,10 @@ public class ScaleTransform extends BufferedTransform {
 
 	@Override
 	public BufferedImage transformUnbuffered(BufferedImage in) {
-		return type.op(in.getWidth(), in.getHeight(), this).filter(in, null);
+		int w = in.getWidth();
+		int h = in.getHeight();
+		if(w <= 0 || h <= 0 || width <= 0 || height <= 0)
+			return in;
+		return type.op(w, h, this).filter(in, null);
 	}
 }
