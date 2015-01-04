@@ -1,6 +1,6 @@
 package mosaic.ui;
 
-import ui.*;
+import icon.*;
 import java.awt.*;
 import java.util.*;
 import javax.swing.*;
@@ -10,13 +10,12 @@ import mosaic.controllers.*;
 import colors.LEGOColor;
 
 public class ColorLegend extends JList<LEGOColor.CountingLEGOColor> implements ChangeListener {
-	private static final long serialVersionUID = 2111134483677184536L;
 	private MagnifierController magnifier;
 	private BrickedView brickedController;
 	private LEGOColor.CountingLEGOColor[] colors;
 	private ColorController cc;
 
-	public ColorLegend(final JDialog owner, MagnifierController magnifier, BrickedView brickedController, ColorController cc) {
+	public ColorLegend(MagnifierController magnifier, BrickedView brickedController, ColorController cc) {
 		this.cc = cc;
 		this.magnifier = magnifier;
 		this.brickedController = brickedController;
@@ -26,22 +25,23 @@ public class ColorLegend extends JList<LEGOColor.CountingLEGOColor> implements C
 	}
 
 	private class CellRenderer extends JLabel implements ListCellRenderer<LEGOColor.CountingLEGOColor> {
-		private static final long serialVersionUID = 21945136035939664L;
-
 		@Override
 		public JComponent getListCellRendererComponent(JList<? extends LEGOColor.CountingLEGOColor> list, 
 				final LEGOColor.CountingLEGOColor color, int index, boolean isSelected, boolean cellHasFocus) {
 			String identifier = cc.getNormalIdentifier(color.c);
 			setText((identifier == null ? "" : identifier + ". ") + (color.cnt > 0 ? ("TOTAL: " + color.cnt) : ""));
 			setIcon(new Icon() {
+				@Override
 				public int getIconHeight() {
 					return Icons.SIZE_LARGE;
 				}
 
+				@Override
 				public int getIconWidth() {
 					return Icons.SIZE_LARGE;
 				}
 
+				@Override
 				public void paintIcon(Component c, Graphics g, int x, int y) {
 					g.setColor(color.c.getRGB());
 					g.fillRect(x, y, getIconWidth(), getIconHeight());
@@ -50,7 +50,7 @@ public class ColorLegend extends JList<LEGOColor.CountingLEGOColor> implements C
 				}
 
 			});
-			setToolTipText(cc.getLongIdentifier(color.c));	
+			setToolTipText(ColorController.getLongIdentifier(color.c));	
 			setFont(list.getFont());
 			setOpaque(true);
 

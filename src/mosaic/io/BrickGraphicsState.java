@@ -1,8 +1,7 @@
 package mosaic.io;
 
 import io.ModelState;
-import java.awt.Dimension;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
 import mosaic.controllers.*;
@@ -24,6 +23,17 @@ public enum BrickGraphicsState implements ModelState {
 	ColorsMinSets(100),
 	ColorsLoadURL("http://rebrickable.com/colors"),
 	ColorsLoadFile(""),
+	
+	// Printing:
+	PrintCoverPageShow(true),
+	PrintCoverPageShowFileName(true),
+	PrintCoverPageShowLegend(true),
+	PrintCoverPageCoverPictureTypeIndex(0),
+	PrintShowPositionIndex(0),
+	PrintShowLegend(true),
+	PrintShowPageNumber(true),
+	PrintMagnifiersPerPage(new Dimension(3,3)),
+	PrintFontSize(14f),
 	
 	// Magnifier:
 	//MagnifierShow(false),
@@ -52,10 +62,10 @@ public enum BrickGraphicsState implements ModelState {
 	ToBricksPropagationPercentage(50),
 	SelectedColors(new String[]{}),
 	SelectedColorGroups(new String[]{"Basic", "Modern"}),
-	ToBricksTypeIndex(0),
-	ToBricksHalfToneTypeIndex(0),
-	ToBricksSizeTypeWidthIndex(2),
-	ToBricksSizeTypeHeightIndex(2);
+	ToBricksTypeIndex(0);
+	//ToBricksHalfToneTypeIndex(0),
+	//ToBricksSizeTypeWidthIndex(2),
+	//ToBricksSizeTypeHeightIndex(2);
 		
 	private Object defaultValue;
 	private Class<?> objectType;
@@ -63,12 +73,15 @@ public enum BrickGraphicsState implements ModelState {
 		this.defaultValue = defaultValue;
 		this.objectType = defaultValue.getClass();
 	}
+	@Override
 	public Class<?> getType() {
 		return objectType;
 	}
+	@Override
 	public Object getDefaultValue() {
 		return defaultValue;
 	}
+	@Override
 	public String getName() {
 		return name();
 	}

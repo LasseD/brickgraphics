@@ -4,10 +4,9 @@ import java.awt.event.*;
 import javax.swing.*;
 
 import mosaic.ui.MainWindow;
-import ui.*;
+import icon.*;
 
 public class ToggleDivider extends AbstractAction {
-	private static final long serialVersionUID = 3048201246080553608L;
 	private MainWindow mw;	
 	
 	public ToggleDivider(MainWindow mw) {
@@ -18,6 +17,7 @@ public class ToggleDivider extends AbstractAction {
 		putValue(LARGE_ICON_KEY, Icons.dividerTriangles(Icons.SIZE_LARGE));
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent e) {
 		JSplitPane sp = mw.getSplitPane();
 		int location = sp.getDividerLocation();

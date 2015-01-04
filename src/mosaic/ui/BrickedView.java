@@ -14,7 +14,6 @@ import bricks.ToBricksType;
 import java.awt.event.*;
 
 public class BrickedView extends JComponent implements ChangeListener {
-	private static final long serialVersionUID = -8531244887026144925L;
 	private BufferedImage inImage, bricked;
 	private ToBricksTransform toBricksTransform;
 	private ToBricksTools toolBar;
@@ -89,6 +88,7 @@ public class BrickedView extends JComponent implements ChangeListener {
 		addKeyListener(magnifierController);
 		mainComponent.setFocusable(true);
 		mainComponent.addMouseListener(new MouseAdapter() {
+			@Override
 			public void mouseClicked(MouseEvent e) {
 				grabFocus();
 			}
@@ -120,6 +120,7 @@ public class BrickedView extends JComponent implements ChangeListener {
 		toBricksTransform.setBasicUnitSize(toolBar.getBasicWidth(), toolBar.getBasicHeight());		
 	}
 
+	@Override
 	public void stateChanged(ChangeEvent e) {
 		if(e != null && e.getSource() instanceof ToBricksTools) {
 			ToBricksTools toolBar = (ToBricksTools)e.getSource();
@@ -136,9 +137,7 @@ public class BrickedView extends JComponent implements ChangeListener {
 		if(toBricksTransform.getToBricksType() == ToBricksType.SNOT_IN_2_BY_2) {
 			return toBricksTransform.lastUsedColorCounts();				
 		}
-		else {
-			return toBricksTransform.getMainTransform().lastUsedColorCounts();								
-		}		
+		return toBricksTransform.getMainTransform().lastUsedColorCounts();								
 	}
 	
 	public ToBricksTransform getToBricksTransform() {

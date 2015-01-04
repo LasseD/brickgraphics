@@ -11,6 +11,10 @@ public class ThresholdTransform extends BufferedLEGOColorTransform {
 		super(1, cc);
 	}
 	
+	public ThresholdTransform(int bufferSize, ColorController cc) {
+		super(bufferSize, cc);
+	}
+	
 	@Override
 	public LEGOColor[][] lcTransformUnbuffered(BufferedImage in) {
 		int w = in.getWidth();

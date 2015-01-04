@@ -3,10 +3,9 @@ package mosaic.controllers;
 import java.awt.Color;
 import java.io.*;
 import java.util.*;
-
+import icon.*;
 import javax.swing.*;
 import javax.swing.event.*;
-import ui.Icons;
 import colors.*;
 import colors.parsers.*;
 import mosaic.io.*;
@@ -445,7 +444,7 @@ public class ColorController implements ModelSaver<BrickGraphicsState> {
 		}
 	}
 	
-	public String getLongIdentifier(LEGOColor c) {
+	public static String getLongIdentifier(LEGOColor c) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(c.getID());
 		sb.append(", ");

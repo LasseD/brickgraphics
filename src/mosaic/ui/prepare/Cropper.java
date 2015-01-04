@@ -65,7 +65,7 @@ public class Cropper implements MouseListener, MouseMotionListener, ModelSaver<B
 
 		return new Rectangle(rx, ry, rw, rh);
 	}
-	private int cut(int i, int min, int max) {
+	private static int cut(int i, int min, int max) {
 		if(i < min)
 			return min;
 		if(i > max)
@@ -113,6 +113,13 @@ public class Cropper implements MouseListener, MouseMotionListener, ModelSaver<B
 			break;
 		case NE:
 			g2.draw(new Line2D.Double(rect.getMaxX(), 0, rect.getMaxX(), inH));
+			break;
+		case ALL:
+		case E:
+		case N:
+		case NONE:
+		case S:
+		case W:
 			break;
 		}
 		
@@ -191,28 +198,34 @@ public class Cropper implements MouseListener, MouseMotionListener, ModelSaver<B
 		}
 	}
 
+	@Override
 	public void mouseClicked(MouseEvent e) {
 		if(e.getClickCount() > 1) {			
 			switchEnabled();
 		}
 	}
 	
+	@Override
 	public void mouseEntered(MouseEvent e) {}
 	
+	@Override
 	public void mouseExited(MouseEvent e) {
 		state = Drag.NONE;
 		notifyListeners();
 	}
 
+	@Override
 	public void mousePressed(MouseEvent e) {
 		lastPress = e.getPoint();
 		lastPress.translate(-2, -2);
 	}
 
+	@Override
 	public void mouseReleased(MouseEvent e) {
 		lastPress = null;
 	}
 
+	@Override
 	public void mouseDragged(MouseEvent e) {
 		if(lastPress == null)
 			return;
@@ -311,6 +324,7 @@ public class Cropper implements MouseListener, MouseMotionListener, ModelSaver<B
 		notifyListeners();
 	}
 
+	@Override
 	public void mouseMoved(MouseEvent e) {
 		Point p = e.getPoint();
 		p.translate(-2, -2);
@@ -322,6 +336,7 @@ public class Cropper implements MouseListener, MouseMotionListener, ModelSaver<B
 		this.mouseImage = new Dimension(image.getWidth(), image.getHeight());
 	}
 
+	@Override
 	public void save(Model<BrickGraphicsState> model) {
 		model.set(BrickGraphicsState.PrepareCrop, unitRect);
 		model.set(BrickGraphicsState.PrepareCropEnabled, enabled);

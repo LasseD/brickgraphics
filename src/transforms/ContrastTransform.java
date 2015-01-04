@@ -10,7 +10,7 @@ public class ContrastTransform extends RGBTransform {
 
 	@Override
 	public BufferedImage transformUnbuffered(BufferedImage in) {
-		if(allAre(1f))
+		if(allAre())
 			return in;
 
 		int w = in.getWidth();
@@ -45,7 +45,7 @@ public class ContrastTransform extends RGBTransform {
 		return new LookupOp(table, null).filter(in, tmp);
 	}
 
-	private short cut(short s) {
+	private static short cut(short s) {
 		if(s < 0)
 			return 0;
 		if(s > 255)

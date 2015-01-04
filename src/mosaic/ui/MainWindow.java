@@ -1,5 +1,6 @@
 package mosaic.ui;
 
+import icon.*;
 import io.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -9,9 +10,9 @@ import java.beans.PropertyChangeListener;
 import java.io.*;
 import javax.swing.*;
 import javax.swing.event.*;
-import ui.Icons;
 import mosaic.controllers.*;
 import mosaic.io.*;
+import mosaic.controllers.PrintController;
 import mosaic.ui.menu.*;
 import mosaic.ui.prepare.*;
 
@@ -19,8 +20,6 @@ import mosaic.ui.prepare.*;
  * @author ld
  */
 public class MainWindow extends JFrame implements ChangeListener, ModelSaver<BrickGraphicsState> {
-	private static final long serialVersionUID = 4819662761398560128L;
-	
 	public static final String APP_NAME = "LD Digital Mosaic Creator";
 	public static final String APP_VERSION = "0.9.1";
 	public static final String HELP_URL = "http://c-mt.dk/software/lddmc/help";
@@ -33,6 +32,7 @@ public class MainWindow extends JFrame implements ChangeListener, ModelSaver<Bri
 
 	private MagnifierController magnifierController;
 	private ColorController colorController;
+	private PrintController printController;
 
 	public MainWindow() {
 		super(APP_NAME);
@@ -43,7 +43,8 @@ public class MainWindow extends JFrame implements ChangeListener, ModelSaver<Bri
 		
 		colorController = ColorController.instance(model);
 		magnifierController = new MagnifierController(model);
-
+		printController = new PrintController(model, this);
+		
 		System.out.println("Created controllers after " + (System.currentTimeMillis()-startTime) + "ms.");
 
 		imagePreparingView = new ImagePreparingView(model);		
@@ -54,6 +55,7 @@ public class MainWindow extends JFrame implements ChangeListener, ModelSaver<Bri
 		System.out.println("Created right view after " + (System.currentTimeMillis()-startTime) + "ms.");
 
 		addWindowListener(new WindowAdapter() {
+			@Override
 			public void windowClosing(WindowEvent e) {
 				try {
 					model.saveToFile();
@@ -65,9 +67,11 @@ public class MainWindow extends JFrame implements ChangeListener, ModelSaver<Bri
 			}
 		});
 		getContentPane().addHierarchyBoundsListener(new HierarchyBoundsListener(){
+			@Override
 			public void ancestorMoved(HierarchyEvent e) {
 				updateModel();				
 			}
+			@Override
 			public void ancestorResized(HierarchyEvent e) {
 				updateModel();				
 			}			
@@ -103,8 +107,15 @@ public class MainWindow extends JFrame implements ChangeListener, ModelSaver<Bri
 				brickedView.getToolBar().update();
 			}
 		});
-
+		
 		setLayout(new BorderLayout());
+
+		// Preparing view tool bar:
+		JPanel pPrepairToolBar = new JPanel();
+		ImagePreparingToolBar prepareToolBar = imagePreparingView.getToolBar();
+		pPrepairToolBar.add(prepareToolBar);
+		add(pPrepairToolBar, BorderLayout.WEST);
+
 		add(splitPane, BorderLayout.CENTER);
 		//add(Log.makeStatusBar(), BorderLayout.SOUTH);
 
@@ -116,7 +127,7 @@ public class MainWindow extends JFrame implements ChangeListener, ModelSaver<Bri
 				Ribbon ribbon = new Ribbon(MainWindow.this);
 				brickedView.getToolBar().addComponents(ribbon, true);		
 				add(ribbon, BorderLayout.NORTH);
-				setJMenuBar(new MainMenu(MainWindow.this, model, csd));				
+				setJMenuBar(new MainMenu(MainWindow.this, model, csd));
 				setIconImage(Icons.get(32, "icon").getImage());
 				new MagnifierWindow(MainWindow.this, magnifierController, colorController); // Do your own thing little window.
 			}
@@ -135,6 +146,7 @@ public class MainWindow extends JFrame implements ChangeListener, ModelSaver<Bri
 	
 	public static void main(String[] args) {
 		SwingUtilities.invokeLater(new Thread() {
+			@Override
 			public void run() {
 				try {
 					UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -173,6 +185,7 @@ public class MainWindow extends JFrame implements ChangeListener, ModelSaver<Bri
 		setVisible(false);
 		dispose();
 		SwingUtilities.invokeLater(new Runnable() {
+			@Override
 			public void run() {
 				newWindow();
 			}
@@ -191,6 +204,10 @@ public class MainWindow extends JFrame implements ChangeListener, ModelSaver<Bri
 
 		if(splitPane != null)
 			repaint();
+	}
+	
+	public String getFileName() {
+		return ((File)model.get(BrickGraphicsState.Image)).getName();
 	}
 
 	public BufferedImage getInImage() {
@@ -216,13 +233,22 @@ public class MainWindow extends JFrame implements ChangeListener, ModelSaver<Bri
 	}
 	
 	public BufferedImage getFinalImage() {
-		return brickedView.getMagnifierController().getCoreImage();
+		return brickedView.getMagnifierController().getCoreImageInCoreUnits();
 	}
 	
 	public ColorController getColorController() {
 		return colorController;
 	}
+	
+	public PrintController getPrintController() {
+		return printController;
+	}
+	
+	public MagnifierController getMagnifierController() {
+		return magnifierController;
+	}
 
+	@Override
 	public void stateChanged(ChangeEvent e) {
 		File file = (File)model.get(BrickGraphicsState.Image);
 		setTitle(APP_NAME + " - " + file.getName());
@@ -233,6 +259,7 @@ public class MainWindow extends JFrame implements ChangeListener, ModelSaver<Bri
 		repaint();
 	}
 	
+	@Override
 	public void save(Model<BrickGraphicsState> model) {
 		model.set(BrickGraphicsState.MainWindowDividerLocation, splitPane.getDividerLocation());
 		model.set(BrickGraphicsState.MainWindowPlacement, new Rectangle(getLocation().x, getLocation().y, getWidth(), getHeight()));

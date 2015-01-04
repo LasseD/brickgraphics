@@ -1,21 +1,26 @@
 package mosaic.ui.menu;
 
-import ui.*;
+import icon.*;
+import icon.ToBricksIcon.ToBricksIconType;
 import mosaic.ui.*;
 import javax.swing.*;
+
+import java.awt.Insets;
 import java.awt.event.*;
 import io.*;
 import javax.swing.event.*;
 import mosaic.io.*;
 import transforms.*;
+import ui.IconizedTextfield;
+
 import java.util.*;
 import bricks.*;
 import mosaic.controllers.*;
 
 public class ToBricksTools implements ChangeListener, ModelSaver<BrickGraphicsState> {
-	private JButton halfToneTypeButton, sizeMeasureButtonWidth, sizeMeasureButtonHeight;
 	private JButton[] toBricksTypeButtons;
-	private JTextField sizeFieldWidth, sizeFieldHeight, propagationPercentageField;
+	private JTextField propagationPercentageField;
+	private IconizedTextfield sizeFieldWidth, sizeFieldHeight; 
 	private JButton buttonLessPP, buttonMorePP;
 	private List<ChangeListener> listeners;
 	
@@ -23,7 +28,6 @@ public class ToBricksTools implements ChangeListener, ModelSaver<BrickGraphicsSt
 	private float originalScale;
 	private ToBricksType toBricksType;
 	private HalfToneType halfToneType;
-	private SizeType typeWidth, typeHeight;
 	private boolean sizeChoiceFromWidth;
 	private ColorChooserDialog colorChooser;
 	private int propagationPercentage;
@@ -42,7 +46,7 @@ public class ToBricksTools implements ChangeListener, ModelSaver<BrickGraphicsSt
 		SwingUtilities.invokeLater(new Runnable() {			
 			@Override
 			public void run() {
-				setUI(parent, model);
+				setUI();
 			}
 		});
 	}
@@ -54,43 +58,31 @@ public class ToBricksTools implements ChangeListener, ModelSaver<BrickGraphicsSt
 			toolBar.add(Box.createHorizontalStrut(10));
 		for(JButton b : toBricksTypeButtons)
 			toolBar.add(b);
-		toolBar.add(halfToneTypeButton);
-		//toolBar.add(Box.createHorizontalStrut(10));
+		toolBar.add(Box.createHorizontalStrut(10));
 		toolBar.add(buttonLessPP);
 		toolBar.add(propagationPercentageField);
 		toolBar.add(buttonMorePP);		
 		toolBar.add(Box.createHorizontalStrut(10));
-		toolBar.add(new JLabel("Width = "));
 		toolBar.add(sizeFieldWidth);
-		toolBar.add(sizeMeasureButtonWidth);
-		toolBar.add(new JLabel("Height = "));
+		toolBar.add(new JLabel(" X "));
 		toolBar.add(sizeFieldHeight);
-		toolBar.add(sizeMeasureButtonHeight);
 	}
 	
-	private void setUI(final JFrame parent, final Model<BrickGraphicsState> model) {
+	private void setUI() {
 		int i = 0;
 		for(final ToBricksType type : ToBricksType.values()) {
 			JButton toBricksTypeButton = new JButton();
 			toBricksTypeButton.addActionListener(new ActionListener() {
+				@Override
 				public void actionPerformed(ActionEvent e) {
 					toBricksType = type;
 					update();
 				}
 			});		
 			toBricksTypeButtons[i++] = toBricksTypeButton;
-		}
+		}		
 		
-		halfToneTypeButton = new JButton();
-		halfToneTypeButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				int length = HalfToneType.values().length;
-				halfToneType = HalfToneType.values()[(halfToneType.ordinal()+1)%length];
-				update();
-			}
-		});		
-		
-		buttonLessPP = new JButton(Icons.get(Icons.SIZE_LARGE, "propagate_less"));
+		buttonLessPP = new JButton(Icons.treshold(Icons.SIZE_LARGE));
 		buttonLessPP.addActionListener(new ActionListener() {			
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -98,7 +90,9 @@ public class ToBricksTools implements ChangeListener, ModelSaver<BrickGraphicsSt
 				update();
 			}
 		});		
+		final int PAD = IconizedTextfield.PADDING;
 		propagationPercentageField = new JTextField(propagationPercentage + "%", 4);
+		propagationPercentageField.setMargin(new Insets(PAD, PAD, PAD, PAD));
 		propagationPercentageField.addActionListener(new ActionListener() {			
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -115,7 +109,7 @@ public class ToBricksTools implements ChangeListener, ModelSaver<BrickGraphicsSt
 				update();
 			}
 		});
-		buttonMorePP = new JButton(Icons.get(Icons.SIZE_LARGE, "propagate_more"));
+		buttonMorePP = new JButton(Icons.floydSteinberg(Icons.SIZE_LARGE));
 		buttonMorePP.addActionListener(new ActionListener() {			
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -124,32 +118,14 @@ public class ToBricksTools implements ChangeListener, ModelSaver<BrickGraphicsSt
 			}
 		});
 
-		sizeMeasureButtonWidth = new JButton();
-		sizeMeasureButtonHeight = new JButton();
-		sizeMeasureButtonWidth.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				sizeChoiceFromWidth = true;
-				typeWidth = SizeType.values()[(typeWidth.ordinal()+1)%SizeType.values().length];
-				sizeMeasureButtonWidth.setIcon(typeWidth.iconWidth);
-				update();
-			}
-		});
-		sizeMeasureButtonHeight.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				sizeChoiceFromWidth = false;
-				typeHeight = SizeType.values()[(typeHeight.ordinal()+1)%SizeType.values().length];
-				sizeMeasureButtonHeight.setIcon(typeHeight.iconHeight);
-				update();
-			}
-		});
-		
-		sizeFieldWidth = new JTextField(4);
-		sizeFieldHeight = new JTextField(4);
+		sizeFieldWidth = new IconizedTextfield(4, toBricksType.getIcon().get(ToBricksIconType.MeasureWidth, Icons.SIZE_SMALL));
+		sizeFieldWidth.setMargin(new Insets(PAD, PAD, PAD, Icons.SIZE_SMALL));
 		sizeFieldWidth.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				sizeChoiceFromWidth = true;
 				try {
-					ToBricksTools.this.width = typeWidth.getBasicSize(Integer.parseInt(sizeFieldWidth.getText().trim()));
+					ToBricksTools.this.width = toBricksType.getUnitWidth()*Integer.parseInt(sizeFieldWidth.getText().trim());
 				}
 				catch(NumberFormatException ex) {
 					// don't change width.
@@ -157,11 +133,14 @@ public class ToBricksTools implements ChangeListener, ModelSaver<BrickGraphicsSt
 				update();
 			}
 		});
+		sizeFieldHeight = new IconizedTextfield(4, toBricksType.getIcon().get(ToBricksIconType.MeasureHeight, Icons.SIZE_SMALL));
+		sizeFieldHeight.setMargin(new Insets(PAD, PAD, PAD, Icons.SIZE_SMALL));
 		sizeFieldHeight.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				sizeChoiceFromWidth = false;
 				try {
-					ToBricksTools.this.height = typeHeight.getBasicSize(Integer.parseInt(sizeFieldHeight.getText().trim()));
+					ToBricksTools.this.height = toBricksType.getUnitHeight()*Integer.parseInt(sizeFieldHeight.getText().trim());
 				}
 				catch(NumberFormatException ex) {
 					// don't change width.
@@ -175,6 +154,7 @@ public class ToBricksTools implements ChangeListener, ModelSaver<BrickGraphicsSt
 		update();		
 	}
 	
+	@Override
 	public void stateChanged(ChangeEvent arg0) {
 		update();
 	}
@@ -203,37 +183,34 @@ public class ToBricksTools implements ChangeListener, ModelSaver<BrickGraphicsSt
 	public void update() {		
 		if(!uiReady)
 			return;
-		halfToneTypeButton.setIcon(halfToneType.getIcon());
 		
 		int i = 0;
 		for(final ToBricksType type : ToBricksType.values()) {
-			toBricksTypeButtons[i].setIcon(toBricksType.ordinal() == i ? type.getEnabledIcon() : type.getDisabledIcon());
+			toBricksTypeButtons[i].setIcon(toBricksType.ordinal() == i ? type.getIcon().get(ToBricksIconType.Enabled, Icons.SIZE_LARGE) : 
+																		 type.getIcon().get(ToBricksIconType.Disabled, Icons.SIZE_LARGE));
 			++i;
 		}
-		sizeMeasureButtonWidth.setIcon(typeWidth.iconWidth);
-		sizeMeasureButtonHeight.setIcon(typeHeight.iconHeight);
-		
-		//propagationPercentagePanel.setEnabled(halfToneType == HalfToneType.FloydSteinberg);
-		propagationPercentageField.setEnabled(halfToneType == HalfToneType.FloydSteinberg);
-		buttonLessPP.setEnabled(halfToneType == HalfToneType.FloydSteinberg);
-		buttonMorePP.setEnabled(halfToneType == HalfToneType.FloydSteinberg);
+		sizeFieldWidth.setIcon(toBricksType.getIcon().get(ToBricksIconType.MeasureWidth, Icons.SIZE_SMALL));
+		sizeFieldHeight.setIcon(toBricksType.getIcon().get(ToBricksIconType.MeasureHeight, Icons.SIZE_SMALL));
 		
 		if(propagationPercentage < 0)
 			propagationPercentage = 0;
 		else if(propagationPercentage > 100)
 			propagationPercentage = 100;
 		propagationPercentageField.setText(propagationPercentage + "%");
-				
+		halfToneType = propagationPercentage == 0 ? HalfToneType.Threshold : HalfToneType.FloydSteinberg;
+
+		
 		if(sizeChoiceFromWidth) {
-			width = toBricksType.closestCompatibleWidth(width, typeWidth.unit);
-			height = toBricksType.closestCompatibleHeight(Math.round(width/originalScale), typeHeight.unit);	
+			width = toBricksType.closestCompatibleWidth(width, toBricksType.getUnitWidth());
+			height = toBricksType.closestCompatibleHeight(Math.round(width/originalScale), toBricksType.getUnitHeight());	
 		}
 		else {
-			height = toBricksType.closestCompatibleHeight(height, typeHeight.unit);		
-			width = toBricksType.closestCompatibleWidth(Math.round(originalScale*height), typeWidth.unit);
+			height = toBricksType.closestCompatibleHeight(height, toBricksType.getUnitHeight());		
+			width = toBricksType.closestCompatibleWidth(Math.round(originalScale*height), toBricksType.getUnitWidth());
 		}
-		sizeFieldWidth.setText("" + typeWidth.getUnitSize(width));
-		sizeFieldHeight.setText("" + typeHeight.getUnitSize(height));
+		sizeFieldWidth.setText("" + (width/toBricksType.getUnitWidth()));
+		sizeFieldHeight.setText("" + (height/toBricksType.getUnitHeight()));
 		ChangeEvent e = new ChangeEvent(this);
 		for(ChangeListener l : listeners) {
 			l.stateChanged(e);
@@ -250,33 +227,11 @@ public class ToBricksTools implements ChangeListener, ModelSaver<BrickGraphicsSt
 		return colorChooser;
 	}
 	
-	private enum SizeType {
-		plate("plate", SizeInfo.PLATE_HEIGHT), 
-		brick("brick", SizeInfo.BRICK_HEIGHT), 
-		stud("stud", SizeInfo.BRICK_WIDTH);
-		
-		public final Icon iconWidth, iconHeight;
-		public final int unit;
-		private SizeType(String icon, int unit) {
-			this.iconWidth = Icons.get(Icons.SIZE_LARGE, "width_" + icon);
-			this.iconHeight = Icons.get(Icons.SIZE_LARGE, "height_" + icon);
-			this.unit = unit;
-		}
-		public int getUnitSize(int sizeInBasicUnits) {
-			return sizeInBasicUnits/unit;
-		}
-		public int getBasicSize(int sizeInUnits) {
-			return sizeInUnits*unit;
-		}
-	}
-
+	@Override
 	public void save(Model<BrickGraphicsState> model) {
 		model.set(BrickGraphicsState.ToBricksWidth, width);
 		model.set(BrickGraphicsState.ToBricksHeight, height);
 		model.set(BrickGraphicsState.ToBricksTypeIndex, toBricksType.ordinal());
-		model.set(BrickGraphicsState.ToBricksHalfToneTypeIndex, halfToneType.ordinal());
-		model.set(BrickGraphicsState.ToBricksSizeTypeWidthIndex, typeWidth.ordinal());
-		model.set(BrickGraphicsState.ToBricksSizeTypeHeightIndex, typeHeight.ordinal());
 		model.set(BrickGraphicsState.ToBricksPropagationPercentage, propagationPercentage);
 	}
 	
@@ -287,10 +242,6 @@ public class ToBricksTools implements ChangeListener, ModelSaver<BrickGraphicsSt
 		originalScale = width/(float)height;
 		int tbtl = ToBricksType.values().length;
 		toBricksType = ToBricksType.values()[((Integer)model.get(BrickGraphicsState.ToBricksTypeIndex))%tbtl];
-		int httl = HalfToneType.values().length;
-		halfToneType = HalfToneType.values()[((Integer)model.get(BrickGraphicsState.ToBricksHalfToneTypeIndex))%httl];
-		typeWidth = SizeType.values()[((Integer)model.get(BrickGraphicsState.ToBricksSizeTypeWidthIndex))%SizeType.values().length];
-		typeHeight = SizeType.values()[((Integer)model.get(BrickGraphicsState.ToBricksSizeTypeHeightIndex))%SizeType.values().length];
 		update();			
 	}
 }

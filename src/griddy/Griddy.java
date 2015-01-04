@@ -3,15 +3,13 @@ package griddy;
 import io.Model;
 import io.ModelChangeListener;
 import io.ModelSaver;
-
+import icon.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
-
 import griddy.actions.*;
 import javax.swing.*;
-import ui.Icons;
 import griddy.grid.*;
 import griddy.rulers.*;
 import griddy.zoom.*;

@@ -1,12 +1,12 @@
 package mosaic.ui.actions;
 
 import java.awt.event.*;
+
 import javax.swing.*;
 import mosaic.ui.prepare.*;
-import ui.*;
+import icon.*;
 
 public class ToggleCrop extends AbstractAction {
-	private static final long serialVersionUID = 3048201246080553608L;
 	private ImagePreparingView view;
 	
 	public ToggleCrop(ImagePreparingView view) {
@@ -18,9 +18,10 @@ public class ToggleCrop extends AbstractAction {
 		putValue(NAME, "Crop");
 		putValue(MNEMONIC_KEY, (int)'R');
 		putValue(DISPLAYED_MNEMONIC_INDEX_KEY, "Crop".indexOf('r'));
-		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_R, KeyEvent.ALT_DOWN_MASK));	
+		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.ALT_DOWN_MASK));	
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent e) {
 		view.switchCropState();
 	}

@@ -1,17 +1,16 @@
 package bricks;
 
+import icon.*;
 import java.awt.image.*;
-import javax.swing.*;
-
 import colors.LEGOColor;
 import transforms.*;
-import ui.*;
 
 /**
  * @author ld
  */
 public enum ToBricksType {
-	STUD_FROM_TOP(Icons.studFromTop(Icons.SIZE_LARGE, 1, true), Icons.studFromTop(Icons.SIZE_LARGE, 1, false), SizeInfo.BRICK_WIDTH, SizeInfo.BRICK_WIDTH) {
+	STUD_FROM_TOP(Icons.studFromTop(1), SizeInfo.BRICK_WIDTH, SizeInfo.BRICK_WIDTH) {
+		@Override
 		public BufferedImage transform(BufferedImage in, ToBricksTransform tbt) {
 			in = tbt.getStudTileTransform().transform(in);
 			in = tbt.getMainTransform().transform(in);
@@ -19,7 +18,8 @@ public enum ToBricksType {
 			return in;
 		}
 	}, 
-	TILE_FROM_TOP(Icons.tileFromTop(Icons.SIZE_LARGE, true), Icons.tileFromTop(Icons.SIZE_LARGE, false), SizeInfo.BRICK_WIDTH, SizeInfo.BRICK_WIDTH) {
+	TILE_FROM_TOP(Icons.tileFromTop(), SizeInfo.BRICK_WIDTH, SizeInfo.BRICK_WIDTH) {
+		@Override
 		public BufferedImage transform(BufferedImage in, ToBricksTransform tbt) {
 			in = tbt.getStudTileTransform().transform(in);
 			in = tbt.getMainTransform().transform(in);
@@ -27,7 +27,8 @@ public enum ToBricksType {
 			return in;
 		}
 	}, 
-	PLATE_FROM_SIDE(Icons.plateFromSide(Icons.SIZE_LARGE, true), Icons.plateFromSide(Icons.SIZE_LARGE, false), SizeInfo.BRICK_WIDTH, SizeInfo.PLATE_HEIGHT) {
+	PLATE_FROM_SIDE(Icons.plateFromSide(), SizeInfo.BRICK_WIDTH, SizeInfo.PLATE_HEIGHT) {
+		@Override
 		public BufferedImage transform(BufferedImage in, ToBricksTransform tbt) {
 			in = tbt.getPlateTransform().transform(in);
 			in = tbt.getMainTransform().transform(in);
@@ -35,7 +36,8 @@ public enum ToBricksType {
 			return in;
 		}
 	}, 
-	BRICK_FROM_SIDE(Icons.brickFromSide(Icons.SIZE_LARGE, true), Icons.brickFromSide(Icons.SIZE_LARGE, false), SizeInfo.BRICK_WIDTH, SizeInfo.BRICK_HEIGHT) {
+	BRICK_FROM_SIDE(Icons.brickFromSide(), SizeInfo.BRICK_WIDTH, SizeInfo.BRICK_HEIGHT) {
+		@Override
 		public BufferedImage transform(BufferedImage in, ToBricksTransform tbt) {
 			in = tbt.getBrickTransform().transform(in);
 			in = tbt.getMainTransform().transform(in);
@@ -43,24 +45,27 @@ public enum ToBricksType {
 			return in;
 		}
 	},
-	SNOT_IN_2_BY_2(Icons.snot(Icons.SIZE_LARGE, true), Icons.snot(Icons.SIZE_LARGE, false), SizeInfo.SNOT_BLOCK_WIDTH, SizeInfo.SNOT_BLOCK_WIDTH) {
+	SNOT_IN_2_BY_2(Icons.snot(), SizeInfo.SNOT_BLOCK_WIDTH, SizeInfo.SNOT_BLOCK_WIDTH) {
+		@Override
 		public BufferedImage transform(BufferedImage in, ToBricksTransform tbt) {
+			//long start = System.currentTimeMillis();
 			BufferedImage normal = tbt.getPlateTransform().transform(in);
 			BufferedImage sideways = tbt.getSidePlateTransform().transform(in);
 
 			LEGOColorTransform mainTransform = tbt.getMainTransform();
 			
 			LEGOColor[][] normalColors = mainTransform.lcTransform(normal);
-			normal = mainTransform.transform(normal);
-			
 			LEGOColor[][] sidewaysColors = mainTransform.lcTransform(sideways);			
-			sideways = mainTransform.transform(sideways);
 
 			in = tbt.getBasicTransform().transform(in);
-			return tbt.bestMatch(normal, normalColors, sideways, sidewaysColors, in);
+			//System.out.println("SNOT transform prepared in: " + (System.currentTimeMillis()-start) + "ms.");
+			BufferedImage res = tbt.bestMatch(normalColors, sidewaysColors, in);
+			//System.out.println("SNOT written in: " + (System.currentTimeMillis()-start) + "ms. total.");			
+			return res;
 		}
 	}, 
-	TWO_BY_TWO_PLATES_FROM_TOP(Icons.studFromTop(Icons.SIZE_LARGE, 2, true), Icons.studFromTop(Icons.SIZE_LARGE, 2, false), SizeInfo.SNOT_BLOCK_WIDTH, SizeInfo.SNOT_BLOCK_WIDTH) {
+	TWO_BY_TWO_PLATES_FROM_TOP(Icons.studFromTop(2), SizeInfo.SNOT_BLOCK_WIDTH, SizeInfo.SNOT_BLOCK_WIDTH) {
+		@Override
 		public BufferedImage transform(BufferedImage in, ToBricksTransform tbt) {
 			in = tbt.getTwoByTwoTransform().transform(in);
 			in = tbt.getMainTransform().transform(in);
@@ -69,15 +74,14 @@ public enum ToBricksType {
 		}
 	};
 	
-	private Icon enabledIcon, disabledIcon;
+	private ToBricksIcon icon;
 	/**
 	 * Unit width and height is the indivisible size of the ToBricksType
 	 */
 	private int unitWidth, unitHeight;
 
-	private ToBricksType(Icon enabledIcon, Icon disabledIcon, int dw, int dh) {
-		this.enabledIcon = enabledIcon;
-		this.disabledIcon = disabledIcon;
+	private ToBricksType(ToBricksIcon icon, int dw, int dh) {
+		this.icon = icon;
 		unitWidth = dw;
 		unitHeight = dh;
 	}
@@ -124,11 +128,8 @@ public enum ToBricksType {
 		return ret;
 	}
 	
-	public Icon getEnabledIcon() {
-		return enabledIcon;
-	}
-	public Icon getDisabledIcon() {
-		return disabledIcon;
+	public ToBricksIcon getIcon() {
+		return icon;
 	}
 	
 	/**

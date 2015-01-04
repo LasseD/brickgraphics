@@ -10,8 +10,10 @@ import colors.parsers.ColorSheetParser;
 import mosaic.controllers.ColorController;
 import mosaic.io.MosaicIO;
 
+/**
+ * @author ld
+ */
 public class ColorSettingsDialog extends JDialog implements ChangeListener {
-	private static final long serialVersionUID = -1273278817213052004L;
 	private ColorController cc;
 	private JTextField tfLoadURL, tfLoadFile, tfFromYear, tfToYear, tfMinSets, tfMinParts;
 	private JCheckBox cbShowMetallic, cbShowTransparent;

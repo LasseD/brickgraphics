@@ -14,7 +14,6 @@ import transforms.*;
  * crop, sharpness, gamma, brightness, contrast, saturation
  */
 public class ImagePreparingView extends JComponent implements ChangeListener, ModelSaver<BrickGraphicsState> {
-	private static final long serialVersionUID = -1814153546542713621L;
 	private BufferedImage inImage, prepared, baseImage, baseCrop;
 	private Cropper cropper;
 	private List<ChangeListener> listeners;
@@ -26,12 +25,18 @@ public class ImagePreparingView extends JComponent implements ChangeListener, Mo
 	private StateTransformRanker brightnessR, gammaR, contrastR, saturationR, sharpnessR;
 	private int maxRank;
 	private ImagePreparingToolBar toolBar;
-	private JPanel toolBarPanel;
 
+	// For showing image:
+	private ScaleTransform fullScaler, cropScaler;
+	
 	public ImagePreparingView(final Model<BrickGraphicsState> model) {
 		model.addModelSaver(this);
+		setLayout(new BorderLayout());
 		listeners = new LinkedList<ChangeListener>();
 
+		fullScaler = new ScaleTransform(ScaleTransform.Type.bounded, AffineTransformOp.TYPE_BILINEAR, 2);
+		cropScaler = new ScaleTransform(ScaleTransform.Type.bounded, AffineTransformOp.TYPE_BILINEAR);
+		
 		cropper = new Cropper(model);		
 		cropper.addChangeListener(this);
 		addMouseMotionListener(cropper);
@@ -58,20 +63,11 @@ public class ImagePreparingView extends JComponent implements ChangeListener, Mo
 			updateMaxRank();
 			Collections.sort(transforms);		
 		}
-
-		SwingUtilities.invokeLater(new Runnable() {			
-			@Override
-			public void run() {
-				setLayout(new BorderLayout());
-				JComponent imageDisplayer = new ImageDisplayComponent();
-				add(imageDisplayer, BorderLayout.CENTER);
-				toolBar = new ImagePreparingToolBar(ImagePreparingView.this, model);
-				toolBarPanel = new JPanel();
-				toolBarPanel.add(toolBar);
-				add(toolBarPanel, BorderLayout.WEST);
-				toolBarPanel.setVisible((Boolean)model.get(BrickGraphicsState.PrepareFiltersEnabled));
-			}
-		});
+		toolBar = new ImagePreparingToolBar(ImagePreparingView.this, model);
+	}
+	
+	public ImagePreparingToolBar getToolBar() {
+		return toolBar;
 	}
 	
 	private void updateMaxRank() {
@@ -87,8 +83,6 @@ public class ImagePreparingView extends JComponent implements ChangeListener, Mo
 		gamma.set((float[])model.get(BrickGraphicsState.PrepareGamma));
 		contrast.set((float[])model.get(BrickGraphicsState.PrepareContrast));
 		saturation.set((Float)model.get(BrickGraphicsState.PrepareSaturation));
-		if(toolBarPanel != null)
-			toolBarPanel.setVisible((Boolean)model.get(BrickGraphicsState.PrepareFiltersEnabled));
 
 		for(StateTransformRanker s : transforms) {
 			s.load(model);
@@ -96,8 +90,10 @@ public class ImagePreparingView extends JComponent implements ChangeListener, Mo
 		Collections.sort(transforms);
 		updateMaxRank();
 
-		if(toolBar != null)
+		if(toolBar != null) {
+			toolBar.setVisible((Boolean)model.get(BrickGraphicsState.PrepareFiltersEnabled));
 			toolBar.reloadModel(model);
+		}
 		updateBaseImages();
 	}
 
@@ -191,7 +187,7 @@ public class ImagePreparingView extends JComponent implements ChangeListener, Mo
 	}
 	
 	public void switchFiltersEnabled() {
-		toolBarPanel.setVisible(!toolBarPanel.isVisible());
+		toolBar.setVisible(!toolBar.isVisible());
 	}
 
 	public void setGamma(int index, float gamma) {
@@ -219,6 +215,7 @@ public class ImagePreparingView extends JComponent implements ChangeListener, Mo
 			setCursor(cursor = c);
 	}
 
+	@Override
 	public void stateChanged(ChangeEvent e) {
 		updateCursor();
 		updateBaseCrop();
@@ -226,13 +223,14 @@ public class ImagePreparingView extends JComponent implements ChangeListener, Mo
 		notifyListeners();
 	}
 
+	@Override
 	public void save(Model<BrickGraphicsState> model) {
 		model.set(BrickGraphicsState.PrepareSharpness, sharpness.get());
 		model.set(BrickGraphicsState.PrepareBrightness, brightness.get());
 		model.set(BrickGraphicsState.PrepareGamma, gamma.get());
 		model.set(BrickGraphicsState.PrepareContrast, contrast.get());
 		model.set(BrickGraphicsState.PrepareSaturation, saturation.get());
-		model.set(BrickGraphicsState.PrepareFiltersEnabled, toolBarPanel != null && toolBarPanel.isVisible());
+		model.set(BrickGraphicsState.PrepareFiltersEnabled, toolBar != null && toolBar.isVisible());
 		
 		Collections.sort(transforms);
 		int i = 0;
@@ -258,6 +256,7 @@ public class ImagePreparingView extends JComponent implements ChangeListener, Mo
 			rank = (Integer) model.get(toSave);
 		}
 
+		@Override
 		public int compareTo(StateTransformRanker other) {
 			return rank - other.rank;
 		}
@@ -279,45 +278,37 @@ public class ImagePreparingView extends JComponent implements ChangeListener, Mo
 		}
 	}
 
-	private class ImageDisplayComponent extends JComponent {
-		private static final long serialVersionUID = 7842211650429220481L;
-		private ScaleTransform fullScaler = new ScaleTransform(ScaleTransform.Type.bounded, 
-				AffineTransformOp.TYPE_BILINEAR, 2);
-		private ScaleTransform cropScaler = new ScaleTransform(ScaleTransform.Type.bounded, 
-				AffineTransformOp.TYPE_BILINEAR);
+	@Override 
+	public void paintComponent(Graphics g) {
+		Graphics2D g2 = (Graphics2D)g;
 
-		@Override 
-		public void paintComponent(Graphics g) {
-			Graphics2D g2 = (Graphics2D)g;
+		Dimension size = getSize();
+		size.height-=4;
+		size.width-=4;
+		if(size.width <= 4 || size.height <= 4)
+			return;
+		
+		fullScaler.setWidth(size.width);
+		fullScaler.setHeight(size.height);
 
-			Dimension size = getSize();
-			size.height-=4;
-			size.width-=4;
-			if(size.width <= 4 || size.height <= 4)
-				return;
-			
-			fullScaler.setWidth(size.width);
-			fullScaler.setHeight(size.height);
+		if(cropper.isEnabled()) {
+			BufferedImage full = ImagePreparingView.this.baseImage;
+			full = fullScaler.transform(full);
+			cropper.setMouseImage(full);
+			g2.drawImage(cropper.pollute(full), null, 0, 0);
 
-			if(cropper.isEnabled()) {
-				BufferedImage full = ImagePreparingView.this.baseImage;
-				full = fullScaler.transform(full);
-				cropper.setMouseImage(full);
-				g2.drawImage(cropper.pollute(full), null, 0, 0);
+			int w = full.getWidth();
+			int h = full.getHeight();
+			Rectangle r = cropper.getCrop(w, h);
+			cropScaler.setWidth(r.width);
+			cropScaler.setHeight(r.height);
 
-				int w = full.getWidth();
-				int h = full.getHeight();
-				Rectangle r = cropper.getCrop(w, h);
-				cropScaler.setWidth(r.width);
-				cropScaler.setHeight(r.height);
-
-				g2.drawImage(cropScaler.transform(ImagePreparingView.this.prepared), null, r.x+2, r.y+2);
-			}
-			else {
-				BufferedImage fullScaled = fullScaler.transform(ImagePreparingView.this.prepared);
-				cropper.setMouseImage(fullScaled);
-				g2.drawImage(fullScaled, null, 2, 2);
-			}
+			g2.drawImage(cropScaler.transform(ImagePreparingView.this.prepared), null, r.x+2, r.y+2);
 		}
-	};
+		else {
+			BufferedImage fullScaled = fullScaler.transform(ImagePreparingView.this.prepared);
+			cropper.setMouseImage(fullScaled);
+			g2.drawImage(fullScaled, null, 2, 2);
+		}
+	}
 }

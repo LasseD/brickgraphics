@@ -2,12 +2,10 @@ package mosaic.ui.actions;
 
 import java.awt.event.*;
 import javax.swing.*;
-
+import icon.*;
 import mosaic.ui.MainWindow;
-import ui.*;
 
 public class DividerLeft extends AbstractAction {
-	private static final long serialVersionUID = 3048201246080553608L;
 	private MainWindow mw;	
 	
 	public DividerLeft(MainWindow mw) {
@@ -18,6 +16,7 @@ public class DividerLeft extends AbstractAction {
 		putValue(LARGE_ICON_KEY, Icons.leftTriangle(Icons.SIZE_LARGE));
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent e) {
 		JSplitPane sp = mw.getSplitPane();
 		int location = sp.getDividerLocation();

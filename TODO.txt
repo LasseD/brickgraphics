@@ -1,0 +1,22 @@
+TODO 0.9.2:
+- Deploy
+- Update home page
+
+TODO 0.9.3:
+Changes that benefit the user:
+ - Shorten printed text messages that go out of bounds
+ - Make PrintDialog more pretty (titles and group radio buttons)
+ - Add more explanation to options in print dialog.
+ - Make left picture float like the right one
+ - Add page flip to print Preview (next/previous page, +show number of pages)
+ - Bug fixes reported by users
+ - Shadow on printed position box.
+Changes that benefit the programmer:
+ - Move PrepareToolBar away from prepare view!
+ - Implement ColorBlock to be used in pipeline
+ - Add PipeLine
+ - Serializable model using XML.
+ - Separate MainWindow from main program.
+ - Add XML serialization to model.
+ - Make model more strict: Report warning when not loading/saving all.
+ - Re-implement logging.

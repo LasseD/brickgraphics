@@ -27,7 +27,7 @@ public class RebrickableColorSheetParser implements ColorSheetParserI {
 		return out;
 	}
 	
-	private void readTRs(List<String> out, String trs) {
+	private static void readTRs(List<String> out, String trs) {
 		if(trs == null)
 			return;
 		char[] cs = trs.toCharArray();
@@ -68,7 +68,7 @@ public class RebrickableColorSheetParser implements ColorSheetParserI {
 		}
 	}
 	
-	private int eatTags(char[] cs, int csi, int numTags) {
+	private static int eatTags(char[] cs, int csi, int numTags) {
 		for(int ignore = 0; ignore < numTags; ++ignore) {
 			while(csi < cs.length && cs[csi] != '<')
 				++csi;

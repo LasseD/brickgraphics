@@ -1,7 +1,7 @@
 package mosaic.ui.prepare;
 
 import io.Model;
-import ui.*;
+import icon.*;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
@@ -12,52 +12,62 @@ import javax.swing.event.*;
 import mosaic.io.BrickGraphicsState;
 
 public class ImagePreparingToolBar extends JToolBar {
-	private static final long serialVersionUID = 2975704528356362833L;
 	private List<ColorSlider> sliderList;
 	
 	public ImagePreparingToolBar(final ImagePreparingView view, Model<BrickGraphicsState> model) {
 		super("Edit picture");
+		setOrientation(VERTICAL);
 		sliderList = new LinkedList<ColorSlider>();
 				
 		sliderList.add(new ColorSlider(Icons.sharpness(Icons.SIZE_SMALL), "Sharpness", model, BrickGraphicsState.PrepareSharpness, 0.5f, 1.5f, new ViewSlideUpdater() {			
+			@Override
 			public void set(int index, float value) {
 				throw new UnsupportedOperationException();
 			}
+			@Override
 			public void set(float value) {
 				view.setSharpness(value);
 			}
 		}));
 		sliderList.add(new ColorSlider(Icons.gamma(Icons.SIZE_SMALL), "Gamma", model, BrickGraphicsState.PrepareGamma, 0.05f, 6f, new ViewSlideUpdater() {			
+			@Override
 			public void set(int index, float value) {
 				view.setGamma(index, value);
 			}
+			@Override
 			public void set(float value) {
 				for(int i = 0; i < 3; i++)
 					view.setGamma(i, value);
 			}
 		}));
 		sliderList.add(new ColorSlider(Icons.brightness(Icons.SIZE_SMALL), "Brightness", model, BrickGraphicsState.PrepareBrightness, 0f, 4f, new ViewSlideUpdater() {			
+			@Override
 			public void set(int index, float value) {
 				view.setBrightness(index, value);
 			}
+			@Override
 			public void set(float value) {
 				for(int i = 0; i < 3; i++)
 					view.setBrightness(i, value);
 			}
 		}));
 		sliderList.add(new ColorSlider(Icons.contrast(Icons.SIZE_SMALL), "Contrast", model, BrickGraphicsState.PrepareContrast, -1f, 4f, new ViewSlideUpdater() {			
+			@Override
 			public void set(int index, float value) {
 				view.setContrast(index, value);
 			}
+			@Override
 			public void set(float value) {
 				for(int i = 0; i < 3; i++)
 					view.setContrast(i, value);
 			}
 		}));
 		sliderList.add(new ColorSlider(Icons.saturation(Icons.SIZE_SMALL), "Saturation", model, BrickGraphicsState.PrepareSaturation, 0f, 4f, new ViewSlideUpdater() {			
+			@Override
 			public void set(int index, float value) {
 				throw new UnsupportedOperationException();
 			}
+			@Override
 			public void set(float value) {
 				view.setSaturation(value);
 			}
@@ -66,7 +76,6 @@ public class ImagePreparingToolBar extends JToolBar {
 		for(ColorSlider slider : sliderList) {
 			add(slider.getComponent());			
 		}
-		setOrientation(VERTICAL);
 	}
 
 	public void reloadModel(Model<BrickGraphicsState> model) {
@@ -144,6 +153,7 @@ public class ImagePreparingToolBar extends JToolBar {
 				if(B)
 					slider.setBackground(RGB[i]);
 				slider.addChangeListener(new ChangeListener() {
+					@Override
 					public void stateChanged(ChangeEvent e) {
 						float newVal = read(sliders[I]);
 						label.setText(String.format("%5.2f", newVal));
@@ -170,18 +180,17 @@ public class ImagePreparingToolBar extends JToolBar {
 
 			final CardLayout cardLayout = new CardLayout();
 			final JPanel cardPanel = new JPanel(cardLayout);
-			cardPanel.add(singlePanel, (Object)"first");
+			cardPanel.add(singlePanel, "first");
 			final Dimension small = cardPanel.getPreferredSize();
-			cardPanel.add(gridPanel, (Object)"last");
+			cardPanel.add(gridPanel, "last");
 			final Dimension large = cardPanel.getPreferredSize();
 			cardPanel.setPreferredSize(small);
 			
 			final JCheckBox button = new JCheckBox(Icons.plus(Icons.SIZE_SMALL), false);
 			button.setSelectedIcon(Icons.minus(Icons.SIZE_SMALL));
 			button.setToolTipText(name);
-//			button.setBorder(new LineBorder(Color.BLACK, 1));
-//			button.setBorderPainted(true);
 			button.addActionListener(new ActionListener() {
+				@Override
 				public void actionPerformed(ActionEvent e) {
 					if(button.isSelected()) {
 						cardLayout.last(cardPanel);	
@@ -219,9 +228,10 @@ public class ImagePreparingToolBar extends JToolBar {
 			slider.setPaintTicks(true);
 			slider.setPaintLabels(false);
 				
-			final JLabel label = new JLabel(String.format("%.2f", init), icon, JLabel.HORIZONTAL);
+			final JLabel label = new JLabel(String.format("%.2f", init), icon, SwingConstants.HORIZONTAL);
 			
 			slider.addChangeListener(new ChangeListener() {
+				@Override
 				public void stateChanged(ChangeEvent e) {
 					float newVal = min + slider.getValue()/100f*(max-min);
 					label.setText(String.format("%.2f", newVal));

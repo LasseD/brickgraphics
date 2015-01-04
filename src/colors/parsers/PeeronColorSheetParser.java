@@ -38,6 +38,10 @@ public class PeeronColorSheetParser {
 		return out;
 	}
 
+	/**
+	 * Currently unused parser. Deprecated.
+	 * @param line  
+	 */
 	private static LEGOColor parseColorLine(String line) {
 		/*
 		try {

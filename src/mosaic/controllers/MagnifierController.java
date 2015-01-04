@@ -7,8 +7,6 @@ import java.awt.event.*;
 import java.awt.image.*;
 import java.awt.*;
 import javax.swing.event.*;
-
-import colors.LEGOColor;
 import transforms.ToBricksTransform;
 import mosaic.io.BrickGraphicsState;
 import mosaic.ui.prepare.Cropper;
@@ -58,7 +56,7 @@ public class MagnifierController implements ChangeListener, MouseListener, Mouse
 	}
 	public Dimension getSizeInUnits() {
 		return new Dimension(sizeInMosaicBlocks.width * tbTransform.getToBricksType().getUnitWidth(),
-				sizeInMosaicBlocks.height * tbTransform.getToBricksType().getUnitHeight());
+						     sizeInMosaicBlocks.height * tbTransform.getToBricksType().getUnitHeight());
 	}
 
 	public void reloadModel(Model<BrickGraphicsState> model) {
@@ -68,13 +66,14 @@ public class MagnifierController implements ChangeListener, MouseListener, Mouse
 		sizeInMosaicBlocks = (Dimension)model.get(BrickGraphicsState.MagnifierSize);		
 	}
 
+	@Override
 	public void save(Model<BrickGraphicsState> model) {
 		//model.set(BrickGraphicsState.MagnifierShow, isEnabled);
 		model.set(BrickGraphicsState.MagnifierShowLegend, showLegend);
 		model.set(BrickGraphicsState.MagnifierShowColors, showColors);
 		model.set(BrickGraphicsState.MagnifierSize, sizeInMosaicBlocks);
 	}
-	public void setColorsInMagnifier(Set<LEGOColor> colors) {
+	public void updateColorsInMagnifier() {
 		notifyListeners(null);
 	}
 	
@@ -122,7 +121,7 @@ public class MagnifierController implements ChangeListener, MouseListener, Mouse
 	/**
 	 * utility function.
 	 */
-	private int bound(int a, int min, int max) {
+	private static int bound(int a, int min, int max) {
 		if(max < min)
 			throw new IllegalStateException("Can't bound " + a + " in [" + min + "," + max + "]");
 		if(a < min)
@@ -204,7 +203,7 @@ public class MagnifierController implements ChangeListener, MouseListener, Mouse
 		sanify();
 	}
 	
-	public BufferedImage getCoreImage() {
+	public BufferedImage getCoreImageInCoreUnits() {
 		return coreImageInCoreUnits;
 	}
 	

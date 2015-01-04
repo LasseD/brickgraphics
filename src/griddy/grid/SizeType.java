@@ -3,35 +3,35 @@ package griddy.grid;
 import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-
 import javax.swing.*;
-import ui.Icons;
+import icon.*;
+import icon.ToBricksIcon.ToBricksIconType;
 
 public enum SizeType {
-	plate(2, 5) {
+	plate(5, 2) {
 		@Override
 		public Icon icon(int iconSize) {
-			return Icons.plateFromSide(iconSize, true);
+			return Icons.plateFromSide().get(ToBricksIconType.Enabled, iconSize);
 		}
-	}, brick(6, 5) {
+	}, brick(5, 6) {
 		@Override
 		public Icon icon(int iconSize) {
-			return Icons.brickFromSide(iconSize, true);
+			return Icons.brickFromSide().get(ToBricksIconType.Enabled, iconSize);
 		}
 	}, sidewaysPlate(5, 2) {
 		@Override
 		public Icon icon(int iconSize) {
-			return new RotateIcon(Icons.plateFromSide(iconSize, true));
+			return new RotateIcon(Icons.plateFromSide().get(ToBricksIconType.Enabled, iconSize));
 		}
 	}, sidewaysBrick(5, 6) {
 		@Override
 		public Icon icon(int iconSize) {
-			return new RotateIcon(Icons.brickFromSide(iconSize, true));
+			return new RotateIcon(Icons.brickFromSide().get(ToBricksIconType.Enabled, iconSize));
 		}
 	}, stud(5, 5) {
 		@Override
 		public Icon icon(int iconSize) {
-			return Icons.studFromTop(iconSize, 1, true);
+			return Icons.studFromTop(1).get(ToBricksIconType.Enabled, iconSize);
 		}
 	};
 	
@@ -46,7 +46,7 @@ public enum SizeType {
 
 	public abstract Icon icon(int iconSize);
 	
-	private SizeType(int h, int w) {
+	private SizeType(int w, int h) {
 		width = w;
 		height = h;
 	}

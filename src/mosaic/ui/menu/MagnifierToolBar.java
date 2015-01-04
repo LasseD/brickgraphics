@@ -1,6 +1,7 @@
 package mosaic.ui.menu;
 
 import javax.swing.JToolBar;
+import javax.swing.SwingConstants;
 
 import mosaic.controllers.MagnifierController;
 import mosaic.ui.actions.ToggleMagnifierLegend;
@@ -11,10 +12,8 @@ import mosaic.ui.actions.MagnifierTaller;
 import mosaic.ui.actions.MagnifierWidener;
 
 public class MagnifierToolBar extends JToolBar {
-	private static final long serialVersionUID = -8687639678741087782L;
-
 	public MagnifierToolBar(MagnifierController magnifierController) {
-		super("Magnifier options", JToolBar.HORIZONTAL);
+		super("Magnifier options", SwingConstants.HORIZONTAL);
 		add(new MagnifierTaller(magnifierController));
 		add(new MagnifierShorter(magnifierController));
 		add(new MagnifierWidener(magnifierController));

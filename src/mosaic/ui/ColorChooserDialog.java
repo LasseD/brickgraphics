@@ -1,6 +1,7 @@
 package mosaic.ui;
 
 import javax.swing.*;
+
 import colors.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -11,7 +12,6 @@ import javax.swing.event.*;
 import mosaic.controllers.*;
 
 public class ColorChooserDialog extends JDialog implements ChangeListener {
-	private static final long serialVersionUID = 801460023279742615L;
 	private List<ColorGroupPanel> panels;
 	private boolean everEnabled, enabled;
 	private ColorController cc;
@@ -30,13 +30,14 @@ public class ColorChooserDialog extends JDialog implements ChangeListener {
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 		
 		addWindowListener(new WindowAdapter() {
+			@Override
 			public void windowClosing(WindowEvent e) {
 				enabled = false;				
 			}
 		});
 		getContentPane().add(new JScrollPane(mainPanel, 
-				 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
-				 JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED));
+				 ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, 
+				 ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED));
 		
 		stateChanged(null);
 	}
@@ -69,6 +70,7 @@ public class ColorChooserDialog extends JDialog implements ChangeListener {
 		cc.setselectedColorsAndGroups(selectedColors, selectedGroups, new ChangeEvent(ColorChooserDialog.this));
 	}
 	
+	@Override
 	public void stateChanged(ChangeEvent e) {
 		if(e != null && e.getSource() == this)
 			return;
@@ -114,7 +116,7 @@ public class ColorChooserDialog extends JDialog implements ChangeListener {
 			// Set up label:
 			JLabel label = new JLabel(group.getName());
 			label.setPreferredSize(new Dimension(labelWidth, label.getPreferredSize().height));
-			label.setHorizontalAlignment(JLabel.RIGHT);
+			label.setHorizontalAlignment(SwingConstants.RIGHT);
 
 			// Set up self:
 			out.setLayout(new FlowLayout(FlowLayout.LEADING, 0, 0));
@@ -137,6 +139,7 @@ public class ColorChooserDialog extends JDialog implements ChangeListener {
 		
 		private ColorGroupPanel() {}
 		
+		@Override
 		public void actionPerformed(ActionEvent e) {
 			if(ignoreEvents)
 				return;
@@ -168,7 +171,7 @@ public class ColorChooserDialog extends JDialog implements ChangeListener {
 		public ColorCheckBox(ColorGroup group, LEGOColor color, ColorController cc) {
 			this.color = color;
 			int size = getPreferredSize().width*2;
-			setToolTipText(cc.getLongIdentifier(color));
+			setToolTipText(ColorController.getLongIdentifier(color));
 			setHorizontalAlignment(SwingConstants.CENTER);
 			setPreferredSize(new Dimension(size, size));
 			setBackground(color.getRGB());

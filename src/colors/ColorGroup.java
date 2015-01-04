@@ -21,6 +21,7 @@ public class ColorGroup implements Comparable<ColorGroup> {
 		colors.toArray(this.colors);
 	}
 	
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder(getClass().getName() + "[name:" + name);
 		for(LEGOColor c : colors) {
@@ -147,7 +148,13 @@ public class ColorGroup implements Comparable<ColorGroup> {
 		return other instanceof ColorGroup && ((ColorGroup)other).name.equals(name);
 	}
 
+	@Override
 	public int compareTo(ColorGroup other) {
 		return name.compareTo(other.name);
+	}
+
+	@Override
+	public int hashCode() {
+		return name.hashCode();
 	}
 }

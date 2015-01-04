@@ -193,6 +193,7 @@ public class LEGOColor implements Comparable<LEGOColor>, Serializable {
 		return other instanceof LEGOColor && ((LEGOColor)other).id == id;
 	}
 	
+	@Override
 	public int compareTo(LEGOColor other) {
 		return id < other.id ? -1 : (id == other.id ? 0 : 1);
 	}

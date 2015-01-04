@@ -18,6 +18,7 @@ public abstract class BufferedTransform implements Transform {
 		imagePairs = new BufferedImage[imagePairs.length][2];		
 	}
 	
+	@Override
 	public BufferedImage transform(BufferedImage in) {
 		for(BufferedImage[] pair : imagePairs) {
 			if(pair[0] == in)

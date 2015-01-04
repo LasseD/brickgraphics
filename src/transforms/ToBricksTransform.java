@@ -44,8 +44,8 @@ public class ToBricksTransform implements InstructionsTransform {
 		
 		LEGOColorLookUp.setColors(colors);
 
-		ditheringTransform = new FloydSteinbergTransform(propagationPercentage, cc);
-		thresholdTransform = new ThresholdTransform(cc);
+		ditheringTransform = new FloydSteinbergTransform(2, propagationPercentage, cc);
+		thresholdTransform = new ThresholdTransform(2, cc);
 		
 		this.toBricksType = toBricksType;
 		this.halfToneType = halfToneType;
@@ -148,8 +148,12 @@ public class ToBricksTransform implements InstructionsTransform {
 	/**
 	 * Writes to original.
 	 */
-	public BufferedImage bestMatch(BufferedImage normal, LEGOColor[][] normalColors, 
-			                       BufferedImage sideways, LEGOColor[][] sidewaysColors, BufferedImage original) {
+	public BufferedImage bestMatch(LEGOColor[][] normalColors, 
+			                       LEGOColor[][] sidewaysColors, BufferedImage original) {
+		if(this.normalColors == normalColors && this.sidewaysColors == sidewaysColors) {
+			return original; // buffered!
+		}
+		
 		if(height == 0 || width == 0)
 			return original;
 		if(original.getWidth() != width) {
@@ -157,18 +161,6 @@ public class ToBricksTransform implements InstructionsTransform {
 		}
 		if(original.getHeight() != height) {
 			throw new IllegalArgumentException("Height " + original.getHeight() + "!=" + height);
-		}
-		if(normal.getWidth() != normalColors.length) {
-			throw new IllegalArgumentException("Normal mismatch width: " + normal.getWidth() + "!=" + normalColors.length);			
-		}
-		if(normal.getHeight() != normalColors[0].length) {
-			throw new IllegalArgumentException("Normal mismatch height: " + normal.getHeight() + "!=" + normalColors[0].length);			
-		}
-		if(sideways.getWidth() != sidewaysColors.length) {
-			throw new IllegalArgumentException("sideways mismatch width: " + sideways.getWidth() + "!=" + sidewaysColors.length);
-		}
-		if(sideways.getHeight() != sidewaysColors[0].length) {
-			throw new IllegalArgumentException("sideways mismatch height: " + sideways.getHeight() + "!=" + sidewaysColors[0].length);
 		}
 
 		this.normalColors = normalColors;
@@ -178,52 +170,84 @@ public class ToBricksTransform implements InstructionsTransform {
 		int ch = height/SizeInfo.SNOT_BLOCK_WIDTH;
 		normalColorsChoosen = new boolean[cw][ch];
 		
+		int[] o = new int[width*height];
+		o = original.getRGB(0,  0, width, height, o, 0, width);
+		
 		for(int x = 0; x < cw; x++) {
-			for(int y = 0; y < ch; y++) {
-				int[] n = normal.getRGB(x*2, y*5, 2, 5, null, 0, 2);
-				int[] s = sideways.getRGB(x*5, y*2, 5, 2 , null, 0, 5);
-				
-				int ox = x*SizeInfo.SNOT_BLOCK_WIDTH;
-				int oy = y*SizeInfo.SNOT_BLOCK_WIDTH;
-				int[] o = original.getRGB(ox, oy, SizeInfo.SNOT_BLOCK_WIDTH, SizeInfo.SNOT_BLOCK_WIDTH, null, 0, SizeInfo.SNOT_BLOCK_WIDTH);
-
-				normalColorsChoosen[x][y] = arrayBestMatch(n, s, o);
-				original.setRGB(ox, oy, SizeInfo.SNOT_BLOCK_WIDTH, SizeInfo.SNOT_BLOCK_WIDTH, o, 0, SizeInfo.SNOT_BLOCK_WIDTH);
+			for(int y = 0; y < ch; y++) {				
+				normalColorsChoosen[x][y] = arrayBestMatch(x, y, o);
 			}
 		}
+		
+		original.setRGB(0, 0, width, height, o, 0, width);
 		return original;
 	}
 	
 	/*
 	 * Writes in original, return whether normal the best match
 	 */
-	private boolean arrayBestMatch(int[] normal, int[] sideways, int[] original) {
-		double distNormal = 0;
-		double distSideways = 0;
-		int length = original.length;
-		
-		for(int i = 0; i < length; i++) {
-			int o = original[i];
-			int n = normal[i/20 + (i % SizeInfo.SNOT_BLOCK_WIDTH) / SizeInfo.BRICK_WIDTH];
-			distNormal += ColorDifference.diffQuickNDirty(n, o);
-			int s = sideways[i/2%SizeInfo.BRICK_WIDTH + 5*(i/50)];
-			distSideways += ColorDifference.diffQuickNDirty(s, o);
+	private boolean arrayBestMatch(int blockX, int blockY, int[] original) {
+		final int w = width;
+		int originalIBlock = w*10*blockY + blockX*10;
+		int n2 = 2;
+		int n5 = 5;
+
+		int distNormal = 0;
+		for(int x = 0; x < n2; x++) {
+			int originalIX = originalIBlock + n5*x;
+			for(int y = 0; y < n5; ++y) {
+				int originalIXY = originalIX + n2*w*y;
+				Color normalColor = normalColors[blockX*n2+x][blockY*n5+y].getRGB();
+				for(int x2 = 0; x2 < n5; x2++) {
+					for(int y2 = 0; y2 < n2; ++y2) {
+						int originalColor =  original[originalIXY + x2 + w*y2];
+						distNormal += ColorDifference.diffCIE94(normalColor, originalColor);
+					}
+				}
+			}
 		}
 		
+		n2 = 5;
+		n5 = 2;
+		int distSideways = 0;
+		for(int x = 0; x < n2; x++) {
+			int originalIX = originalIBlock + n5*x;
+			for(int y = 0; y < n5; ++y) {
+				int originalIXY = originalIX + n2*w*y;
+				Color sidewaysColor = sidewaysColors[blockX*n2+x][blockY*n5+y].getRGB();
+				for(int x2 = 0; x2 < n5; x2++) {
+					for(int y2 = 0; y2 < n2; ++y2) {
+						int originalColor = original[originalIXY + x2 + w*y2];
+						distSideways += ColorDifference.diffCIE94(sidewaysColor, originalColor);
+					}
+				}
+			}
+		}
+						
+		boolean res = false;
 		if(distNormal <= distSideways) {
-			for(int i = 0; i < length; i++) {
-				original[i] = normal[2*(i/20) + (i % 10)/5];				
-			}
-			return true;
+			res = true;
+			n2 = 2;
+			n5 = 5;
 		}
-		else {
-			for(int i = 0; i < length; i++) {
-				original[i] = sideways[(i/2)%5 + 5*(i/50)]; // xAdd + yAdd
+		
+		for(int x = 0; x < n2; x++) {
+			int originalIX = originalIBlock + n5*x;
+			for(int y = 0; y < n5; ++y) {
+				int originalIXY = originalIX + n2*w*y;
+				int c = (res ? normalColors[blockX*n2+x][blockY*n5+y] : sidewaysColors[blockX*n2+x][blockY*n5+y]).getRGB().getRGB();				
+				for(int x2 = 0; x2 < n5; x2++) {
+					for(int y2 = 0; y2 < n2; ++y2) {
+						//original[originalIXY + x2 + w*y2] = (distNormal == distSideways ? Color.WHITE : (res ? Color.red : Color.BLUE)).getRGB();
+						original[originalIXY + x2 + w*y2] = c;
+					}
+				}
 			}
-			return false;
 		}
+		return res;
 	}
 	
+	@Override
 	public BufferedImage transform(BufferedImage in) {
 		return toBricksType.transform(in, this);
 	}
@@ -231,6 +255,7 @@ public class ToBricksTransform implements InstructionsTransform {
 	/*
 	 * Only for SNOT
 	 */
+	@Override
 	public Set<LEGOColor> drawLastInstructions(Graphics2D g2, 
 			Rectangle basicUnitRect, int blockWidth, int blockHeight, Dimension toSize) {
 		if(blockWidth != 10 || blockHeight != 10)
@@ -242,6 +267,7 @@ public class ToBricksTransform implements InstructionsTransform {
 	/*
 	 * Only for SNOT
 	 */
+	@Override
 	public Set<LEGOColor> drawLastColors(Graphics2D g2, 
 			Rectangle basicUnitRect, int blockWidth, int blockHeight, Dimension toSize, int ignore) {
 		if(blockWidth != 10 || blockHeight != 10)
@@ -336,7 +362,7 @@ public class ToBricksTransform implements InstructionsTransform {
 		return used;
 	}
 
-	private void addOne(Map<LEGOColor, Integer> m, LEGOColor c) {
+	private static void addOne(Map<LEGOColor, Integer> m, LEGOColor c) {
 		if(m.containsKey(c)) {
 			m.put(c, m.get(c)+1);					
 		}
@@ -371,6 +397,7 @@ public class ToBricksTransform implements InstructionsTransform {
 		}
 	}
 	
+	@Override
 	public LEGOColor.CountingLEGOColor[] lastUsedColorCounts() {
 		Map<LEGOColor, Integer> colorCounts = new TreeMap<LEGOColor, Integer>();
 
@@ -378,6 +405,7 @@ public class ToBricksTransform implements InstructionsTransform {
 		
 		List<Map.Entry<LEGOColor, Integer>> l = new ArrayList<Map.Entry<LEGOColor, Integer>>(colorCounts.entrySet());
 		Collections.sort(l, new Comparator<Map.Entry<LEGOColor, Integer>>() {
+			@Override
 			public int compare(Map.Entry<LEGOColor, Integer> o1, Map.Entry<LEGOColor, Integer> o2) {
 				//return o2.getValue().compareTo(o1.getValue());
 				return o1.getKey().getID() - o2.getKey().getID();

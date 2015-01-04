@@ -14,7 +14,7 @@ import mosaic.controllers.ColorController;
 
 import colors.*;
 
-public abstract class BufferedLEGOColorTransform implements LEGOColorTransform, Transform, InstructionsTransform {
+public abstract class BufferedLEGOColorTransform implements LEGOColorTransform, InstructionsTransform {
 	private BufferedImage[] ins;
 	private LEGOColor[][][] outColors;
 	private BufferedImage[] outImages;
@@ -39,6 +39,7 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform, 
 		outColors = new LEGOColor[size][][];
 	}
 	
+	@Override
 	public LEGOColor[][] lcTransform(BufferedImage in) {
 		for(int i = 0; i < ins.length; i++)
 			if(ins[i] == in) {
@@ -59,6 +60,7 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform, 
 		return newOut;
 	}
 	
+	@Override
 	public BufferedImage transform(BufferedImage in) {
 		for(int i = 0; i < ins.length; i++) {
 			if(ins[i] == in) {
@@ -79,7 +81,7 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform, 
 		return transform(in);
 	}
 	
-	private BufferedImage build(LEGOColor[][] lcs) {
+	private static BufferedImage build(LEGOColor[][] lcs) {
 		int w = lcs.length;
 		int h = lcs[0].length;
 		BufferedImage out = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
@@ -95,6 +97,7 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform, 
 		return out;
 	}
 	
+	@Override
 	public Set<LEGOColor> drawLastInstructions(Graphics2D g2, 
 			Rectangle unitBounds, int blockWidth, int blockHeight, Dimension toSize) {
 		g2.setColor(Color.WHITE);
@@ -139,6 +142,7 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform, 
 		return used;
 	}
 
+	@Override
 	public Set<LEGOColor> drawLastColors(Graphics2D g2, 
 			Rectangle unitBounds, int blockWidth, int blockHeight, Dimension toSize, int numStuds) {		
 		// Find scaling parameters:
@@ -218,6 +222,7 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform, 
 		return used;
 	}
 	
+	@Override
 	public LEGOColor.CountingLEGOColor[] lastUsedColorCounts() {
 		LEGOColor[][] transformedColors = outColors[lastIndex];
 		Map<LEGOColor, Integer> m = new TreeMap<LEGOColor, Integer>();
@@ -234,8 +239,8 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform, 
 		}
 		List<Map.Entry<LEGOColor, Integer>> l = new ArrayList<Map.Entry<LEGOColor, Integer>>(m.entrySet());
 		Collections.sort(l, new Comparator<Map.Entry<LEGOColor, Integer>>() {
+			@Override
 			public int compare(Entry<LEGOColor, Integer> o1, Entry<LEGOColor, Integer> o2) {
-				//return o2.getValue().compareTo(o1.getValue());
 				return o1.getKey().getID() - o2.getKey().getID();
 			}
 		});

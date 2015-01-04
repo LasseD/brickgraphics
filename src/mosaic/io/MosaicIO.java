@@ -8,8 +8,8 @@ import javax.swing.*;
 import javax.swing.filechooser.*;
 import javax.swing.filechooser.FileFilter;
 import io.*;
+import icon.*;
 import mosaic.ui.*;
-import ui.*;
 import bricks.LDRPrinter;
 import java.util.*;
 
@@ -86,8 +86,7 @@ public class MosaicIO {
 	public static Action createOpenAction(final Model<BrickGraphicsState> currentModel, final MainWindow parent) {
 		final JFileChooser fileChooser = new JFileChooser();
 		Action open = new AbstractAction() {
-			private static final long serialVersionUID = -4753100136802594575L;
-
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				File currentImage = (File)currentModel.get(BrickGraphicsState.Image);
 				fileChooser.setCurrentDirectory(currentImage.getParentFile());
@@ -121,7 +120,7 @@ public class MosaicIO {
 		open.putValue(Action.NAME, "Open");
 		open.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_O);
 		open.putValue(Action.DISPLAYED_MNEMONIC_INDEX_KEY, "Open".indexOf('O'));
-		open.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.CTRL_DOWN_MASK));
+		open.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
 
 		return open;
 	}
@@ -129,8 +128,7 @@ public class MosaicIO {
 	public static Action createHtmlFileOpenAction(final JDialog parent, final JTextField tf) {
 		final JFileChooser fileChooser = new JFileChooser();
 		Action a = new AbstractAction() {
-			private static final long serialVersionUID = -4753100136802594575L;
-
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				fileChooser.setCurrentDirectory(null);
 				
@@ -150,8 +148,7 @@ public class MosaicIO {
 
 	public static Action createSaveAction(final Model<BrickGraphicsState> currentModel, final MainWindow parent) {
 		Action save = new AbstractAction() {
-			private static final long serialVersionUID = -2081040070189800089L;
-
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				File file = (File)currentModel.get(BrickGraphicsState.Image);
 				file = ensureSuffix(file, MOSAIC_SUFFIX);
@@ -171,7 +168,7 @@ public class MosaicIO {
 		save.putValue(Action.NAME, "Save");
 		save.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_O);
 		save.putValue(Action.DISPLAYED_MNEMONIC_INDEX_KEY, "Save".indexOf('S'));
-		save.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK));
+		save.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK));
 
 		return save;
 	}
@@ -193,8 +190,7 @@ public class MosaicIO {
 		fileChooser.setSelectedFile(ensureSuffix(currentImage, MOSAIC_SUFFIX));
 
 		Action saveAs = new AbstractAction() {
-			private static final long serialVersionUID = -4859023768855816648L;
-
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				int retVal = fileChooser.showSaveDialog(parent);
 				if(retVal == JFileChooser.APPROVE_OPTION) {
@@ -217,7 +213,7 @@ public class MosaicIO {
 		saveAs.putValue(Action.NAME, "Save As");
 		saveAs.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_A);
 		saveAs.putValue(Action.DISPLAYED_MNEMONIC_INDEX_KEY, "Save As".indexOf('A'));
-		saveAs.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK | KeyEvent.SHIFT_DOWN_MASK));
+		saveAs.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
 
 		return saveAs;
 	}
@@ -240,10 +236,9 @@ public class MosaicIO {
 		fileChooser.setSelectedFile(currentImage);
 
 		Action export = new AbstractAction() {
-			private static final long serialVersionUID = 6603142727821352661L;
-
+			@Override
 			public void actionPerformed(ActionEvent e) {
-				int retVal = fileChooser.showDialog(parent, "Export building instructions");
+				int retVal = fileChooser.showDialog(parent, "Export mosaic to LDraw");
 				if(retVal == JFileChooser.APPROVE_OPTION) {
 					File file = fileChooser.getSelectedFile();
 					FileNameExtensionFilter fileFilter = (FileNameExtensionFilter)fileChooser.getFileFilter();
@@ -266,13 +261,13 @@ public class MosaicIO {
 			}
 		};
 
-		export.putValue(Action.SHORT_DESCRIPTION, "Export building instructions for the mosaic.");
+		export.putValue(Action.SHORT_DESCRIPTION, "Export mosaic as an LDraw model.");
 		export.putValue(Action.SMALL_ICON, Icons.get(16, "fileexport"));
 		export.putValue(Action.LARGE_ICON_KEY, Icons.get(32, "fileexport"));
-		export.putValue(Action.NAME, "Export instructions");
+		export.putValue(Action.NAME, "Export mosaic to LDraw");
 		export.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_E);
-		export.putValue(Action.DISPLAYED_MNEMONIC_INDEX_KEY, "Export instructions".indexOf('E'));
-		export.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_E, KeyEvent.CTRL_DOWN_MASK));
+		export.putValue(Action.DISPLAYED_MNEMONIC_INDEX_KEY, "Export mosaic to LDraw".indexOf('E'));
+		export.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_DOWN_MASK));
 
 		return export;
 	}

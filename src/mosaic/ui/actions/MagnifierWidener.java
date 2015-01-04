@@ -1,12 +1,12 @@
 package mosaic.ui.actions;
 
 import java.awt.event.*;
+
 import javax.swing.*;
-import ui.*;
+import icon.*;
 import mosaic.controllers.MagnifierController;
 
 public class MagnifierWidener extends AbstractAction {
-	private static final long serialVersionUID = 5288481355127856856L;
 	private MagnifierController magnifier;
 	
 	public MagnifierWidener(MagnifierController magnifier) {
@@ -18,9 +18,10 @@ public class MagnifierWidener extends AbstractAction {
 		putValue(NAME, "Wider");
 		putValue(MNEMONIC_KEY, KeyEvent.VK_W);
 		putValue(DISPLAYED_MNEMONIC_INDEX_KEY, "Wider".indexOf('W'));
-		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, KeyEvent.ALT_DOWN_MASK));	
+		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, InputEvent.ALT_DOWN_MASK));	
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent e) {
 		magnifier.changeSizeWidthInMosaicBlocks(1);
 	}

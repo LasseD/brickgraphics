@@ -2,7 +2,8 @@ package mosaic.ui.menu;
 
 import io.Model;
 import javax.swing.*;
-import ui.*;
+import icon.*;
+import ui.AboutDialog;
 import ui.actions.*;
 import mosaic.io.*;
 import mosaic.ui.*;
@@ -21,7 +22,7 @@ public class MainMenu extends JMenuBar {
 		fileMenu.add(MosaicIO.createSaveAction(model, mw));
 		fileMenu.add(MosaicIO.createSaveAsAction(model, mw));
 		fileMenu.add(MosaicIO.createExportAction(model, mw));
-		fileMenu.add(PrintAction.createPrintAction(model, mw));
+		fileMenu.add(mw.getPrintController().createPrintAction());
 		fileMenu.addSeparator();
 		fileMenu.add(new ExitAction(model));
 

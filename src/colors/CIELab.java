@@ -133,16 +133,14 @@ public class CIELab extends ColorSpace {
     private static double f(double x) {
         if (x > 216.0 / 24389.0) {
             return Math.cbrt(x);
-        } else {
-            return (841.0 / 108.0) * x + N;
-        }
+        } 
+        return (841.0 / 108.0) * x + N;
     }
 
     private static double fInv(double x) {
         if (x > 6.0 / 29.0) {
             return x*x*x;
-        } else {
-            return (108.0 / 841.0) * (x - N);
-        }
+        } 
+        return (108.0 / 841.0) * (x - N);
     }
 }

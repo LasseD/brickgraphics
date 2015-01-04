@@ -1,12 +1,12 @@
 package mosaic.ui.actions;
 
 import java.awt.event.*;
+
 import javax.swing.*;
-import ui.*;
+import icon.*;
 import mosaic.controllers.MagnifierController;
 
 public class MagnifierShorter extends AbstractAction {
-	private static final long serialVersionUID = -9197875075916954879L;
 	private MagnifierController magnifier;
 	
 	public MagnifierShorter(MagnifierController magnifier) {
@@ -18,9 +18,10 @@ public class MagnifierShorter extends AbstractAction {
 		putValue(NAME, "Shorter");
 		putValue(MNEMONIC_KEY, KeyEvent.VK_H);
 		putValue(DISPLAYED_MNEMONIC_INDEX_KEY, "Shorter".indexOf('h'));
-		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, KeyEvent.ALT_DOWN_MASK));	
+		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, InputEvent.ALT_DOWN_MASK));	
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent e) {
 		magnifier.changeSizeHeightInMosaicBlocks(-1);
 	}

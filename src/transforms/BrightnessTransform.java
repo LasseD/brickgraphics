@@ -9,7 +9,7 @@ public class BrightnessTransform extends RGBTransform {
 
 	@Override
 	public BufferedImage transformUnbuffered(BufferedImage in) {
-		if(allAre(1f))
+		if(allAre())
 			return in;
 
 		RescaleOp op = new RescaleOp(get(), new float[3], null);

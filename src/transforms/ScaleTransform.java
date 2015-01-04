@@ -6,6 +6,7 @@ import java.awt.image.*;
 public class ScaleTransform extends BufferedTransform {
 	public enum Type {
 		width {
+			@Override
 			public AffineTransformOp op(double inX, double inY, ScaleTransform st) {
 				double scaleX = st.width / inX;
 				AffineTransform scaler = AffineTransform.getScaleInstance(scaleX, scaleX);
@@ -13,6 +14,7 @@ public class ScaleTransform extends BufferedTransform {
 			}
 		},
 		height {
+			@Override
 			public AffineTransformOp op(double inX, double inY, ScaleTransform st) {
 				double scaleY = st.height / inY;				
 				AffineTransform scaler = AffineTransform.getScaleInstance(scaleY, scaleY);
@@ -20,6 +22,7 @@ public class ScaleTransform extends BufferedTransform {
 			}
 		}, 
 		dims {
+			@Override
 			public AffineTransformOp op(double inX, double inY, ScaleTransform st) {
 				double scaleX = st.width / inX;
 				double scaleY = st.height / inY;
@@ -28,24 +31,28 @@ public class ScaleTransform extends BufferedTransform {
 			}
 		}, 
 		scaleX {
+			@Override
 			public AffineTransformOp op(double inX, double inY, ScaleTransform st) {
 				AffineTransform scaler = AffineTransform.getScaleInstance(st.scaleX, st.scaleX);
 				return new AffineTransformOp(scaler, st.quality);
 			}
 		}, 
 		scaleY {
+			@Override
 			public AffineTransformOp op(double inX, double inY, ScaleTransform st) {
 				AffineTransform scaler = AffineTransform.getScaleInstance(st.scaleY, st.scaleY);
 				return new AffineTransformOp(scaler, st.quality);
 			}
 		}, 
 		scale {
+			@Override
 			public AffineTransformOp op(double inX, double inY, ScaleTransform st) {
 				AffineTransform scaler = AffineTransform.getScaleInstance(st.scaleX, st.scaleY);
 				return new AffineTransformOp(scaler, st.quality);
 			}
 		}, 
 		bounded {
+			@Override
 			public AffineTransformOp op(double inX, double inY, ScaleTransform st) {
 				double scaleX = st.width / inX;
 				double scaleY = st.height / inY;

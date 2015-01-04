@@ -20,7 +20,6 @@ import javax.swing.KeyStroke;
  * @author ld
  */
 public class AboutDialog extends JDialog {
-	private static final long serialVersionUID = 7842563607059033693L;
 	public static final String NAME_STR = "About";
 	public static final String FILE_NAME = "about.txt";
 
@@ -56,8 +55,7 @@ public class AboutDialog extends JDialog {
 	
 	public static Action createAction(final JFrame parent, final String programName, final String version, final Icon icon, final Icon smallIcon) {
 		Action a = new AbstractAction() {
-			private static final long serialVersionUID = -4753100136802594575L;
-
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				JDialog d = new AboutDialog(parent, programName, version, icon);		
 				d.setVisible(true);				

@@ -2,9 +2,7 @@ package griddy.rulers;
 
 import griddy.*;
 import javax.swing.*;
-
-import ui.Icons;
-
+import icon.*;
 import java.awt.*;
 import java.awt.event.*;
 

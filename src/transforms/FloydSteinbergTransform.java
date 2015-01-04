@@ -1,11 +1,7 @@
 package transforms;
 
-import static colors.LEGOColorLookUp.*;
-
 import java.awt.image.*;
-
 import mosaic.controllers.ColorController;
-
 import colors.*;
 
 public class FloydSteinbergTransform extends BufferedLEGOColorTransform {
@@ -13,6 +9,11 @@ public class FloydSteinbergTransform extends BufferedLEGOColorTransform {
 	
 	public FloydSteinbergTransform(int pp, ColorController cc) {
 		super(1, cc);
+		propagationPercentage = pp;
+	}
+	
+	public FloydSteinbergTransform(int bufferSize, int pp, ColorController cc) {
+		super(bufferSize, cc);
 		propagationPercentage = pp;
 	}
 	
@@ -24,86 +25,88 @@ public class FloydSteinbergTransform extends BufferedLEGOColorTransform {
 		return true;
 	}
 	
-	private void propagate(float[] before, int after, float[] leftOver) {
-		leftOver[0] = before[0] - LEGOColorLookUp.getRed(after);
-		leftOver[1] = before[1] - LEGOColorLookUp.getGreen(after);
-		leftOver[2] = before[2] - LEGOColorLookUp.getBlue(after);
+	private static int boundFF(int a) {
+		if(a < 0) {
+			return 0;
+		}
+		if(a > 255) {
+			return 255;
+		}
+		return a;
+	}
+	private static void splitColor(int c, int[] components) {
+		components[0] = LEGOColorLookUp.getRed(c);
+		components[1] = LEGOColorLookUp.getGreen(c);
+		components[2] = LEGOColorLookUp.getBlue(c);
+	}
+	private static int mergeColor(int[] components) {
+		return (components[0] << 16) + (components[1] << 8) + components[2];
 	}	
-	
-	private void processPixel(float[][][] tmpPixels, LEGOColor[][] realPixels, int x, int y, float[] leftOver) {
-		final float[] pixel = tmpPixels[x][y];
+	private static void diff(int before, int after, int[] out) {
+		out[0] = LEGOColorLookUp.getRed(before) - LEGOColorLookUp.getRed(after);
+		out[1] = LEGOColorLookUp.getGreen(before) - LEGOColorLookUp.getGreen(after);
+		out[2] = LEGOColorLookUp.getBlue(before) - LEGOColorLookUp.getBlue(after);
+	}	
+	private static void processPixel(final int pixel, LEGOColor[][] out, final int x, final int y, int[] diff) {
 		LEGOColor nearest = LEGOColorLookUp.lookUp(pixel);
 		
-		realPixels[x][y] = nearest;
-		propagate(pixel, nearest.getRGB().getRGB(), leftOver);
+		out[x][y] = nearest;
+		diff(pixel, nearest.getRGB().getRGB(), diff);
+	}	
+	private void sub(int[] pixels, int pixelIndex, int weight, int[] diff) {
+		int[] components = new int[3];
+		splitColor(pixels[pixelIndex], components);
+		for(int i = 0; i < 3; ++i) {
+			components[i] += (weight*diff[i]*propagationPercentage)/1600;
+			components[i] = boundFF(components[i]);
+		}
+		pixels[pixelIndex] = mergeColor(components);
 	}
 	
-	private void sub(float[] tmpPixel, int weight, float[] diff) {
-		for(int i = 0; i < 3; ++i)
-    		tmpPixel[i] += weight*diff[i]*propagationPercentage/1600;
-	}
-	
+	@Override
 	public LEGOColor[][] lcTransformUnbuffered(BufferedImage in) {		
 		int w = in.getWidth();
 		int h = in.getHeight();
 		io.Log.log("Floyd-Steinberg " + w + "x" + h + " with " + LEGOColorLookUp.size() + " colors: ");		
 		
-		int[] iPixels = new int[w*h];
-		in.getRGB(0, 0, w, h, iPixels, 0, w);
-		LEGOColor[][] pixels = new LEGOColor[w][h];
+		int[] pixels = new int[w*h];
+		in.getRGB(0, 0, w, h, pixels, 0, w);
+		LEGOColor[][] out = new LEGOColor[w][h];
 
-		float[][][] tmpPixels = floatPixels(iPixels, w);
-
-		// TODO: Use only two rows:
-		//float[][] rowCurr = new float[w][3];
-		//float[][] rowNext = new float[w][3];
-		
-		float[] diff = new float[3];
+		int[] diff = new int[3];
 		int dir = 1, start = 0;
 		for(int y = 0; y < h-1; y++, dir = -dir, start = (w-1)-start) {
 			//handle first pixel in each row specially:
-			processPixel(tmpPixels, pixels, start, y, diff);
-			sub(tmpPixels[start+dir][y], 8, diff);
-			sub(tmpPixels[start][y+1], 6, diff);
-			sub(tmpPixels[start+dir][y+1], 2, diff);
+			processPixel(pixels[y*w+start], out, start, y, diff);
+			sub(pixels, y*w+start+dir, 8, diff);
+			sub(pixels, (y+1)*w+start, 6, diff);
+			sub(pixels, (y+1)*w+start+dir, 2, diff);
 			
 			// handle most pixels:
 			for(int i = 1; i < w-1; i++) {
 				int x = start+dir*i;
-				processPixel(tmpPixels, pixels, x, y, diff);
+				processPixel(pixels[y*w+x], out, x, y, diff);
 
-				sub(tmpPixels[x+dir][y], 7, diff);
-				sub(tmpPixels[x-dir][y+1], 3, diff);
-				sub(tmpPixels[x    ][y+1], 5, diff);
-				sub(tmpPixels[x+dir][y+1], 1, diff);
+				sub(pixels,x+dir+w*y, 7, diff);
+				sub(pixels,x-dir+w*(y+1), 3, diff);
+				sub(pixels,x    +w*(y+1), 5, diff);
+				sub(pixels,x+dir+w*(y+1), 1, diff);
 			}
 			//handle last pixel in each row specially:
-			processPixel(tmpPixels, pixels, w-1-start, y, diff);
+			processPixel(pixels[y*w+w-1-start], out, w-1-start, y, diff);
 
-			sub(tmpPixels[w-1-start][y+1], 9, diff);
-			sub(tmpPixels[w-1-start-dir][y+1], 7, diff);			
+			sub(pixels,w-1-start+w*(y+1), 9, diff);
+			sub(pixels,w-1-start-dir+w*(y+1), 7, diff);			
 		}
 		//handle last row specially:
 		for(int i = 0; i < w-1; i++) {
 			int x = start+dir*i;
-			processPixel(tmpPixels, pixels, x, h-1, diff);
-			sub(tmpPixels[x+dir][h-1], 16, diff);
+			processPixel(pixels[(h-1)*w+x], out, x, h-1, diff);
+			sub(pixels, x+dir+(h-1)*w, 16, diff);
 		}
 		//handle last pixel in last row specially:
-		processPixel(tmpPixels, pixels, w-1-start, h-1, diff);
+		processPixel(pixels[w*(h-1)+w-1-start], out, w-1-start, h-1, diff);
 
-	    return pixels;
-	}
-	
-	private float[][][] floatPixels(int[] intPixels, int w) {
-		int h = intPixels.length/w;
-		float[][][] floatPixels = new float[w][h][];
-		for(int y = 0, i = 0; y < h; y++) {
-			for(int x = 0; x < w; x++, i++) {
-				int c = intPixels[i];
-				floatPixels[x][y] = new float[]{getRed(c), getGreen(c), getBlue(c)};
-			}
-		}
-		return floatPixels;
+	    return out;
 	}
 }

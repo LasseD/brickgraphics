@@ -1,18 +1,18 @@
 package mosaic.ui.actions;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
-import ui.Icons;
+import icon.*;
 import mosaic.ui.ColorSettingsDialog;
 
 /**
  * @author ld
  */
 public class ShowColorOptionsAction extends AbstractAction {
-	private static final long serialVersionUID = 282109593703963925L;
 	public static final String NAME_STR = "Color settings";
 	private ColorSettingsDialog csd;
 	
@@ -24,7 +24,7 @@ public class ShowColorOptionsAction extends AbstractAction {
 		putValue(Action.LARGE_ICON_KEY, Icons.get(Icons.SIZE_LARGE, "preferences"));
 		putValue(Action.MNEMONIC_KEY, KeyEvent.VK_C);
 		putValue(Action.DISPLAYED_MNEMONIC_INDEX_KEY, NAME_STR.indexOf('C'));
-		putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_T, KeyEvent.ALT_DOWN_MASK));	
+		putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_T, InputEvent.ALT_DOWN_MASK));	
 	}
 
 	@Override

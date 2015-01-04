@@ -9,24 +9,19 @@ import java.awt.Color;
  * @author THEjoezack at github
  */
 public class ColorDifference {
-	private static int diffInt(int a, int b) {
-		return Math.abs(a-b);
-	}
-	
-	/**
-	 * Homebrew super simple (and bad) color comparison.
-	 */
-	public static int diffQuickNDirty(int a, int b) {
-		return diffInt(LEGOColorLookUp.getRed(a), LEGOColorLookUp.getRed(b)) +
-				diffInt(LEGOColorLookUp.getGreen(a), LEGOColorLookUp.getGreen(b)) +
-				diffInt(LEGOColorLookUp.getBlue(a), LEGOColorLookUp.getBlue(b));
-	}
-	
 	public static double diffCIE94(Color a, Color b) {
 		int[] labA = new int[3];
 		CIELab.rgb2lab(a.getRed(), a.getGreen(), a.getBlue(), labA);
 		int[] labB = new int[3];		
 		CIELab.rgb2lab(b.getRed(), b.getGreen(), b.getBlue(), labB);
+		return diffCIE94(labA, labB);
+	}
+	
+	public static double diffCIE94(Color a, int b) {
+		int[] labA = new int[3];
+		CIELab.rgb2lab(a.getRed(), a.getGreen(), a.getBlue(), labA);
+		int[] labB = new int[3];		
+		CIELab.rgb2lab(LEGOColorLookUp.getRed(b), LEGOColorLookUp.getGreen(b), LEGOColorLookUp.getBlue(b), labB);
 		return diffCIE94(labA, labB);
 	}
 	

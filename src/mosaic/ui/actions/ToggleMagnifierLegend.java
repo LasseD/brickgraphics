@@ -1,12 +1,12 @@
 package mosaic.ui.actions;
 
 import java.awt.event.*;
+
 import javax.swing.*;
-import ui.Icons;
+import icon.*;
 import mosaic.controllers.MagnifierController;
 
 public class ToggleMagnifierLegend extends AbstractAction {
-	private static final long serialVersionUID = 4284266557973002161L;
 	private MagnifierController magnifier;
 	
 	public ToggleMagnifierLegend(MagnifierController magnifier) {
@@ -18,9 +18,10 @@ public class ToggleMagnifierLegend extends AbstractAction {
 		putValue(Action.NAME, "Legend");
 		putValue(Action.MNEMONIC_KEY, KeyEvent.VK_L);
 		putValue(Action.DISPLAYED_MNEMONIC_INDEX_KEY, "Legend".indexOf('L'));
-		putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_L, KeyEvent.ALT_DOWN_MASK));	
+		putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.ALT_DOWN_MASK));	
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent e) {
 		magnifier.flipLegendEnabled();
 	}

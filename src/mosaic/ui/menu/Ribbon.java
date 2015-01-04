@@ -10,8 +10,6 @@ import mosaic.ui.actions.*;
 import mosaic.ui.prepare.ImagePreparingView;
 
 public class Ribbon extends JToolBar {
-	private static final long serialVersionUID = -593506515925172964L;
-
 	public Ribbon(MainWindow mw) {
 		setFloatable(true);
 		setLayout(new WrapLayout(0, 0));

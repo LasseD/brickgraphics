@@ -74,6 +74,7 @@ public class LDRPrinter {
 	
 	private void buildSnot(final PrintWriter out) {
 		LDRBuilder builder = new LDRBuilder() {
+			@Override
 			public void add(int x, int y, LEGOColor color) {
 				String part = "3024.DAT";
 				if(y%5==0)
@@ -81,6 +82,7 @@ public class LDRPrinter {
 				out.printf("1 %d 0 %d %d 0 0 -1 0 1 0 1 0 0 %s\n", color.getFirstIDLDraw(), 8*y, 20*x, part);
 			}
 
+			@Override
 			public void addSideways(int x, int y, LEGOColor color) {
 				String part = "3024.DAT";
 				if(x%5==4)

@@ -9,7 +9,7 @@ public class GammaTransform extends RGBTransform {
 
 	@Override
 	public BufferedImage transformUnbuffered(BufferedImage in) {
-		if(allAre(1f))
+		if(allAre())
 			return in;
 
 		int w = in.getWidth();

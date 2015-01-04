@@ -1,15 +1,15 @@
 package mosaic.ui.actions;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
 import mosaic.ui.*;
-import ui.Icons;
+import icon.*;
 
 public class ToggleColorChooser extends AbstractAction {
-	private static final long serialVersionUID = 304212080553608L;
 	private ColorChooserDialog cs;
 	
 	public ToggleColorChooser(ColorChooserDialog cs) {
@@ -22,9 +22,10 @@ public class ToggleColorChooser extends AbstractAction {
 		putValue(Action.NAME, "Colors");
 		putValue(Action.MNEMONIC_KEY, KeyEvent.VK_C);
 		putValue(Action.DISPLAYED_MNEMONIC_INDEX_KEY, "Colors".indexOf('C'));
-		putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_C, KeyEvent.ALT_DOWN_MASK));
+		putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.ALT_DOWN_MASK));
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent e) {
 		cs.switchEnabled();
 	}

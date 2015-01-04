@@ -10,10 +10,9 @@ import javax.swing.Action;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
-import ui.Icons;
+import icon.*;
 
 public class HelpLinkAction extends AbstractAction {
-	private static final long serialVersionUID = -2111948710777749501L;
 	public static final String NAME_STR = "On-line help";
 	private JFrame owner;
 	private String url;
@@ -31,6 +30,7 @@ public class HelpLinkAction extends AbstractAction {
 		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0));	
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent e) {
 		Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
 	    if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {

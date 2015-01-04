@@ -16,7 +16,6 @@ import mosaic.ui.MainWindow;
 import mosaic.ui.menu.*;
 
 public class MagnifierWindow extends JDialog implements ChangeListener {
-	private static final long serialVersionUID = 1111134483677184536L;
 	private MagnifierController magnifierController;
 	private MagnifierCanvas canvas;
 	private boolean everShown;
@@ -39,7 +38,7 @@ public class MagnifierWindow extends JDialog implements ChangeListener {
 		
 		add(new MagnifierToolBar(magnifierController), BorderLayout.NORTH);
 
-		legend = new ColorLegend(this, magnifierController, owner.getBrickedView(), cc);
+		legend = new ColorLegend(magnifierController, owner.getBrickedView(), cc);
 		legend.setBackground(getBackground());
 		JScrollPane scrollPane = new JScrollPane(legend);
 		splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, canvas, scrollPane);
@@ -86,9 +85,9 @@ public class MagnifierWindow extends JDialog implements ChangeListener {
 			setPreferredSize(shownMagnifierSize);
 			
 			g2.translate(viewRect.x, viewRect.y);
-			g2.setColor(Color.BLACK);
 
 			// draw magnified:
+			g2.setColor(Color.BLACK);
 			ToBricksTransform tbTransform = magnifierController.getTBTransform();
 			int basicUnitWidth = tbTransform.getToBricksType().getUnitWidth();
 			int basicUnitHeight = tbTransform.getToBricksType().getUnitHeight();
