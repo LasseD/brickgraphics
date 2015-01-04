@@ -225,6 +225,9 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform, 
 	@Override
 	public LEGOColor.CountingLEGOColor[] lastUsedColorCounts() {
 		LEGOColor[][] transformedColors = outColors[lastIndex];
+		if(transformedColors == null)
+			return new LEGOColor.CountingLEGOColor[]{};
+		
 		Map<LEGOColor, Integer> m = new TreeMap<LEGOColor, Integer>();
 		for(int x = 0; x < transformedColors.length; x++) {
 			for(int y = 0; y < transformedColors[0].length; y++) {
