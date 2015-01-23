@@ -5,8 +5,6 @@ import java.awt.event.*;
 import java.io.*;
 import javax.swing.*;
 import javax.swing.event.*;
-import colors.ColorGroup;
-import colors.parsers.ColorSheetParser;
 import mosaic.controllers.ColorController;
 import mosaic.io.MosaicIO;
 
@@ -15,8 +13,8 @@ import mosaic.io.MosaicIO;
  */
 public class ColorSettingsDialog extends JDialog implements ChangeListener {
 	private ColorController cc;
-	private JTextField tfLoadURL, tfLoadFile, tfFromYear, tfToYear, tfMinSets, tfMinParts;
-	private JCheckBox cbShowMetallic, cbShowTransparent;
+	private JTextField tfLoadRebrickableURL, tfLoadRebrickableFile, tfLoadLDDXMLFile, tfFromYear, tfToYear, tfMinSets, tfMinParts;
+	private JCheckBox cbShowMetallic, cbShowTransparent, cbShowOnlyLDD;
 	private static final String DIALOG_TITLE = "Color Settings";
 
 	public ColorSettingsDialog(JFrame parent, ColorController cc) {
@@ -39,45 +37,66 @@ public class ColorSettingsDialog extends JDialog implements ChangeListener {
 		
 		// Load options:
 		{
-			// URL:
+			// Rebrickable URL:
 			JPanel titlePanel = new JPanel(new FlowLayout());
 			titlePanel.setBorder(BorderFactory.createTitledBorder("Update colors using Rebrickable.com"));
-			tfLoadURL = new JTextField(40);
+			tfLoadRebrickableURL = new JTextField(40);
 			JButton loadURLButton = new JButton("Download");
 			loadURLButton.addActionListener(new ActionListener() {				
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					boolean ok = cc.loadColorsFromURL(tfLoadURL.getText(), ColorSettingsDialog.this);
+					boolean ok = cc.loadColorsFromURL(tfLoadRebrickableURL.getText(), ColorSettingsDialog.this);
 					if(ok)
 						JOptionPane.showMessageDialog(ColorSettingsDialog.this, "Latest colors successfully downloaded!", "Colors updated", JOptionPane.PLAIN_MESSAGE);
 				}
 			});
-			titlePanel.add(tfLoadURL);
+			titlePanel.add(tfLoadRebrickableURL);
 			titlePanel.add(loadURLButton);
 			cp.add(titlePanel);
 		}
 		{
-			// File:
+			// Rebrickable File:
 			JPanel titlePanel = new JPanel(new FlowLayout());
 			titlePanel.setBorder(BorderFactory.createTitledBorder("Update colors using a colors file downloaded from Rebrickable.com"));
-			tfLoadFile = new JTextField(40);
+			tfLoadRebrickableFile = new JTextField(40);
 			JButton findButton = new JButton("...");
-			findButton.addActionListener(MosaicIO.createHtmlFileOpenAction(this, tfLoadFile));
+			findButton.addActionListener(MosaicIO.createHtmlFileOpenAction(this, tfLoadRebrickableFile));
 			JButton loadFileButton = new JButton("Load file");
 			loadFileButton.addActionListener(new ActionListener() {				
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
-					boolean ok = cc.loadColorsFromFile(tfLoadFile.getText(), ColorSettingsDialog.this);
+					boolean ok = cc.loadColorsFromFile(tfLoadRebrickableFile.getText(), ColorSettingsDialog.this);
 					if(ok)
 						JOptionPane.showMessageDialog(ColorSettingsDialog.this, "Latest colors successfully read from file!", "Colors updated", JOptionPane.PLAIN_MESSAGE);
 				}
 			});
-			titlePanel.add(tfLoadFile);
+			titlePanel.add(tfLoadRebrickableFile);
 			titlePanel.add(findButton);
 			titlePanel.add(loadFileButton);
 			cp.add(titlePanel);
 		}
 		{
+			// LDD XML File:
+			JPanel titlePanel = new JPanel(new FlowLayout());
+			titlePanel.setBorder(BorderFactory.createTitledBorder("Update LDD color IDs using ldraw.xml from either an LDD installation or gallaghersart.com"));
+			tfLoadLDDXMLFile = new JTextField(40);
+			JButton findButton = new JButton("...");
+			findButton.addActionListener(MosaicIO.createLDDXMLFileOpenAction(this, tfLoadLDDXMLFile));
+			JButton loadFileButton = new JButton("Load ldraw.xml file");
+			loadFileButton.addActionListener(new ActionListener() {				
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					boolean ok = cc.loadLDDXMLFile(tfLoadLDDXMLFile.getText(), ColorSettingsDialog.this);
+					if(ok)
+						JOptionPane.showMessageDialog(ColorSettingsDialog.this, "Successfully read ldraw.xml file!", "Colors updated", JOptionPane.PLAIN_MESSAGE);
+				}
+			});
+			titlePanel.add(tfLoadLDDXMLFile);
+			titlePanel.add(findButton);
+			titlePanel.add(loadFileButton);
+			cp.add(titlePanel);
+		}
+		/*{
 			// colors.txt:
 			JPanel titlePanel = new JPanel(new FlowLayout());
 			titlePanel.setBorder(BorderFactory.createTitledBorder("Update colors from the local " + ColorSheetParser.COLORS_FILE +" file"));
@@ -114,7 +133,7 @@ public class ColorSettingsDialog extends JDialog implements ChangeListener {
 			titlePanel.add(loadButton);
 			titlePanel.add(new JLabel("This updates the color groups shown in the color chooser."));
 			cp.add(titlePanel);
-		}
+		}*/
 		{
 			// color translations in color_translations/*.txt:
 			JPanel titlePanel = new JPanel(new BorderLayout());
@@ -211,7 +230,7 @@ public class ColorSettingsDialog extends JDialog implements ChangeListener {
 		{
 			// Exclusions:
 			JPanel titlePanel = new JPanel(new FlowLayout());
-			titlePanel.setBorder(BorderFactory.createTitledBorder("Colors that do not make much sense to show"));
+			titlePanel.setBorder(BorderFactory.createTitledBorder("Additional color filters"));
 			cbShowMetallic = new JCheckBox("Show metallic colors");
 			cbShowMetallic.addActionListener(new ActionListener() {				
 				@Override
@@ -219,6 +238,7 @@ public class ColorSettingsDialog extends JDialog implements ChangeListener {
 					cc.setShowMetallic(cbShowMetallic.isSelected(), ColorSettingsDialog.this);
 				}
 			});
+			titlePanel.add(cbShowMetallic);
 			cbShowTransparent = new JCheckBox("Show transparent colors");
 			cbShowTransparent.addActionListener(new ActionListener() {				
 				@Override
@@ -226,8 +246,15 @@ public class ColorSettingsDialog extends JDialog implements ChangeListener {
 					cc.setShowTransparent(cbShowTransparent.isSelected(), ColorSettingsDialog.this);
 				}
 			});
-			titlePanel.add(cbShowMetallic);
 			titlePanel.add(cbShowTransparent);
+			cbShowOnlyLDD = new JCheckBox("Show only colors available in LDD");
+			cbShowOnlyLDD.addActionListener(new ActionListener() {				
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					cc.setShowOnlyLDD(cbShowOnlyLDD.isSelected(), ColorSettingsDialog.this);
+				}
+			});
+			titlePanel.add(cbShowOnlyLDD);
 			cp.add(titlePanel);			
 		}
 		{
@@ -253,12 +280,14 @@ public class ColorSettingsDialog extends JDialog implements ChangeListener {
 		if(e != null && e.getSource() == this)
 			return;
 		
-		tfLoadURL.setText(cc.getLoadURL());
-		tfLoadFile.setText(cc.getLoadFile());
+		tfLoadRebrickableURL.setText(cc.getLoadRebrickableURL());
+		tfLoadRebrickableFile.setText(cc.getLoadRebrickableFile());
+		tfLoadLDDXMLFile.setText(cc.getLoadLDDXMLFile());
 		tfFromYear.setText("" + cc.getFromYear());
 		tfToYear.setText("" + cc.getToYear());
 		tfMinSets.setText("" + cc.getMinSets());
 		tfMinParts.setText("" + cc.getMinParts());
+		cbShowOnlyLDD.setSelected(cc.getShowOnlyLDD());
 		cbShowTransparent.setSelected(cc.getShowTransparent());
 		cbShowMetallic.setSelected(cc.getShowMetallic());
 	}

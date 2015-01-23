@@ -4,6 +4,7 @@ import io.*;
 import java.awt.*;
 import java.awt.print.*;
 import java.awt.event.*;
+import java.awt.font.FontRenderContext;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.util.*;
@@ -217,11 +218,27 @@ public class PrintController implements Printable, ModelSaver<BrickGraphicsState
 			g2.fillRect(xIndent, yIndent, fontSizeIn1_72inches, fontSizeIn1_72inches);
 			g2.setColor(Color.BLACK);
 			g2.drawRect(xIndent, yIndent, fontSizeIn1_72inches, fontSizeIn1_72inches);
-			g2.drawString(c.cnt + "x " + colorController.getNormalIdentifier(c.c), xMin + x*columnWidth + rowHeight, yMin + y*rowHeight + fontSizeIn1_72inches*9/10);
+			int maxWidth = columnWidth - rowHeight;
+			
+			g2.drawString(cut(c.cnt + "x " + colorController.getNormalIdentifier(c.c), g2, maxWidth), xMin + x*columnWidth + rowHeight, yMin + y*rowHeight + fontSizeIn1_72inches*9/10);
 
 			++i;
 		}
 		return yMax;
+	}
+	
+	private static int lastLength = Short.MAX_VALUE;
+	private static String cut(String s, Graphics2D g2, int maxWidth) {
+		Font font = g2.getFont();
+		FontRenderContext context = g2.getFontRenderContext();
+		if(lastLength+1 < s.length()) {
+			s = s.substring(0, lastLength+1);
+		}
+		while(font.getStringBounds(s, context).getWidth() > maxWidth) {
+			s = s.substring(0,  s.length()-1);
+		}
+		lastLength = s.length(); 
+		return s;
 	}
 	
 	private static void drawImage(Graphics2D g2, int xMin, int xMax, int yMin, int yMax, BufferedImage image) {
@@ -496,8 +513,8 @@ public class PrintController implements Printable, ModelSaver<BrickGraphicsState
 			g2.fillRect(xIndent, yIndent, fontSizeIn1_72inches, fontSizeIn1_72inches);
 			g2.setColor(Color.BLACK);
 			g2.drawRect(xIndent, yIndent, fontSizeIn1_72inches, fontSizeIn1_72inches);
-			g2.drawString(colorController.getNormalIdentifier(c), xMin + x*columnWidth + rowHeight, yMin + y*rowHeight + fontSizeIn1_72inches*9/10);
-
+			int maxWidth = columnWidth-rowHeight;
+			g2.drawString(cut(colorController.getNormalIdentifier(c), g2, maxWidth), xMin + x*columnWidth + rowHeight, yMin + y*rowHeight + fontSizeIn1_72inches*9/10);
 			++i;
 		}
 	}

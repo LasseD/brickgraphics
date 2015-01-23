@@ -42,6 +42,7 @@ public class AboutDialog extends JDialog {
 			sb.append("Version: " + version + "\n");
 			sb.append("Author: Lasse Deleuran\n");
 			sb.append("Contact: lassedeleuran@gmail.com\n");
+			sb.append("Warning: " + FILE_NAME + " could not be read from the file system!\n");
 		}
 		
 		JTextArea ta = new JTextArea(sb.toString());

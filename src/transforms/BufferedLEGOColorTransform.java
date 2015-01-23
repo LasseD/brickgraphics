@@ -15,17 +15,15 @@ import mosaic.controllers.ColorController;
 import colors.*;
 
 public abstract class BufferedLEGOColorTransform implements LEGOColorTransform, InstructionsTransform {
-	private BufferedImage[] ins;
-	private LEGOColor[][][] outColors;
-	private BufferedImage[] outImages;
+	private TransformationSet[] sets;
 	private int pairIndex, lastIndex;
 	private ColorController cc;
 	
 	public BufferedLEGOColorTransform(int bufferSize, ColorController cc) {
 		this.cc = cc;
-		ins = new BufferedImage[bufferSize];
-		outImages = new BufferedImage[bufferSize];
-		outColors = new LEGOColor[bufferSize][][];
+		sets = new TransformationSet[bufferSize];
+		lastIndex = -1;
+		pairIndex = 0;
 	}
 
 	public BufferedLEGOColorTransform(ColorController cc) {
@@ -33,55 +31,50 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform, 
 	}
 	
 	public void clearBuffer() {
-		int size = ins.length;
-		ins = new BufferedImage[size];
-		outImages = new BufferedImage[size];
-		outColors = new LEGOColor[size][][];
+		int size = sets.length;
+		sets = new TransformationSet[size];
 	}
 	
 	@Override
 	public LEGOColor[][] lcTransform(BufferedImage in) {
-		for(int i = 0; i < ins.length; i++)
-			if(ins[i] == in) {
-				lastIndex = i;
-				return outColors[i];
-			}
-		
-		LEGOColor[][] newOut = lcTransformUnbuffered(in);
-		if(ins.length == 0)
-			return newOut;
-
-		ins[pairIndex] = in;
-		outColors[pairIndex] = newOut;
-		outImages[pairIndex] = null;
-		
-		pairIndex++;
-		pairIndex %= ins.length;
-		return newOut;
+		return transformSet(in).colors;
 	}
 	
 	@Override
 	public BufferedImage transform(BufferedImage in) {
-		for(int i = 0; i < ins.length; i++) {
-			if(ins[i] == in) {
-				if(outImages[i] != null) {
-					lastIndex = i;
-					return outImages[i];					
-				}
-				BufferedImage built = build(outColors[i]);
-				outImages[i] = built;
-				return built;
-			}
-		}
-
-		if(ins.length == 0)
-			return build(lcTransform(in));
-
-		lcTransform(in);
-		return transform(in);
+		return transformSet(in).out;
 	}
 	
-	private static BufferedImage build(LEGOColor[][] lcs) {
+	private TransformationSet transformSet(BufferedImage in) {
+		for(int i = 0; i < sets.length; i++) {
+			if(sets[i] != null && sets[i].in == in) {
+				lastIndex = i;
+				return sets[i];
+			}
+		}
+		
+		TransformationSet s = new TransformationSet();
+		s.in = in;
+		s.colors = lcTransformUnbuffered(in);
+		s.out = toBufferedImage(s.colors);
+		
+		if(sets.length == 0)
+			return s;
+
+		sets[pairIndex] = s;
+		lastIndex = pairIndex;
+		
+		pairIndex++;
+		pairIndex %= sets.length;
+		return s;
+	}
+		
+	private static class TransformationSet {
+		public BufferedImage in, out;
+		public LEGOColor[][] colors;
+	}
+	
+	private static BufferedImage toBufferedImage(LEGOColor[][] lcs) {
 		int w = lcs.length;
 		int h = lcs[0].length;
 		BufferedImage out = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
@@ -110,7 +103,7 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform, 
 		int cellW = (int)Math.round(scaleW);
 		int cellH = (int)Math.round(scaleH);
 
-		LEGOColor[][] transformedColors = outColors[lastIndex];
+		LEGOColor[][] transformedColors = sets[lastIndex].colors;
 		Font font = LEGOColor.makeFont(g2, cellW-4, cellH-4, cc, lastUsedColorCounts());
 		g2.setFont(font);
 		FontMetrics fm = g2.getFontMetrics(font);
@@ -154,7 +147,7 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform, 
 		int cellH = (int)Math.ceil(scaleH);
 		
 		// draw colors and studs:
-		LEGOColor[][] transformedColors = outColors[lastIndex];
+		LEGOColor[][] transformedColors = sets[lastIndex].colors;
 		Set<LEGOColor> used = new TreeSet<LEGOColor>();
 		for(int x = 0; x < w; x++) {
 			int xIndent = (int)Math.round(scaleW*x);
@@ -224,7 +217,7 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform, 
 	
 	@Override
 	public LEGOColor.CountingLEGOColor[] lastUsedColorCounts() {
-		LEGOColor[][] transformedColors = outColors[lastIndex];
+		LEGOColor[][] transformedColors = sets[lastIndex].colors;
 		if(transformedColors == null)
 			return new LEGOColor.CountingLEGOColor[]{};
 		
@@ -244,7 +237,7 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform, 
 		Collections.sort(l, new Comparator<Map.Entry<LEGOColor, Integer>>() {
 			@Override
 			public int compare(Entry<LEGOColor, Integer> o1, Entry<LEGOColor, Integer> o2) {
-				return o1.getKey().getID() - o2.getKey().getID();
+				return o1.getKey().getIDRebrickable() - o2.getKey().getIDRebrickable();
 			}
 		});
 		LEGOColor.CountingLEGOColor[] out = new LEGOColor.CountingLEGOColor[l.size()];
@@ -257,7 +250,7 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform, 
 	}
 	
 	public LEGOColor[][] lastInstructions() {
-		return outColors[lastIndex];
+		return sets[lastIndex].colors;
 	}
 	
 	public abstract LEGOColor[][] lcTransformUnbuffered(BufferedImage in);

@@ -4,9 +4,8 @@ import java.awt.*;
 import java.awt.image.*;
 import java.util.*;
 import java.util.List;
-
 import mosaic.controllers.ColorController;
-
+import mosaic.io.InstructionsBuilderI;
 import colors.*;
 import bricks.*;
 
@@ -408,7 +407,7 @@ public class ToBricksTransform implements InstructionsTransform {
 			@Override
 			public int compare(Map.Entry<LEGOColor, Integer> o1, Map.Entry<LEGOColor, Integer> o2) {
 				//return o2.getValue().compareTo(o1.getValue());
-				return o1.getKey().getID() - o2.getKey().getID();
+				return o1.getKey().getIDRebrickable() - o2.getKey().getIDRebrickable();
 			}
 		});
 		LEGOColor.CountingLEGOColor[] out = new LEGOColor.CountingLEGOColor[l.size()];
@@ -421,7 +420,8 @@ public class ToBricksTransform implements InstructionsTransform {
 	}
 
 	// ONLY FOR SNOT!
-	public void buildLastInstructions(LDRPrinter.LDRBuilder printer, Rectangle bounds) {
+	public void buildLastInstructions(InstructionsBuilderI printer, Rectangle bounds) {
+		int id = 0;
 		int maxX = Math.min(normalColorsChoosen.length, bounds.x+bounds.width);
 		for(int x = bounds.x; x < maxX; x++) {
 			int maxY = Math.min(normalColorsChoosen[0].length, bounds.y+bounds.height);
@@ -441,11 +441,11 @@ public class ToBricksTransform implements InstructionsTransform {
 						int iy = y*n5+j;
 						if(normal) {
 							color = normalColors[ix][iy];
-							printer.add(2*x+i, 5*y+j, color);
+							printer.add(id++, 2*x+i, 5*y+j, color);
 						}
 						else {
 							color = sidewaysColors[ix][iy];
-							printer.addSideways(5*x+i, 2*y+j, color);
+							printer.addSideways(id++, 5*x+i, 2*y+j, color);
 						}
 					}			
 				}

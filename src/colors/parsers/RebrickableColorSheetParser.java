@@ -2,6 +2,8 @@ package colors.parsers;
 
 import java.util.*;
 import java.io.*;
+import colors.LEGOColor;
+import mosaic.controllers.ColorController;
 
 /**
  * ID, Name, #rgb, |parts|, |sets|, from, to, LEGO names, LDraw IDs, Bricklink IDs, Peeron names
@@ -9,7 +11,13 @@ import java.io.*;
  */
 public class RebrickableColorSheetParser implements ColorSheetParserI {
 	@Override
-	public List<String> parse(InputStreamReader isr) throws IOException {
+	public List<String> parse(InputStreamReader isr, ColorController cc) throws IOException {
+		// construct lookup for rebrickable id -> ldd id:
+		Map<Integer,Integer> map = new TreeMap<Integer,Integer>();
+		for(LEGOColor color : cc.getColorsFromDisk()) {
+			map.put(color.getIDRebrickable(), color.getIDLEGO());
+		}
+		
 		BufferedReader br = new BufferedReader(isr);
 		List<String> out = new LinkedList<String>();
 		
@@ -17,17 +25,17 @@ public class RebrickableColorSheetParser implements ColorSheetParserI {
 		ParserHelper.skipPastLine(br, "</tr>", true);
 		// Now we are at the line with non-transparent colors:
 		String tr = br.readLine();
-		readTRs(out, tr);
+		readTRs(out, tr, map);
 		
 		ParserHelper.skipPastLine(br, "</tr>", true);
 		// Now we are at the line with transparent colors:
 		tr = br.readLine();
-		readTRs(out, tr);		
+		readTRs(out, tr, map);		
 		
 		return out;
 	}
 	
-	private static void readTRs(List<String> out, String trs) {
+	private static void readTRs(List<String> out, String trs, Map<Integer,Integer> map) {
 		if(trs == null)
 			return;
 		char[] cs = trs.toCharArray();
@@ -38,6 +46,7 @@ public class RebrickableColorSheetParser implements ColorSheetParserI {
 			if(csi >= cs.length)
 				return;
 			// retrieve 11 pieces of data:
+			int id = 0;
 			StringBuilder sb = new StringBuilder();
 			for(int i = 0; i < 11; ++i) {
 				if(i != 0)
@@ -59,11 +68,19 @@ public class RebrickableColorSheetParser implements ColorSheetParserI {
 							csi++;
 						++csi;
 					}
-					else
-						sb.append(cs[csi++]);
+					else {
+						if(i == 0)
+							id = 10*id + cs[csi];
+						sb.append(cs[csi++]);						
+					}
 				}
 				csi = eatTags(cs, csi, 2);
 			}
+			sb.append('|');
+			if(map.containsKey(id))
+				sb.append(map.get(id));
+			else
+				sb.append("-1");
 			out.add(sb.toString());
 		}
 	}

@@ -67,7 +67,7 @@ public class ColorChooserDialog extends JDialog implements ChangeListener {
 			selectedColors.add(LEGOColor.BW[1]);
 		}
 
-		cc.setselectedColorsAndGroups(selectedColors, selectedGroups, new ChangeEvent(ColorChooserDialog.this));
+		cc.setColorChooserSelectedColorsAndGroups(selectedColors, selectedGroups, new ChangeEvent(ColorChooserDialog.this));
 	}
 	
 	@Override
@@ -110,7 +110,7 @@ public class ColorChooserDialog extends JDialog implements ChangeListener {
 			out.ccd = ccd;
 			out.group = group;
 			out.mainBox = new JCheckBox();
-			out.mainBox.setSelected(cc.getSelectedColorGroups().contains(group));
+			out.mainBox.setSelected(cc.getColorChooserSelectedColorGroups().contains(group));
 			out.mainBox.addActionListener(out);
 			
 			// Set up label:
@@ -176,8 +176,8 @@ public class ColorChooserDialog extends JDialog implements ChangeListener {
 			setPreferredSize(new Dimension(size, size));
 			setBackground(color.getRGB());
 			
-			selectedWhenNotSupressed = cc.getSelectedColors().contains(color);
-			boolean supressed = cc.getSelectedColorGroups().contains(group);
+			selectedWhenNotSupressed = cc.getColorChooserSelectedColors().contains(color);
+			boolean supressed = cc.getColorChooserSelectedColorGroups().contains(group);
 			super.setEnabled(!supressed);
 			setSelected(supressed || selectedWhenNotSupressed);
 		}

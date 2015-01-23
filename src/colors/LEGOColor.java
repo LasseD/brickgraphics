@@ -6,7 +6,7 @@ import mosaic.controllers.ColorController;
 
 public class LEGOColor implements Comparable<LEGOColor>, Serializable {
 	private static final long serialVersionUID = 6713668277298989578L;
-	private int id;
+	private int idRebrickable, idLEGO;
 	private String name;
 	private Color rgb;
 	private int[] lab;
@@ -15,8 +15,13 @@ public class LEGOColor implements Comparable<LEGOColor>, Serializable {
 	private String namesLEGO, idsLDraw, idsBrickLink, namesPeeron;
 	
 	public LEGOColor(int rgb) {
-		id = rgb;
+		idRebrickable = rgb;
 		name = "Pure RGB #" + rgb;
+		sets = Integer.MAX_VALUE;
+		parts = Integer.MAX_VALUE;
+		from = 0;
+		to = Integer.MAX_VALUE;
+		idLEGO = -1;
 		setRGB(new Color(rgb));
 	}
 	
@@ -26,19 +31,19 @@ public class LEGOColor implements Comparable<LEGOColor>, Serializable {
 		if(s == null)
 			return null;
 		String[] parts = s.split("[|]", -1);
-		if(parts.length != 11) {
+		if(parts.length != 12) {
 			System.err.println("Expected color line to contain 11 parts. Contained " + parts.length + ": " + s);
 			return null;
 		}
-		for(int i = 0; i < 11; ++i) 
+		for(int i = 0; i < 12; ++i) 
 			parts[i] = parts[i].trim();
 		
 		LEGOColor c = new LEGOColor();
-		c.id = parseInt(parts[0]);
+		c.idRebrickable = parseInt(parts[0]);
 		c.name = parts[1];
-		if(c.id == BLACK.id)
+		if(c.idRebrickable == BLACK.idRebrickable)
 			c.setRGB(BLACK.rgb);
-		else if(c.id == WHITE.id)			
+		else if(c.idRebrickable == WHITE.idRebrickable)			
 			c.setRGB(WHITE.rgb);
 		else
 			c.setRGB(new Color(parseInt(parts[2])));
@@ -50,7 +55,23 @@ public class LEGOColor implements Comparable<LEGOColor>, Serializable {
 		c.idsLDraw = parts[8];
 		c.idsBrickLink = parts[9];
 		c.namesPeeron = parts[10];
+		c.idLEGO = parseInt(parts[11]);
 		return c;
+	}
+	
+	public String toDelimitedString() {
+		return idRebrickable + 
+				"|" + name + 
+				"|#" + Integer.toHexString(rgb.getRGB() & 0xFFFFFF) + 
+				"|" + parts + 
+				"|" + sets + 
+				"|" + from + 
+				"|" + to + 
+				"|" + namesLEGO + 
+				"|" + idsLDraw + 
+				"|" + idsBrickLink + 
+				"|" + namesPeeron + 
+				"|" + idLEGO;
 	}
 	
 	private static int parseInt(String s) {
@@ -63,8 +84,11 @@ public class LEGOColor implements Comparable<LEGOColor>, Serializable {
 		return Integer.parseInt(s);
 	}
 	
-	public int getID() {
-		return id;
+	public int getIDRebrickable() {
+		return idRebrickable;
+	}
+	public int getIDLEGO() {
+		return idLEGO;
 	}
 	public String getName() {
 		return name;
@@ -116,6 +140,9 @@ public class LEGOColor implements Comparable<LEGOColor>, Serializable {
 		return namesPeeron;
 	}
 	
+	public boolean isLDD() {
+		return idLEGO != -1;
+	}
 	public boolean isTransparent() {
 		return name.toLowerCase().contains("trans");
 	}
@@ -127,6 +154,9 @@ public class LEGOColor implements Comparable<LEGOColor>, Serializable {
 	public void setRGB(Color color) {
 		this.rgb = color;
 		updateLAB();
+	}
+	public void setIdLEGO(int idLEGO) {
+		this.idLEGO = idLEGO;
 	}
 	
 	private void updateLAB() {
@@ -175,27 +205,27 @@ public class LEGOColor implements Comparable<LEGOColor>, Serializable {
 	static {
 		BLACK.name = "Black";
 		BLACK.rgb = Color.BLACK;
-		BLACK.id = 0;
+		BLACK.idRebrickable = 0;
 
 		WHITE.name = "White";
 		WHITE.rgb = Color.WHITE;
-		WHITE.id = 15;
+		WHITE.idRebrickable = 15;
 	}
 	public static final LEGOColor[] BW = {BLACK, WHITE};
 
 	@Override
 	public int hashCode() {
-		return id;
+		return idRebrickable;
 	}
 	
 	@Override
 	public boolean equals(Object other) {
-		return other instanceof LEGOColor && ((LEGOColor)other).id == id;
+		return other instanceof LEGOColor && ((LEGOColor)other).idRebrickable == idRebrickable;
 	}
 	
 	@Override
 	public int compareTo(LEGOColor other) {
-		return id < other.id ? -1 : (id == other.id ? 0 : 1);
+		return idRebrickable < other.idRebrickable ? -1 : (idRebrickable == other.idRebrickable ? 0 : 1);
 	}
 	
 	public static class CountingLEGOColor {

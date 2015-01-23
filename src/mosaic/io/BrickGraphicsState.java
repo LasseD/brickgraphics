@@ -18,11 +18,13 @@ public enum BrickGraphicsState implements ModelState {
 	ColorsFromYear(1900),
 	ColorsToYear(2100), // Although it would be cool if this code was used so far into the future
 	ColorsShowMetallic(false),
+	ColorsShowOnlyLDD(false),
 	ColorsShowTransparent(false),
 	ColorsMinParts(1),
 	ColorsMinSets(100),
-	ColorsLoadURL("http://rebrickable.com/colors"),
-	ColorsLoadFile(""),
+	ColorsLoadRebrickableURL("http://rebrickable.com/colors"),
+	ColorsLoadRebrickableFile(""),
+	ColorsLoadLDDXMLFile(""),
 	
 	// Printing:
 	PrintCoverPageShow(true),

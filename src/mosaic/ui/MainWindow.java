@@ -10,6 +10,8 @@ import java.beans.PropertyChangeListener;
 import java.io.*;
 import javax.swing.*;
 import javax.swing.event.*;
+
+import colors.parsers.ColorSheetParser;
 import mosaic.controllers.*;
 import mosaic.io.*;
 import mosaic.controllers.PrintController;
@@ -17,11 +19,15 @@ import mosaic.ui.menu.*;
 import mosaic.ui.prepare.*;
 
 /**
- * @author ld
+ * @author LD
  */
 public class MainWindow extends JFrame implements ChangeListener, ModelSaver<BrickGraphicsState> {
 	public static final String APP_NAME = "LD Digital Mosaic Creator";
-	public static final String APP_VERSION = "0.9.1";
+	public static final String APP_NAME_SHORT = "LDDMC";
+	public static final int VERSION_MAJOR = 0;
+	public static final int VERSION_MINOR = 9;
+	public static final int VERSION_MICRO = 2;
+	public static final String APP_VERSION = VERSION_MAJOR + "." + VERSION_MINOR + "." + VERSION_MICRO;
 	public static final String HELP_URL = "http://c-mt.dk/software/lddmc/help";
 	
 	private ImagePreparingView imagePreparingView;
@@ -130,6 +136,9 @@ public class MainWindow extends JFrame implements ChangeListener, ModelSaver<Bri
 				setJMenuBar(new MainMenu(MainWindow.this, model, csd));
 				setIconImage(Icons.get(32, "icon").getImage());
 				new MagnifierWindow(MainWindow.this, magnifierController, colorController); // Do your own thing little window.
+				if(colorController.usesBackupColors()) {
+					JOptionPane.showMessageDialog(MainWindow.this, "The file " + ColorSheetParser.COLORS_FILE + " could not be read.\nBackup colors are used.\nTo get all the functionality of this program, please make sure that the file exists and that the program is allowed to read the file.\nThis also applies to the other files and folders of the program.", "Error reading file", JOptionPane.WARNING_MESSAGE);
+				}
 			}
 		});
 
@@ -208,6 +217,10 @@ public class MainWindow extends JFrame implements ChangeListener, ModelSaver<Bri
 	
 	public String getFileName() {
 		return ((File)model.get(BrickGraphicsState.Image)).getName();
+	}
+
+	public File getFile() {
+		return (File)model.get(BrickGraphicsState.Image);
 	}
 
 	public BufferedImage getInImage() {

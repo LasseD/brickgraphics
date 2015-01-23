@@ -1,8 +1,9 @@
-package bricks;
+package mosaic.io;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.io.*;
+import bricks.*;
 import mosaic.controllers.MagnifierController;
 import mosaic.ui.BrickedView;
 import mosaic.ui.menu.ToBricksTools;
@@ -13,7 +14,6 @@ import transforms.*;
  * Class responsible for outputting to LDR file. 
  * This is a very simple LDR "printer".
  * @author ld
- *
  */
 public class LDRPrinter {
 	private ToBricksTransform tbt;
@@ -48,14 +48,20 @@ public class LDRPrinter {
 		case STUD_FROM_TOP:
 			buildWithStuds(out);
 			break;
+		case TILE_FROM_TOP:
+			buildWithTiles(out);			
+			break;
 		case PLATE_FROM_SIDE:
 			buildWithPlates(out);
 			break;
-		case SNOT_IN_2_BY_2:
-			buildSnot(out);
-			break;
 		case BRICK_FROM_SIDE:
 			buildWidthBricks(out);
+			break;
+		case TWO_BY_TWO_PLATES_FROM_TOP:
+			buildWithTwoByTwoPlates(out);
+			break;
+		case SNOT_IN_2_BY_2:
+			buildSnot(out);
 			break;
 		default: 
 			throw new IllegalStateException("Enum broken: " + type);
@@ -67,15 +73,10 @@ public class LDRPrinter {
 		outStream.close();
 	}
 	
-	public interface LDRBuilder {
-		void addSideways(int xPlateIndent, int yPlateIndent, LEGOColor color);
-		void add(int x, int y, LEGOColor color);
-	}
-	
 	private void buildSnot(final PrintWriter out) {
-		LDRBuilder builder = new LDRBuilder() {
+		InstructionsBuilderI builder = new InstructionsBuilderI() {
 			@Override
-			public void add(int x, int y, LEGOColor color) {
+			public void add(int id, int x, int y, LEGOColor color) {
 				String part = "3024.DAT";
 				if(y%5==0)
 					part = "3070B.DAT";
@@ -83,7 +84,7 @@ public class LDRPrinter {
 			}
 
 			@Override
-			public void addSideways(int x, int y, LEGOColor color) {
+			public void addSideways(int id, int x, int y, LEGOColor color) {
 				String part = "3024.DAT";
 				if(x%5==4)
 					part = "3070B.DAT";
@@ -103,12 +104,20 @@ public class LDRPrinter {
 		build(out, 20, 20, "0 -1 0 0 0 -1 1 0 0 3024.DAT"); 
 	}
 
+	private void buildWithTwoByTwoPlates(PrintWriter out) {
+		build(out, 40, 40, "0 -1 0 0 0 -1 1 0 0 3022.DAT"); 
+	}
+
+	private void buildWithTiles(PrintWriter out) {
+		build(out, 20, 20, "0 -1 0 0 0 -1 1 0 0 3070B.DAT"); 
+	}
+
 	private void buildWithPlates(PrintWriter out) {
 		build(out, 20, 8, "0 0 -1 0 1 0 1 0 0 3024.DAT");
 	}
 	
 	private void buildWidthBricks(PrintWriter out) {
-		build(out, 20, 8*3, "0 0 -1 0 1 0 1 0 0 3005.DAT");
+		build(out, 20, 24, "0 0 -1 0 1 0 1 0 0 3005.DAT");
 	}
 	
 	private void build(PrintWriter out, int xMult, int yMult, String orientAndDat) {

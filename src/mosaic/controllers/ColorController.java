@@ -25,12 +25,13 @@ public class ColorController implements ModelSaver<BrickGraphicsState> {
 	private ShownName shownName;
 	private String localizedFileNameNoTXT;
 	private int fromYear, toYear, minParts, minSets;
-	private boolean showMetallic, showTransparent;
-	private String loadURL, loadFile;
+	private boolean showMetallic, showTransparent, showOnlyLDD;
+	private String loadRebrickableURL, loadRebrickableFile, loadLDDXMLFile;
 	// Color Chooser state:
-	private Set<LEGOColor> selectedColors;
-	private Set<ColorGroup> selectedGroups;
+	private Set<LEGOColor> colorChooserSelectedColors;
+	private Set<ColorGroup> colorChooserSelectedGroups;
 	private LEGOColor[] selectedColorsMerged;
+	private boolean usesBackupColors;
 	
 	private static volatile ColorController instance = null;
 
@@ -42,26 +43,26 @@ public class ColorController implements ModelSaver<BrickGraphicsState> {
 	}
 	
 	private ColorController(Model<BrickGraphicsState> model) {
-		model.addModelSaver(this);
 		listeners = new LinkedList<ChangeListener>();
 		incrementalIDs = new TreeMap<LEGOColor, Integer>();
 		allLocalizedColors = new TreeMap<String, Map<LEGOColor, String> >(); // other two localization attributes null is ok.
-		selectedColors = new TreeSet<LEGOColor>();
-		selectedGroups = new TreeSet<ColorGroup>();
+		colorChooserSelectedColors = new TreeSet<LEGOColor>();
+		colorChooserSelectedGroups = new TreeSet<ColorGroup>();
 		filteredColors = new ArrayList<LEGOColor>(150);
+		model.addModelSaver(this);
 		
 		reloadModel(model);
 		Icons.colorControllerLoaded(this);
 		try {
 			reloadColorTranslations(null, false);
 		} catch (IOException e) {
-			e.printStackTrace(); // OK - now we just don't have any translations...
+			//e.printStackTrace(); // OK - now we just don't have any translations...
 		}
 	}
 	
 	public void reloadModel(Model<BrickGraphicsState> model) {
 		// Stuff from file:
-		reloadColorsFile(this, false);
+		usesBackupColors = !reloadColorsFile(this, false);
 		
 		// Stuff for color settings:
 		shownID = ShownID.values()[(Integer)model.get(BrickGraphicsState.ColorsShownNumber)];
@@ -69,27 +70,29 @@ public class ColorController implements ModelSaver<BrickGraphicsState> {
 		localizedFileNameNoTXT = (String)model.get(BrickGraphicsState.ColorsLocalizedFileName);
 		fromYear = (Integer)model.get(BrickGraphicsState.ColorsFromYear);
 		toYear = (Integer)model.get(BrickGraphicsState.ColorsToYear);
+		showOnlyLDD = (Boolean)model.get(BrickGraphicsState.ColorsShowOnlyLDD);
 		showMetallic = (Boolean)model.get(BrickGraphicsState.ColorsShowMetallic);
 		showTransparent = (Boolean)model.get(BrickGraphicsState.ColorsShowTransparent);
 		minParts = (Integer)model.get(BrickGraphicsState.ColorsMinParts);
 		minSets = (Integer)model.get(BrickGraphicsState.ColorsMinSets);
-		loadURL = (String)model.get(BrickGraphicsState.ColorsLoadURL);
-		loadFile = (String)model.get(BrickGraphicsState.ColorsLoadFile);
+		loadRebrickableURL = (String)model.get(BrickGraphicsState.ColorsLoadRebrickableURL);
+		loadRebrickableFile = (String)model.get(BrickGraphicsState.ColorsLoadRebrickableFile);
+		loadLDDXMLFile = (String)model.get(BrickGraphicsState.ColorsLoadLDDXMLFile);
 		updateColorListsAndFilters(this, false);
 
 		// Stuff for color chooser:
 		reloadColorGroups(false);
-		selectedGroups.clear();
-		selectedColors.clear();
+		colorChooserSelectedGroups.clear();
+		colorChooserSelectedColors.clear();
 		Set<String> selectedGroupsFromModel = new TreeSet<String>(Arrays.asList((String[])model.get(BrickGraphicsState.SelectedColorGroups)));
 		for(ColorGroup group : groupsFromDisk) {
 			if(selectedGroupsFromModel.contains(group.getName()))
-				selectedGroups.add(group);
+				colorChooserSelectedGroups.add(group);
 		}
 		Set<String> selectedColorsFromModel = new TreeSet<String>(Arrays.asList((String[])model.get(BrickGraphicsState.SelectedColors)));
 		for(LEGOColor color : colorsFromDisk) {
 			if(selectedColorsFromModel.contains(color.getName()))
-				selectedColors.add(color);
+				colorChooserSelectedColors.add(color);
 		}
 		
 		notifyListeners(null);		
@@ -101,6 +104,9 @@ public class ColorController implements ModelSaver<BrickGraphicsState> {
 		return selectedColorsMerged;
 	}
 	
+	public boolean usesBackupColors() {
+		return usesBackupColors;
+	}
 	public String getLocalizedFileNameNoTXT() {
 		return localizedFileNameNoTXT;
 	}
@@ -128,6 +134,7 @@ public class ColorController implements ModelSaver<BrickGraphicsState> {
 				translation.put(c, b);
 			}
 		}
+		scanner.close();
 		if(!translation.isEmpty())
 			allLocalizedColors.put(fileNameNoTXT, translation);
 	}
@@ -191,18 +198,18 @@ public class ColorController implements ModelSaver<BrickGraphicsState> {
 			notifyListeners(null);
 		return ok;
 	}
-	public Set<ColorGroup> getSelectedColorGroups() {
-		return selectedGroups;
+	public Set<ColorGroup> getColorChooserSelectedColorGroups() {
+		return colorChooserSelectedGroups;
 	}
 	public ColorGroup[] getColorGroupsFromDisk() {
 		return groupsFromDisk;
 	}
-	public Set<LEGOColor> getSelectedColors() {
-		return selectedColors;
+	public Set<LEGOColor> getColorChooserSelectedColors() {
+		return colorChooserSelectedColors;
 	}
-	public void setselectedColorsAndGroups(Set<LEGOColor> selectedColors, Set<ColorGroup> selectedGroups, ChangeEvent e) {
-		this.selectedColors = selectedColors;
-		this.selectedGroups = selectedGroups;
+	public void setColorChooserSelectedColorsAndGroups(Set<LEGOColor> selectedColors, Set<ColorGroup> selectedGroups, ChangeEvent e) {
+		this.colorChooserSelectedColors = selectedColors;
+		this.colorChooserSelectedGroups = selectedGroups;
 		
 		Set<LEGOColor> selectedColorsMerged = new TreeSet<LEGOColor>();
 		for(ColorGroup group : selectedGroups) {
@@ -250,6 +257,7 @@ public class ColorController implements ModelSaver<BrickGraphicsState> {
 			     c.getFrom() > toYear || 
 			     c.getSets() < minSets || 
 			     c.getParts() < minParts || 
+			     (showOnlyLDD && !c.isLDD()) ||
 			     (!showMetallic && c.isMetallic()) ||
 			     (!showTransparent && c.isTransparent())))
 				filteredColors.add(c);
@@ -277,33 +285,48 @@ public class ColorController implements ModelSaver<BrickGraphicsState> {
 	public List<LEGOColor> getColorsFromDisk() {
 		return colorsFromDisk;
 	}
-	public String getLoadURL() {
-		return loadURL;
+	public String getLoadRebrickableURL() {
+		return loadRebrickableURL;
 	}
 	public boolean loadColorsFromURL(String url, JDialog toMoalizeOnError) {
 		try {
-			ColorSheetParser.saveFromWeb(url);
+			ColorSheetParser.saveFromWeb(url, this);
 		} catch (IOException e) {
 			JOptionPane.showMessageDialog(toMoalizeOnError, "Error loading colors from web: " + e.getMessage(), "Error loading colors", JOptionPane.ERROR_MESSAGE);
 			e.printStackTrace();
 			return false;
 		}
 		reloadColorsFile(toMoalizeOnError);
-		loadURL = url;
+		loadRebrickableURL = url;
 		return true;
 	}
-	public String getLoadFile() {
-		return loadFile;
+	public String getLoadRebrickableFile() {
+		return loadRebrickableFile;
+	}
+	public String getLoadLDDXMLFile() {
+		return loadLDDXMLFile;
 	}
 	public boolean loadColorsFromFile(String file, JDialog toMoalizeOnError) {
 		try {
-			ColorSheetParser.saveFromFile(file);
+			ColorSheetParser.saveFromRebrickableFile(file, this);
 		} catch (IOException e) {
 			JOptionPane.showMessageDialog(toMoalizeOnError, "Error loading colors from file: " + e.getMessage(), "Error loading colors", JOptionPane.ERROR_MESSAGE);
 			e.printStackTrace();
 			return false;
 		}
-		loadFile = file;
+		loadRebrickableFile = file;
+		reloadColorsFile(toMoalizeOnError);
+		return true;
+	}
+	public boolean loadLDDXMLFile(String file, JDialog toMoalizeOnError) {
+		try {
+			ColorSheetParser.saveFromLDDXMLFile(file, this);
+		} catch (IOException e) {
+			JOptionPane.showMessageDialog(toMoalizeOnError, "Error loading ldraw.xml file: " + e.getMessage(), "Error loading file", JOptionPane.ERROR_MESSAGE);
+			e.printStackTrace();
+			return false;
+		}
+		loadLDDXMLFile = file;
 		reloadColorsFile(toMoalizeOnError);
 		return true;
 	}
@@ -347,11 +370,18 @@ public class ColorController implements ModelSaver<BrickGraphicsState> {
 		}
 		updateColorListsAndFilters(toMoalizeOnError, true);
 	}
+	public boolean getShowOnlyLDD() {
+		return showOnlyLDD;
+	}
 	public boolean getShowMetallic() {
 		return showMetallic;
 	}
 	public boolean getShowTransparent() {
 		return showTransparent;
+	}
+	public void setShowOnlyLDD(boolean s, Object source) {
+		showOnlyLDD = s;
+		updateColorListsAndFilters(source, true);
 	}
 	public void setShowTransparent(boolean st, Object source) {
 		showTransparent = st;
@@ -367,13 +397,15 @@ public class ColorController implements ModelSaver<BrickGraphicsState> {
 		case NONE:
 			return "-";
 		case ID:
-			return ""+c.getID();
+			return ""+c.getIDRebrickable();
 		case LDRAW:
 			return ""+c.getFirstIDLDraw();
 		case BRICKLINK:
 			return ""+c.getFirstIDBL();
 		case INCREMENTAL:
 			return incrementalIDs.get(c)+"";
+		case LEGO:
+			return ""+c.getIDLEGO();
 		default:
 			throw new IllegalStateException("Enum broken: " + shownID);
 		}
@@ -403,13 +435,15 @@ public class ColorController implements ModelSaver<BrickGraphicsState> {
 		case NONE:
 			return null;
 		case ID:
-			return ""+c.getID();
+			return ""+c.getIDRebrickable();
 		case LDRAW:
 			return c.getIDsLDraw();
 		case BRICKLINK:
 			return c.getIDsBL();
 		case INCREMENTAL:
 			return incrementalIDs.get(c)+"";
+		case LEGO:
+			return ""+c.getIDLEGO();
 		default:
 			throw new IllegalStateException("Enum broken: " + shownID);
 		}
@@ -446,7 +480,7 @@ public class ColorController implements ModelSaver<BrickGraphicsState> {
 	
 	public static String getLongIdentifier(LEGOColor c) {
 		StringBuilder sb = new StringBuilder();
-		sb.append(c.getID());
+		sb.append(c.getIDRebrickable());
 		sb.append(", ");
 		sb.append(c.getName());
 		sb.append(", #");		
@@ -511,28 +545,30 @@ public class ColorController implements ModelSaver<BrickGraphicsState> {
 		model.set(BrickGraphicsState.ColorsLocalizedFileName, localizedFileNameNoTXT);
 		model.set(BrickGraphicsState.ColorsFromYear, fromYear);
 		model.set(BrickGraphicsState.ColorsToYear, toYear);
+		model.set(BrickGraphicsState.ColorsShowOnlyLDD, showOnlyLDD);
 		model.set(BrickGraphicsState.ColorsShowMetallic, showMetallic);
 		model.set(BrickGraphicsState.ColorsShowTransparent, showTransparent);
 		model.set(BrickGraphicsState.ColorsMinParts, minParts);
 		model.set(BrickGraphicsState.ColorsMinSets, minSets);
-		model.set(BrickGraphicsState.ColorsLoadURL, loadURL);
-		model.set(BrickGraphicsState.ColorsLoadFile, loadFile);
+		model.set(BrickGraphicsState.ColorsLoadRebrickableURL, loadRebrickableURL);
+		model.set(BrickGraphicsState.ColorsLoadRebrickableFile, loadRebrickableFile);
+		model.set(BrickGraphicsState.ColorsLoadLDDXMLFile, loadLDDXMLFile);
 		// Color chooser:
-		String[] sg = new String[selectedGroups.size()];
+		String[] sg = new String[colorChooserSelectedGroups.size()];
 		int i = 0;
-		for(ColorGroup group : selectedGroups)
+		for(ColorGroup group : colorChooserSelectedGroups)
 			sg[i++] = group.getName();
 		model.set(BrickGraphicsState.SelectedColorGroups, sg);
 		
-		String[] sc = new String[selectedColors.size()];
+		String[] sc = new String[colorChooserSelectedColors.size()];
 		i = 0;
-		for(LEGOColor color: selectedColors)
+		for(LEGOColor color: colorChooserSelectedColors)
 			sc[i++] = color.getName();
 		model.set(BrickGraphicsState.SelectedColors, sc);
 	}
 
 	public static enum ShownID {
-		NONE("None"), ID("Rebrickable ID"), LDRAW("LDraw IDs"), BRICKLINK("Bricklink IDs"), INCREMENTAL("Incremental number");
+		NONE("None"), ID("Rebrickable ID"), LDRAW("LDraw IDs"), BRICKLINK("Bricklink IDs"), INCREMENTAL("Incremental number"), LEGO("LEGO/LDD ID");
 
 		public final String displayName;
 		private ShownID(String displayName) {

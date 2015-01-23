@@ -21,7 +21,8 @@ public class MainMenu extends JMenuBar {
 		fileMenu.add(MosaicIO.createOpenAction(model, mw));
 		fileMenu.add(MosaicIO.createSaveAction(model, mw));
 		fileMenu.add(MosaicIO.createSaveAsAction(model, mw));
-		fileMenu.add(MosaicIO.createExportAction(model, mw));
+		fileMenu.add(new ExportLDR(model, mw));
+		fileMenu.add(new ExportLXF(model, mw));
 		fileMenu.add(mw.getPrintController().createPrintAction());
 		fileMenu.addSeparator();
 		fileMenu.add(new ExitAction(model));
@@ -44,7 +45,9 @@ public class MainMenu extends JMenuBar {
 		helpMenu.setMnemonic('H');
 		helpMenu.add(new HelpLinkAction(mw, MainWindow.HELP_URL));
 		helpMenu.addSeparator();
-		helpMenu.add(AboutDialog.createAction(mw, MainWindow.APP_NAME, MainWindow.APP_VERSION, Icons.floydSteinberg(64), Icons.floydSteinberg(Icons.SIZE_SMALL)));
+		String appName = MainWindow.APP_NAME + " (" + MainWindow.APP_NAME_SHORT + ")";
+		String appVersion = MainWindow.APP_VERSION;
+		helpMenu.add(AboutDialog.createAction(mw, appName, appVersion, Icons.floydSteinberg(64), Icons.floydSteinberg(Icons.SIZE_SMALL)));
 		
 		// this menu bar:
 		add(fileMenu);

@@ -10,7 +10,6 @@ import javax.swing.filechooser.FileFilter;
 import io.*;
 import icon.*;
 import mosaic.ui.*;
-import bricks.LDRPrinter;
 import java.util.*;
 
 /**
@@ -22,7 +21,6 @@ import java.util.*;
 public class MosaicIO {
 	public static final String MOSAIC_SUFFIX = "mosaic";
 	public static final String[] HTML_SUFFIXES = {"htm", "html", "xhtml"};
-	public static final String LDR_SUFFIX = "ldr";
 	private static String[] IMG_SUFFIXES = null;
 
 	public static void saveMosaic(Model<BrickGraphicsState> model, BufferedImage image, File file) throws IOException {
@@ -34,10 +32,6 @@ public class MosaicIO {
 		ImageIO.write(image, suffix((File)model.get(BrickGraphicsState.Image)), fos);
 		oos.close();
 		fos.close();
-	}
-
-	public static void saveLDR(BrickedView brickedView, File file) throws IOException {
-		new LDRPrinter(brickedView).printTo(file);		
 	}
 
 	public static void saveImage(BufferedImage bricked, File file) throws IOException {
@@ -56,8 +50,6 @@ public class MosaicIO {
 			fis.close();
 			parent.mosaicLoaded(img);
 			break;
-		case ldr:
-			throw new IOException("Cannont load ldr files. Only export to them.");
 		case img:
 			changingModel.set(BrickGraphicsState.Image, file);
 			//changingModel.set(BrickGraphicsState.ImageType, suffix(file));
@@ -125,13 +117,30 @@ public class MosaicIO {
 		return open;
 	}
 
+	public static Action createLDDXMLFileOpenAction(final JDialog parent, final JTextField tf) {
+		final JFileChooser fileChooser = new JFileChooser();
+		Action a = new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				FileNameExtensionFilter filter = new FileNameExtensionFilter("ldraw.xml", "xml");
+				fileChooser.setFileFilter(filter);
+				fileChooser.setMultiSelectionEnabled(false);
+				
+				int retVal = fileChooser.showOpenDialog(parent);
+				if(retVal == JFileChooser.APPROVE_OPTION) {
+					tf.setText(fileChooser.getSelectedFile().getAbsolutePath());
+				}
+			}
+		};
+
+		return a;
+	}
+
 	public static Action createHtmlFileOpenAction(final JDialog parent, final JTextField tf) {
 		final JFileChooser fileChooser = new JFileChooser();
 		Action a = new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				fileChooser.setCurrentDirectory(null);
-				
 				FileNameExtensionFilter filter = new FileNameExtensionFilter("HTML file (website)", HTML_SUFFIXES);
 				fileChooser.setFileFilter(filter);
 				fileChooser.setMultiSelectionEnabled(false);
@@ -173,7 +182,7 @@ public class MosaicIO {
 		return save;
 	}
 	
-	private static File ensureSuffix(File file, String suffix) {
+	public static File ensureSuffix(File file, String suffix) {
 		if(!file.isDirectory() && suffix(file).equals(suffix))
 			return file;
 		return new File(file.getParent(), file.getName() + "." + suffix);
@@ -218,60 +227,6 @@ public class MosaicIO {
 		return saveAs;
 	}
 	
-	public static Action createExportAction(final Model<BrickGraphicsState> currentModel, final MainWindow parent) {
-		File currentImage = (File)currentModel.get(BrickGraphicsState.Image);
-		final JFileChooser fileChooser = new JFileChooser(currentImage.getParentFile());
-		
-		for(FileFilter filter : fileChooser.getChoosableFileFilters())
-			fileChooser.removeChoosableFileFilter(filter);
-		/*for(String imgType : ImageIO.getWriterFileSuffixes()) {
-			if(imgType.equals("jpeg"))
-				continue; // confuses when there is both jpeg and jpg.
-			fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("Image, " + imgType, imgType));
-		}*/
-		fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("Model, ." + LDR_SUFFIX, LDR_SUFFIX));
-
-		fileChooser.setMultiSelectionEnabled(false);
-		fileChooser.setName("Export");
-		fileChooser.setSelectedFile(currentImage);
-
-		Action export = new AbstractAction() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				int retVal = fileChooser.showDialog(parent, "Export mosaic to LDraw");
-				if(retVal == JFileChooser.APPROVE_OPTION) {
-					File file = fileChooser.getSelectedFile();
-					FileNameExtensionFilter fileFilter = (FileNameExtensionFilter)fileChooser.getFileFilter();
-					String type = fileFilter.getExtensions()[0];
-					file = ensureSuffix(file, type);
-					
-					try {
-						if(type.equals(LDR_SUFFIX)) {
-							saveLDR(parent.getBrickedView(), file);
-						}
-						else {
-							saveImage(parent.getFinalImage(), file);
-						}
-					} catch (Exception e1) {
-						String message = "An error ocurred while saving file " + file.getName() + "\n" + e1.getMessage();
-						JOptionPane.showMessageDialog(parent, message, "Error when saving file", JOptionPane.ERROR_MESSAGE);
-						e1.printStackTrace();
-					}
-				}
-			}
-		};
-
-		export.putValue(Action.SHORT_DESCRIPTION, "Export mosaic as an LDraw model.");
-		export.putValue(Action.SMALL_ICON, Icons.get(16, "fileexport"));
-		export.putValue(Action.LARGE_ICON_KEY, Icons.get(32, "fileexport"));
-		export.putValue(Action.NAME, "Export mosaic to LDraw");
-		export.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_E);
-		export.putValue(Action.DISPLAYED_MNEMONIC_INDEX_KEY, "Export mosaic to LDraw".indexOf('E'));
-		export.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_DOWN_MASK));
-
-		return export;
-	}
-
 	public static String suffix(File file) {
 		if(file.isDirectory())
 			throw new IllegalArgumentException("Directories don't have a suffix: " + file);
@@ -281,15 +236,12 @@ public class MosaicIO {
 	}
 
 	private static enum FileType {
-		mosaic, ldr, img;
+		mosaic, img;
 
 		public static FileType get(File file) {
 			String suffix = suffix(file).toLowerCase();
 			if(suffix.equals(MOSAIC_SUFFIX)) {
 				return mosaic;
-			}
-			else if(suffix.equals(LDR_SUFFIX)) {
-				return ldr;
 			}
 			else {
 				ensureIMG_SUFFIXES();

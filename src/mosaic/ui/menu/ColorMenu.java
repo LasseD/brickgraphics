@@ -22,6 +22,7 @@ public class ColorMenu extends JMenu implements ChangeListener {
 	public ColorMenu(ColorSettingsDialog csd, final ColorController cc) {
 		super("Colors");
 		this.cc = cc;
+		cc.addChangeListener(this);
 		setDisplayedMnemonicIndex(1);
 		setMnemonic('o');
 		add(new ShowColorOptionsAction(csd));
@@ -59,6 +60,7 @@ public class ColorMenu extends JMenu implements ChangeListener {
 	}
 	
 	private void updateColorTextMenu() {
+		colorTextMenu.removeAll();
 		// Color names:
 		ButtonGroup names = new ButtonGroup();
 		for(final ColorController.ShownName shownName : ColorController.ShownName.values()) {
@@ -96,7 +98,7 @@ public class ColorMenu extends JMenu implements ChangeListener {
 
 	@Override
 	public void stateChanged(ChangeEvent e) {
-		if(e.getSource() != null && e.getSource() != this)
+		if(e != null && e.getSource() != this)
 			updateColorTextMenu();
 	}
 }
