@@ -43,8 +43,13 @@ public class LDDXMLParser implements ColorSheetParserI {
 				continue;				
 			}
 			LEGOColor color = map.get(ldrawID);
+			map.remove(ldrawID);
 			color.setIdLEGO(legoID);
 			out.add(color.toDelimitedString());
+		}
+		// remaining colors:
+		for(LEGOColor color : map.values()) {
+			out.add(color.toDelimitedString());			
 		}
 		
 		return out;

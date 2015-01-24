@@ -30,6 +30,8 @@ public class AboutDialog extends JDialog {
 		add(topLabel, BorderLayout.WEST);
 		
 		StringBuffer sb = new StringBuffer();
+		sb.append("Software: " + programName + "\n");
+		sb.append("Version: " + version + "\n\n");
 		
 		try {
 			Scanner scanner = new Scanner(new File(FILE_NAME));
@@ -38,8 +40,6 @@ public class AboutDialog extends JDialog {
 			}			
 		}
 		catch(IOException e) {
-			sb.append("Software: " + programName + "\n");
-			sb.append("Version: " + version + "\n");
 			sb.append("Author: Lasse Deleuran\n");
 			sb.append("Contact: lassedeleuran@gmail.com\n");
 			sb.append("Warning: " + FILE_NAME + " could not be read from the file system!\n");

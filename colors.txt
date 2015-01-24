@@ -85,7 +85,6 @@
 151|Very Light Bluish Gray|#e6e3e0|398|64|2004|2014|Light stone grey, LGH. ST. GREY|151|99|LtStone|208
 212|Bright Light Blue|#9fc3e9|259|86|2003|2014|Light Royal blue, LGH. ROY. BLUE|212|105|LtRoyalBlue, BtLtBlue|212
 216|Rust|#b31004|18|5|1997|2013|Rust|216|27|Rust|216
-6|Brown|#583927|9485|987|1974|2014|Earth Orange, Sand Yellow Metallic, EARTH-ORA, MET. EAR.ORA|6|8|OldBrown|217
 5|Dark Pink|#c870a0|2737|358|1994|2015|Bright Purple, BR. PURPLE|5|47|DkPink|221
 29|Bright Pink|#e4adc8|2709|255|2003|2015|Light Purple, LGH. PURPLE|29|104|BtPink|222
 77|Light Pink|#fecccf|14|11|1994|2007|Light Pink|77|56|ParaPink, LtPink|223
@@ -100,12 +99,27 @@
 297|Pearl Gold|#aa7f2e|8675|704|2002|2015|Warm Gold, W.GOLD|297|115|PearlGold|297
 80|Metallic Silver|#a5a9b4|2896|539|1957|2015|C.SILVER, DR. L, SILVER INK|80|67|MetallicSilver|298
 82|Metallic Gold|#dbac34|348|139|1997|2014|W.GOLD, DR.LA., GOLD INK|82|65|MetallicGold|299
-117|Glitter Trans-Clear|#ffffff|11|7|2003|2005|Transparent Glitter, TR.W.GLITTER|117|101|ClearGlitter|304
 308|Dark Brown|#352100|4984|550|2002|2014|Dark Brown, DK. BROWN|308|120|DkBrown|308
-26|Magenta|#923978|1165|153|2002|2015|Bright reddish violet, BR.RED-VIOL.|26|71|Magenta|309
 334|Chrome Gold|#bba53d|1607|254|1989|2014|Metalized Gold|334|21|ChromeGold|310
 35|Trans-Bright Green|#d9e4a7|586|148|2003|2015|Transparent Bright Yellowish Green, Transparent Bright Green, TR. BR. YEL GR, TR. BR. GREEN|35|108|TrBtGreen|311
 86|Dark Flesh|#7c503a|209|24|2004|2014|BROWN|86|91|DkFlesh|312
 148|Pearl Dark Gray|#575857|1671|415|2002|2014|Titanium Metallic, Mettalic Dark Grey, TITAN. METAL., MET.DK.GREY|83, 148|77|PearlDkGray|316
 321|Dark Azure|#78bc9|493|78|2011|2014|Dark Azur|321|153|DkAzure|321
 323|Light Aqua|#adc3c0|253|54|2011|2014|Aqua|323|152|LtAqua|323
+158|Yellowish Green|#dfeea5|24|9|2012|2014|Spring Yellow Green, SPR. YELL. GREE||158||-1
+30|Medium Lavender|#ac78ba|914|89|2005|2015|Medium Lavender, MEDIUM LAVENDEL|30|157|MdLavender|-1
+31|Lavender|#e1d5ed|111|32|2011|2014|Lavender|31|154|Lavender|-1
+32|Trans-Black IR Lens|#635f52|0|0|0|0||32|||-1
+60|Chrome Antique Brass|#645a4c|30|14|2001|2005||60|57|ChromeBrass|-1
+61|Chrome Blue|#6c96bf|44|17|1998|2006||61|52|ChromeBlue|-1
+62|Chrome Green|#3cb371|2|2|1999|1999||62|64|ChromeGreen|-1
+63|Chrome Pink|#aa4d8e|32|21|2001|2007||63|82|ChromePink|-1
+64|Chrome Black|#1b2a34|3|1|2009|2009||64|122|ChromeBlack|-1
+75|Speckle Black-Copper|#0|7|3|2006|2006|COP. DIF.|75|116|BlackCopperGlitter|-1
+76|Speckle DBGray-Silver|#635f61|9|4|2006|2006||76|117|DkStoneGlitter|-1
+84|Medium Dark Flesh|#cc702a|2425|228|2010|2015|Medium Nougat, M. NOUGAT|84|150|MdDkFlesh|-1
+132|Speckle Black-Silver|#0|171|43|2005|2014|Black Glitter, CO.SILVER DIF|132|111|BlackGlitter|-1
+322|Medium Azure|#36aebf|1444|166|2010|2015|Medium Azure, MEDIUM AZUR|322|156|MdAzure|-1
+326|Olive Green|#9b9a5a|2111|114|2012|2014|Olive Green, OLIVE GREEN|326|155|OliveGreen|-1
+366|Earth Orange|#fa9c1c|68|52|1982|2012|Dark Nougat, L.ORABROWN, DARK NOUGAT|366|29|EarthOrange|-1
+383|Chrome Silver|#e0e0e0|2500|439|1977|2014|Metalized Silver|383|22|ChromeSilver|-1
