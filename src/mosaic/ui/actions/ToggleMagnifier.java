@@ -4,13 +4,13 @@ import java.awt.event.*;
 
 import javax.swing.*;
 import icon.*;
-import mosaic.controllers.MagnifierController;
+import mosaic.controllers.*;
 
 public class ToggleMagnifier extends AbstractAction {
-	private MagnifierController magnifier;
+	private UIController controller;
 	
-	public ToggleMagnifier(MagnifierController magnifier) {
-		this.magnifier = magnifier;
+	public ToggleMagnifier(UIController c) {
+		this.controller = c;
 
 		putValue(SHORT_DESCRIPTION, "Toggle the magnifier.");
 		putValue(Action.SMALL_ICON, Icons.get(Icons.SIZE_SMALL, "zoom"));
@@ -23,6 +23,6 @@ public class ToggleMagnifier extends AbstractAction {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		magnifier.flipEnabled();
+		controller.flipShowMagnifier();
 	}
 }

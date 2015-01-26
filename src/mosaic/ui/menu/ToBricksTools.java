@@ -4,7 +4,6 @@ import icon.*;
 import icon.ToBricksIcon.ToBricksIconType;
 import mosaic.ui.*;
 import javax.swing.*;
-
 import java.awt.Insets;
 import java.awt.event.*;
 import io.*;
@@ -12,10 +11,8 @@ import javax.swing.event.*;
 import mosaic.io.*;
 import transforms.*;
 import ui.IconizedTextfield;
-
 import java.util.*;
 import bricks.*;
-import mosaic.controllers.*;
 
 public class ToBricksTools implements ChangeListener, ModelSaver<BrickGraphicsState> {
 	private JButton[] toBricksTypeButtons;
@@ -29,18 +26,16 @@ public class ToBricksTools implements ChangeListener, ModelSaver<BrickGraphicsSt
 	private ToBricksType toBricksType;
 	private HalfToneType halfToneType;
 	private boolean sizeChoiceFromWidth;
-	private ColorChooserDialog colorChooser;
 	private int propagationPercentage;
 	private volatile boolean uiReady;
 	
-	public ToBricksTools(final JFrame parent, final Model<BrickGraphicsState> model, ColorController cc) {
+	public ToBricksTools(final MainWindow mw, final Model<BrickGraphicsState> model) {
 		uiReady = false;
 		model.addModelSaver(this);
-		cc.addChangeListener(this);
+		mw.getColorController().addChangeListener(this);
 
 		reloadModel(model);
 		listeners = new LinkedList<ChangeListener>();
-		colorChooser = new ColorChooserDialog(parent, cc);
 		toBricksTypeButtons = new JButton[ToBricksType.values().length];
 
 		SwingUtilities.invokeLater(new Runnable() {			
@@ -219,12 +214,6 @@ public class ToBricksTools implements ChangeListener, ModelSaver<BrickGraphicsSt
 	
 	public void addChangeListener(ChangeListener listener) {
 		listeners.add(listener);
-	}
-	
-	public ColorChooserDialog getColorChooser() {
-		if(colorChooser == null)
-			throw new IllegalStateException();
-		return colorChooser;
 	}
 	
 	@Override

@@ -1,9 +1,8 @@
 package mosaic.ui.actions;
 
 import java.awt.event.*;
-
 import javax.swing.*;
-import mosaic.ui.prepare.*;
+import mosaic.ui.*;
 import icon.*;
 
 public class ToggleCrop extends AbstractAction {

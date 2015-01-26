@@ -8,7 +8,6 @@ import ui.actions.*;
 import mosaic.io.*;
 import mosaic.ui.*;
 import mosaic.ui.actions.*;
-import mosaic.ui.prepare.*;
 
 public class MainMenu extends JMenuBar {
 	private static final long serialVersionUID = 3921145264492575680L;
@@ -36,8 +35,8 @@ public class MainMenu extends JMenuBar {
 		viewMenu.add(new ToggleCrop(ipv));
 		viewMenu.add(new ToggleFilters(ipv));
 		viewMenu.addSeparator();
-		viewMenu.add(new ToggleColorChooser(bv.getToolBar().getColorChooser()));
-		viewMenu.add(new ToggleMagnifier(bv.getMagnifierController()));
+		viewMenu.add(new ToggleColorChooser(mw.getColorChooser()));
+		viewMenu.add(new ToggleMagnifier(mw.getUIController()));
 
 		//Help menu:
 		JMenu helpMenu = new JMenu("Help");
@@ -53,7 +52,7 @@ public class MainMenu extends JMenuBar {
 		add(fileMenu);
 		add(viewMenu);
 		add(new ColorMenu(csd, mw.getColorController()));
-		add(new MagnifierMenu(bv.getMagnifierController()));
+		add(new MagnifierMenu(bv.getMagnifierController(), mw.getUIController()));
 		add(helpMenu);
 	}
 }

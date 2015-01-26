@@ -10,13 +10,11 @@ import java.beans.PropertyChangeListener;
 import java.io.*;
 import javax.swing.*;
 import javax.swing.event.*;
-
 import colors.parsers.ColorSheetParser;
 import mosaic.controllers.*;
 import mosaic.io.*;
 import mosaic.controllers.PrintController;
 import mosaic.ui.menu.*;
-import mosaic.ui.prepare.*;
 
 /**
  * @author LD
@@ -35,8 +33,11 @@ public class MainWindow extends JFrame implements ChangeListener, ModelSaver<Bri
 	private BufferedImage image;
 	private JSplitPane splitPane;
 	private Model<BrickGraphicsState> model;
+	private SaveDialog saveDialog;
+	private ColorChooserDialog colorChooser;
 
 	private MagnifierController magnifierController;
+	private UIController uiController;
 	private ColorController colorController;
 	private PrintController printController;
 
@@ -48,8 +49,11 @@ public class MainWindow extends JFrame implements ChangeListener, ModelSaver<Bri
 		model.addModelSaver(this);
 		
 		colorController = ColorController.instance(model);
-		magnifierController = new MagnifierController(model);
-		printController = new PrintController(model, this);
+		uiController = new UIController(model);
+		magnifierController = new MagnifierController(model, uiController);
+		printController = new PrintController(model, this);		
+		saveDialog = new SaveDialog(this);
+		saveDialog.setParentFolder(getFile().getParentFile());
 		
 		System.out.println("Created controllers after " + (System.currentTimeMillis()-startTime) + "ms.");
 
@@ -57,7 +61,7 @@ public class MainWindow extends JFrame implements ChangeListener, ModelSaver<Bri
 		imagePreparingView.addChangeListener(this);
 		System.out.println("Created left view after " + (System.currentTimeMillis()-startTime) + "ms.");
 		
-		brickedView = new BrickedView(this, model, magnifierController, colorController);
+		brickedView = new BrickedView(this, model);
 		System.out.println("Created right view after " + (System.currentTimeMillis()-startTime) + "ms.");
 
 		addWindowListener(new WindowAdapter() {
@@ -79,7 +83,7 @@ public class MainWindow extends JFrame implements ChangeListener, ModelSaver<Bri
 			}
 			@Override
 			public void ancestorResized(HierarchyEvent e) {
-				updateModel();				
+				updateModel();
 			}			
 			private void updateModel() {
 				int state = MainWindow.this.getExtendedState();
@@ -108,8 +112,9 @@ public class MainWindow extends JFrame implements ChangeListener, ModelSaver<Bri
 		splitPane.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY, new PropertyChangeListener() {			
 			@Override
 			public void propertyChange(PropertyChangeEvent evt) {
-				imagePreparingView.setVisible(splitPane.getDividerLocation() >= getMinDividerLocation());
-				brickedView.setVisible(splitPane.getDividerLocation() <= getMaxDividerLocation());
+				int dividerLocation = splitPane.getDividerLocation();
+				imagePreparingView.setVisible(dividerLocation >= getMinDividerLocation());
+				brickedView.setVisible(dividerLocation <= getMaxDividerLocation());
 				brickedView.getToolBar().update();
 			}
 		});
@@ -130,12 +135,13 @@ public class MainWindow extends JFrame implements ChangeListener, ModelSaver<Bri
 			public void run() {
 				ColorSettingsDialog csd = new ColorSettingsDialog(MainWindow.this, colorController);
 
+				colorChooser = new ColorChooserDialog(MainWindow.this); // Must be made before ribbon!
 				Ribbon ribbon = new Ribbon(MainWindow.this);
 				brickedView.getToolBar().addComponents(ribbon, true);		
 				add(ribbon, BorderLayout.NORTH);
 				setJMenuBar(new MainMenu(MainWindow.this, model, csd));
 				setIconImage(Icons.get(32, "icon").getImage());
-				new MagnifierWindow(MainWindow.this, magnifierController, colorController); // Do your own thing little window.
+				new MagnifierWindow(MainWindow.this); // Do your own thing little window.
 				if(colorController.usesBackupColors()) {
 					JOptionPane.showMessageDialog(MainWindow.this, "The file " + ColorSheetParser.COLORS_FILE + " could not be read.\nBackup colors are used.\nTo get all the functionality of this program, please make sure that the file exists and that the program is allowed to read the file.\nThis also applies to the other files and folders of the program.", "Error reading file", JOptionPane.WARNING_MESSAGE);
 				}
@@ -145,12 +151,22 @@ public class MainWindow extends JFrame implements ChangeListener, ModelSaver<Bri
 		System.out.println("LDDMC main window operational after " + (System.currentTimeMillis()-startTime) + "ms.");
 	}
 	
-	public int getMinDividerLocation() {
+	public ColorChooserDialog getColorChooser() {
+		if(colorChooser == null)
+			throw new IllegalStateException();
+		return colorChooser;
+	}
+	
+	private int getMinDividerLocation() {
 		return Math.max(32, imagePreparingView.getPreferredSize().width);
 	}
 	
-	public int getMaxDividerLocation() {
+	private int getMaxDividerLocation() {
 		return splitPane.getSize().width - splitPane.getDividerSize() - Math.max(32, brickedView.getPreferredSize().width) - 2;
+	}
+	
+	public SaveDialog getSaveDialog() {
+		return saveDialog;
 	}
 	
 	public static void main(String[] args) {
@@ -259,6 +275,10 @@ public class MainWindow extends JFrame implements ChangeListener, ModelSaver<Bri
 	
 	public MagnifierController getMagnifierController() {
 		return magnifierController;
+	}
+
+	public UIController getUIController() {
+		return uiController;
 	}
 
 	@Override

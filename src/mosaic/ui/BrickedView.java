@@ -21,11 +21,11 @@ public class BrickedView extends JComponent implements ChangeListener {
 	private ColorController colorController;
 	private JComponent mainComponent;
 	
-	public BrickedView(JFrame parent, Model<BrickGraphicsState> model, final MagnifierController magnifierController, ColorController colorController) {
-		this.magnifierController = magnifierController;
-		this.colorController = colorController;
+	public BrickedView(MainWindow mw, Model<BrickGraphicsState> model) {
+		magnifierController = mw.getMagnifierController();
+		colorController = mw.getColorController();
 		// UI:		
-		toolBar = new ToBricksTools(parent, model, colorController);
+		toolBar = new ToBricksTools(mw, model);
 		toolBar.addChangeListener(magnifierController);
 		magnifierController.addChangeListener(this);
 

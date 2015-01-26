@@ -38,9 +38,14 @@ public enum BrickGraphicsState implements ModelState {
 	PrintFontSize(14f),
 	
 	// Magnifier:
-	//MagnifierShow(false),
 	MagnifierShowLegend(true),
 	MagnifierShowColors(true),
+	MagnifierShowTotals(true),
+	MagnifierShow(false),
+	
+	// Color Chooser:
+	ColorDistributionChartShow(true),
+	
 	MagnifierSize(new Dimension(4, 4)),
 	
 	// Prepare:

@@ -29,6 +29,7 @@ public class PrintController implements Printable, ModelSaver<BrickGraphicsState
 	private PrintDialog printDialog;
 	private PageFormat pageFormat;
 	private MagnifierController magnifierController;
+	private UIController uiController;
 	private ColorController colorController;
 	// Model state:
 	private boolean coverPageShow, coverPageShowFileName, coverPageShowLegend, showLegend, showPageNumber;
@@ -460,13 +461,13 @@ public class PrintController implements Printable, ModelSaver<BrickGraphicsState
 		basicUnitRect.y = (page / numPagesWidth)*basicUnitRect.height;
 		
 		if(tbTransform.getToBricksType() == ToBricksType.SNOT_IN_2_BY_2) {
-			if(magnifierController.showColors())
+			if(uiController.showColors())
 				used.addAll(tbTransform.drawLastColors(g2, basicUnitRect, basicUnitWidth, basicUnitHeight, shownMagnifierSize, 0));
 			else
 				used.addAll(tbTransform.drawLastInstructions(g2, basicUnitRect, basicUnitWidth, basicUnitHeight, shownMagnifierSize));
 		}
 		else {
-			if(magnifierController.showColors()) {
+			if(uiController.showColors()) {
 				int numStuds = 0;
 				if(tbTransform.getToBricksType() == ToBricksType.STUD_FROM_TOP)
 					numStuds = 1;

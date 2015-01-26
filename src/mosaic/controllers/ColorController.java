@@ -296,8 +296,9 @@ public class ColorController implements ModelSaver<BrickGraphicsState> {
 			e.printStackTrace();
 			return false;
 		}
-		reloadColorsFile(toMoalizeOnError);
 		loadRebrickableURL = url;
+		reloadColorsFile(toMoalizeOnError);
+		reloadColorGroups(true); // Current implementation requires the groups to be reloaded.
 		return true;
 	}
 	public String getLoadRebrickableFile() {
@@ -316,6 +317,7 @@ public class ColorController implements ModelSaver<BrickGraphicsState> {
 		}
 		loadRebrickableFile = file;
 		reloadColorsFile(toMoalizeOnError);
+		reloadColorGroups(true); // Current implementation requires the groups to be reloaded.
 		return true;
 	}
 	public boolean loadLDDXMLFile(String file, JDialog toMoalizeOnError) {

@@ -1,13 +1,9 @@
 package mosaic.ui.menu;
 
 import javax.swing.*;
-
-import ui.WrapLayout;
-import mosaic.controllers.MagnifierController;
-import mosaic.ui.BrickedView;
-import mosaic.ui.MainWindow;
+import ui.*;
+import mosaic.ui.*;
 import mosaic.ui.actions.*;
-import mosaic.ui.prepare.ImagePreparingView;
 
 public class Ribbon extends JToolBar {
 	public Ribbon(MainWindow mw) {
@@ -15,14 +11,12 @@ public class Ribbon extends JToolBar {
 		setLayout(new WrapLayout(0, 0));
 
 		ImagePreparingView imagePreparingView = mw.getImagePreparingView();
-		BrickedView brickedView = mw.getBrickedView();
-		MagnifierController magnifierController = brickedView.getMagnifierController();
 		
 		add(new ToggleCrop(imagePreparingView));
 		add(new ToggleFilters(imagePreparingView));
 		add(new ToggleDivider(mw));
-		add(new ToggleColorChooser(brickedView.getToolBar().getColorChooser()));
-		add(new ToggleMagnifier(magnifierController));
+		add(new ToggleColorChooser(mw.getColorChooser()));
+		add(new ToggleMagnifier(mw.getUIController()));
 	}
 	
 	/*private static JButton makeButton(Action a) {

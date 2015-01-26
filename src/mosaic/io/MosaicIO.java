@@ -52,7 +52,6 @@ public class MosaicIO {
 			break;
 		case img:
 			changingModel.set(BrickGraphicsState.Image, file);
-			//changingModel.set(BrickGraphicsState.ImageType, suffix(file));
 			BufferedImage read = ImageIO.read(file);
 			//System.out.println(read);
 			if(read.getType() == BufferedImage.TYPE_CUSTOM) {
@@ -183,39 +182,34 @@ public class MosaicIO {
 	}
 	
 	public static File ensureSuffix(File file, String suffix) {
-		if(!file.isDirectory() && suffix(file).equals(suffix))
+		if(!file.isDirectory() && suffix(file).equals(suffix)) {
 			return file;
+		}
 		return new File(file.getParent(), file.getName() + "." + suffix);
 	}
 
 	public static Action createSaveAsAction(final Model<BrickGraphicsState> currentModel, final MainWindow parent) {
-		File currentImage = (File)currentModel.get(BrickGraphicsState.Image);
-		final JFileChooser fileChooser = new JFileChooser(currentImage.getParentFile());
-		
-		for(FileFilter filter : fileChooser.getChoosableFileFilters())
-			fileChooser.removeChoosableFileFilter(filter);
-		fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("." + MOSAIC_SUFFIX, MOSAIC_SUFFIX));
-		fileChooser.setMultiSelectionEnabled(false);
-		fileChooser.setSelectedFile(ensureSuffix(currentImage, MOSAIC_SUFFIX));
+		final FileFilter ff = new FileNameExtensionFilter("." + MOSAIC_SUFFIX, MOSAIC_SUFFIX);
 
 		Action saveAs = new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				int retVal = fileChooser.showSaveDialog(parent);
-				if(retVal == JFileChooser.APPROVE_OPTION) {
-					File file = ensureSuffix(fileChooser.getSelectedFile(), MOSAIC_SUFFIX);
+				File file = parent.getSaveDialog().showSaveDialog("Save the mosaic file", ff);
+				
+				if(file != null) {
+					file = ensureSuffix(file, MOSAIC_SUFFIX);
 					
 					try {
 						saveMosaic(currentModel, parent.getInImage(), file);
 						currentModel.set(BrickGraphicsState.Image, file);
+						JOptionPane.showMessageDialog(parent,  "Mosaic file saved sucessfully!", "File saved",JOptionPane.INFORMATION_MESSAGE);
 					} catch (Exception e1) {
 						String message = "An error ocurred while saving file " + file.getName() + "\n" + e1.getMessage();
 						JOptionPane.showMessageDialog(parent, message, "Error when saving file", JOptionPane.ERROR_MESSAGE);
-					}
+					}	
 				}
 			}
 		};
-
 		saveAs.putValue(Action.SHORT_DESCRIPTION, "Save the mosaic to a given file.");
 		saveAs.putValue(Action.SMALL_ICON, Icons.get(16, "filesaveas"));
 		saveAs.putValue(Action.LARGE_ICON_KEY, Icons.get(32, "filesaveas"));
@@ -223,7 +217,7 @@ public class MosaicIO {
 		saveAs.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_A);
 		saveAs.putValue(Action.DISPLAYED_MNEMONIC_INDEX_KEY, "Save As".indexOf('A'));
 		saveAs.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
-
+		
 		return saveAs;
 	}
 	

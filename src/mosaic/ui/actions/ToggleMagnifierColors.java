@@ -4,13 +4,13 @@ import java.awt.event.*;
 
 import javax.swing.*;
 import icon.*;
-import mosaic.controllers.MagnifierController;
+import mosaic.controllers.*;
 
 public class ToggleMagnifierColors extends AbstractAction {
-	private MagnifierController magnifier;
+	private UIController controller;
 
-	public ToggleMagnifierColors(MagnifierController magnifier) {
-		this.magnifier = magnifier;
+	public ToggleMagnifierColors(UIController controller) {
+		this.controller = controller;
 
 		putValue(SHORT_DESCRIPTION, "Toggle colors in the magnifier.");
 		putValue(SMALL_ICON, Icons.showColors(Icons.SIZE_SMALL));
@@ -23,6 +23,6 @@ public class ToggleMagnifierColors extends AbstractAction {
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		magnifier.flipShowColors();
+		controller.flipShowColors();
 	}
 }

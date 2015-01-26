@@ -7,7 +7,7 @@ import java.io.*;
 import java.util.Random;
 import colors.*;
 import mosaic.controllers.ColorController;
-import mosaic.ui.prepare.*;
+import mosaic.ui.*;
 
 public class Icons {
 	public static final int SIZE_LARGE = 32;
@@ -92,6 +92,19 @@ public class Icons {
 				int[] xs = new int[]{0, 0, size};
 				int[] ys = new int[]{0, size, size/2};
 				g2.fillPolygon(xs,  ys, 3);
+			}
+		};		
+	}
+	
+	public static Icon totalsSymbol(final int size) {
+		return new BrickGraphicsIcon(size) {
+			@Override
+			public void paint(Graphics2D g2) {
+				g2.setColor(Color.BLACK);
+				g2.drawLine(0,  0, size-1, 0);
+				g2.drawLine(0,  0, size/2, size/2);
+				g2.drawLine(0, size-1, size/2, size/2);
+				g2.drawLine(0,  size-1, size, size-1);
 			}
 		};		
 	}
@@ -395,7 +408,6 @@ public class Icons {
 		return new BrickGraphicsIcon(size) {
 			@Override
 			public void paint(Graphics2D g2) {
-				Font origFont = g2.getFont();
 				int w = 8;
 				for(int y = 0; w*y < Math.min(colorGroups.length*w, size); y++) {
 					LEGOColor[] colors = colorGroups[y].getColors();
@@ -408,7 +420,6 @@ public class Icons {
 					g2.setColor(Color.LIGHT_GRAY);
 					g2.fillRect(w + 4, w*y + w/3 + 1, size-w-4, w/2);
 				}
-				g2.setFont(origFont);
 			}
 		};
 	}
@@ -440,11 +451,16 @@ public class Icons {
 			@Override
 			public void paint(Graphics2D g2) {
 				g2.setColor(Color.BLACK);
-				int q = size/4;
-				g2.drawLine(mid+q, 0, mid, q);
-				g2.drawLine(mid-q, 0, mid, q);
-				g2.drawLine(mid+q, size-1, mid, size-q);
-				g2.drawLine(mid-q, size-1, mid, size-q);
+				int q = size/8;
+				g2.drawRect(mid-q, mid-q, 2*q, 2*q);
+				g2.drawLine(mid, 0, mid, mid-q);
+				g2.drawLine(mid, mid+q, mid, size-1);
+				
+				g2.drawLine(mid, mid-q, mid-q, mid-2*q);
+				g2.drawLine(mid, mid-q, mid+q, mid-2*q);
+
+				g2.drawLine(mid, mid+q, mid-q, mid+2*q);
+				g2.drawLine(mid, mid+q, mid+q, mid+2*q);
 			}
 		};
 	}
@@ -453,11 +469,16 @@ public class Icons {
 			@Override
 			public void paint(Graphics2D g2) {
 				g2.setColor(Color.BLACK);
-				int q = size/4;
-				g2.drawLine(0, mid-q, q, mid);
-				g2.drawLine(0, mid+q, q, mid);
-				g2.drawLine(size-1, mid+q, size-q, mid);
-				g2.drawLine(size-1, mid-q, size-q, mid);
+				int q = size/8;
+				g2.drawRect(mid-q, mid-q, 2*q, 2*q);
+				g2.drawLine(0, mid, mid-q, mid);
+				g2.drawLine(mid+q, mid, size-1, mid);
+
+				g2.drawLine(mid-q, mid, mid-2*q, mid+q);
+				g2.drawLine(mid-q, mid, mid-2*q, mid-q);
+
+				g2.drawLine(mid+q, mid, mid+2*q, mid+q);
+				g2.drawLine(mid+q, mid, mid+2*q, mid-q);
 			}
 		};
 	}
@@ -466,7 +487,11 @@ public class Icons {
 			@Override
 			public void paint(Graphics2D g2) {
 				g2.setColor(Color.BLACK);
-				int q = size/4;
+				int q = size/8;
+				g2.drawRect(mid-q, mid-q, 2*q, 2*q);
+				g2.drawLine(mid, 0, mid, mid-q);
+				g2.drawLine(mid, mid+q, mid, size-1);
+
 				g2.drawLine(mid, 0, mid+q, q);
 				g2.drawLine(mid, 0, mid-q, q);
 				g2.drawLine(mid, size-1, mid+q, size-q);
@@ -479,11 +504,57 @@ public class Icons {
 			@Override
 			public void paint(Graphics2D g2) {
 				g2.setColor(Color.BLACK);
-				int q = size/4;
+				int q = size/8;
+				g2.drawRect(mid-q, mid-q, 2*q, 2*q);
+				g2.drawLine(0, mid, mid-q, mid);
+				g2.drawLine(mid+q, mid, size-1, mid);
+
 				g2.drawLine(0, mid, q, mid+q);
 				g2.drawLine(0, mid, q, mid-q);
 				g2.drawLine(size-1, mid, size-q, mid+q);
 				g2.drawLine(size-1, mid, size-q, mid-q);
+			}
+		};
+	}
+	
+	public static Icon pack(final int size) {
+		return new BrickGraphicsIcon(size) {
+			@Override
+			public void paint(Graphics2D g2) {
+				g2.setColor(Color.BLACK);
+				int q = size/8;
+				g2.drawRect(0,  0, size-1, size-1);
+				
+				g2.drawLine(mid, 0, mid, size-1);
+				g2.drawLine(0, mid, size-1, mid);
+				g2.drawLine(mid, 0, mid+q, q);
+				g2.drawLine(mid, 0, mid-q, q);
+				g2.drawLine(mid, size-1, mid+q, size-q);
+				g2.drawLine(mid, size-1, mid-q, size-q);
+				g2.drawLine(0, mid, q, mid+q);
+				g2.drawLine(0, mid, q, mid-q);
+				g2.drawLine(size-1, mid, size-q, mid+q);
+				g2.drawLine(size-1, mid, size-q, mid-q);
+			}
+		};
+	}
+	public static Icon colorDistributionChart(final int size) {
+		return new BrickGraphicsIcon(size) {
+			@Override
+			public void paint(Graphics2D g2) {
+				int angle = 0;
+				int angleAdd = 100;
+				for(LEGOColor color : colorGroups[0].getColors()) {
+					g2.setColor(color.getRGB());
+					g2.fillArc(0, 0, size, size, angle, angleAdd); 
+					angle += angleAdd;
+					angleAdd = Math.max(angleAdd-15, angleAdd*2/3);
+					if(angleAdd == 0)
+						break;
+				}
+				
+				g2.setColor(Color.BLACK);
+				g2.drawOval(0, 0, size-1, size-1);
 			}
 		};
 	}

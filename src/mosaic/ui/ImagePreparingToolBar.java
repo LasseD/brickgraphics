@@ -1,4 +1,4 @@
-package mosaic.ui.prepare;
+package mosaic.ui;
 
 import io.Model;
 import icon.*;

@@ -9,22 +9,23 @@ import javax.swing.event.*;
 import transforms.ToBricksTransform;
 import bricks.ToBricksType;
 import colors.LEGOColor;
-import mosaic.controllers.ColorController;
-import mosaic.controllers.MagnifierController;
+import mosaic.controllers.*;
 import mosaic.ui.ColorLegend;
 import mosaic.ui.MainWindow;
 import mosaic.ui.menu.*;
 
 public class MagnifierWindow extends JDialog implements ChangeListener {
 	private MagnifierController magnifierController;
+	private UIController uiController;
 	private MagnifierCanvas canvas;
 	private boolean everShown;
 	private ColorLegend legend;
 	private JSplitPane splitPane;
 
-	public MagnifierWindow(final MainWindow owner, final MagnifierController magnifierController, ColorController cc) {
+	public MagnifierWindow(final MainWindow owner) {
 		super(owner, "Magnifier", false);
-		this.magnifierController = magnifierController;
+		magnifierController = owner.getMagnifierController();
+		uiController = owner.getUIController();
 		everShown = false;
 		setAlwaysOnTop(false);
 		setFocusableWindowState(false);
@@ -36,9 +37,9 @@ public class MagnifierWindow extends JDialog implements ChangeListener {
 		
 		setLayout(new BorderLayout());
 		
-		add(new MagnifierToolBar(magnifierController), BorderLayout.NORTH);
+		add(new MagnifierToolBar(magnifierController, uiController), BorderLayout.NORTH);
 
-		legend = new ColorLegend(magnifierController, owner.getBrickedView(), cc);
+		legend = new ColorLegend(owner);
 		legend.setBackground(getBackground());
 		JScrollPane scrollPane = new JScrollPane(legend);
 		splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, canvas, scrollPane);
@@ -46,12 +47,11 @@ public class MagnifierWindow extends JDialog implements ChangeListener {
 				
 		// listener for key presses:
 		addKeyListener(magnifierController);
-		magnifierController.addChangeListener(legend);
 		magnifierController.addChangeListener(this);
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosed(WindowEvent e) {
-				magnifierController.flipEnabled();
+				uiController.flipShowMagnifier();
 			}			
 		});
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -94,13 +94,13 @@ public class MagnifierWindow extends JDialog implements ChangeListener {
 			Rectangle basicUnitRect = magnifierController.getCoreRect();
 			Set<LEGOColor> used;
 			if(tbTransform.getToBricksType() == ToBricksType.SNOT_IN_2_BY_2) {
-				if(magnifierController.showColors())
+				if(uiController.showColors())
 					used = tbTransform.drawLastColors(g2, basicUnitRect, basicUnitWidth, basicUnitHeight, shownMagnifierSize, 0);
 				else
 					used = tbTransform.drawLastInstructions(g2, basicUnitRect, basicUnitWidth, basicUnitHeight, shownMagnifierSize);
 			}
 			else {
-				if(magnifierController.showColors()) {
+				if(uiController.showColors()) {
 					int numStuds = 0;
 					if(tbTransform.getToBricksType() == ToBricksType.STUD_FROM_TOP)
 						numStuds = 1;
@@ -118,7 +118,7 @@ public class MagnifierWindow extends JDialog implements ChangeListener {
 	@Override
 	public void stateChanged(ChangeEvent e) {
 		setTitle(magnifierController.getDisplayPosition());
-		boolean visible = magnifierController.isEnabled();
+		boolean visible = uiController.showMagnifier();
 		if(!everShown && visible) {
 			pack();
 			Point rightOfOwner = new Point(getOwner().getLocation().x + getOwner().getWidth(), Math.max(0,  getOwner().getLocation().y));
@@ -130,7 +130,7 @@ public class MagnifierWindow extends JDialog implements ChangeListener {
 		setVisible(visible);
 
 		if(visible) {
-			if(!magnifierController.enableLegend()) {
+			if(!uiController.enableLegend()) {
 				splitPane.setDividerLocation(1.0);
 			}
 			else if(splitPane.getDividerLocation() > splitPane.getSize().height * 8 / 10){

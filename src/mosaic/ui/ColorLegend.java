@@ -10,18 +10,19 @@ import mosaic.controllers.*;
 import colors.LEGOColor;
 
 public class ColorLegend extends JList<LEGOColor.CountingLEGOColor> implements ChangeListener {
-	private MagnifierController magnifier;
 	private BrickedView brickedController;
 	private LEGOColor.CountingLEGOColor[] colors;
 	private ColorController cc;
+	private UIController uc;
 
-	public ColorLegend(MagnifierController magnifier, BrickedView brickedController, ColorController cc) {
-		this.cc = cc;
-		this.magnifier = magnifier;
-		this.brickedController = brickedController;
+	public ColorLegend(MainWindow mw) {
+		cc = mw.getColorController();
+		uc = mw.getUIController();
+		brickedController = mw.getBrickedView();
 		setAutoscrolls(true);
 		setCellRenderer(new CellRenderer());
 		setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+		mw.getMagnifierController().addChangeListener(this);
 	}
 
 	private class CellRenderer extends JLabel implements ListCellRenderer<LEGOColor.CountingLEGOColor> {
@@ -29,7 +30,12 @@ public class ColorLegend extends JList<LEGOColor.CountingLEGOColor> implements C
 		public JComponent getListCellRendererComponent(JList<? extends LEGOColor.CountingLEGOColor> list, 
 				final LEGOColor.CountingLEGOColor color, int index, boolean isSelected, boolean cellHasFocus) {
 			String identifier = cc.getNormalIdentifier(color.c);
-			setText((identifier == null ? "" : identifier + ". ") + (color.cnt > 0 ? ("TOTAL: " + color.cnt) : ""));
+			String text = "";
+			if(identifier != null)
+				text = identifier + ".";
+			if(uc.showTotals())
+				text += " TOTAL: " + color.cnt;
+			setText(text);
 			setIcon(new Icon() {
 				@Override
 				public int getIconHeight() {
@@ -66,7 +72,7 @@ public class ColorLegend extends JList<LEGOColor.CountingLEGOColor> implements C
 	}
 	
 	public void setHighlightedColors(Set<LEGOColor> highlights) {
-		if(!magnifier.enableLegend() || colors == null || highlights.isEmpty())
+		if(!uc.enableLegend() || colors == null || highlights.isEmpty())
 			return;
 		// Remove already selected indices:
 		int[] alreadySelected = getSelectedIndices();
@@ -90,7 +96,7 @@ public class ColorLegend extends JList<LEGOColor.CountingLEGOColor> implements C
 
 	@Override
 	public void stateChanged(ChangeEvent e) {
-		if(!magnifier.enableLegend())
+		if(!uc.enableLegend())
 			return;
 		colors = brickedController.getLegendColors();
 		setListData(colors);

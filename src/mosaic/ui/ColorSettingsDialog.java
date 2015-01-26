@@ -23,12 +23,7 @@ public class ColorSettingsDialog extends JDialog implements ChangeListener {
 		cc.addChangeListener(this);
 		setLocation(parent.getLocation());
 		
-		SwingUtilities.invokeLater(new Runnable() {			
-			@Override
-			public void run() {
-				setupUI();
-			}
-		});
+		setupUI();
 	}
 	
 	private void setupUI() {
@@ -64,7 +59,7 @@ public class ColorSettingsDialog extends JDialog implements ChangeListener {
 			JButton loadFileButton = new JButton("Load file");
 			loadFileButton.addActionListener(new ActionListener() {				
 				@Override
-				public void actionPerformed(ActionEvent arg0) {
+				public void actionPerformed(ActionEvent e) {
 					boolean ok = cc.loadColorsFromFile(tfLoadRebrickableFile.getText(), ColorSettingsDialog.this);
 					if(ok)
 						JOptionPane.showMessageDialog(ColorSettingsDialog.this, "Latest colors successfully read from file!", "Colors updated", JOptionPane.PLAIN_MESSAGE);

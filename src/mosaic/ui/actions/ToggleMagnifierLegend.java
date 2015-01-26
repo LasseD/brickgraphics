@@ -4,13 +4,13 @@ import java.awt.event.*;
 
 import javax.swing.*;
 import icon.*;
-import mosaic.controllers.MagnifierController;
+import mosaic.controllers.*;
 
 public class ToggleMagnifierLegend extends AbstractAction {
-	private MagnifierController magnifier;
+	private UIController controller;
 	
-	public ToggleMagnifierLegend(MagnifierController magnifier) {
-		this.magnifier = magnifier;
+	public ToggleMagnifierLegend(UIController controller) {
+		this.controller = controller;
 
 		putValue(Action.SHORT_DESCRIPTION, "Toggle the legend in the magnifier.");
 		putValue(Action.SMALL_ICON, Icons.colorLegend(Icons.SIZE_SMALL));
@@ -23,6 +23,6 @@ public class ToggleMagnifierLegend extends AbstractAction {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		magnifier.flipLegendEnabled();
+		controller.flipLegendEnabled();
 	}
 }

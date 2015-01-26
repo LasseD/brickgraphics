@@ -1,4 +1,4 @@
-package mosaic.ui.prepare;
+package mosaic.ui;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -13,9 +13,9 @@ import io.*;
 public class Cropper implements MouseListener, MouseMotionListener, ModelSaver<BrickGraphicsState> {
 	public static final int TOLERANCE = 3;
 
-	private Dimension mouseImage;
+	private Rectangle mouseImage;
 	private Drag state;
-	private Rectangle2D.Double unitRect;
+	private Rectangle2D.Double cropRect;
 	private Point lastPress;
 	private List<ChangeListener> listeners;
 	private boolean enabled;
@@ -23,7 +23,7 @@ public class Cropper implements MouseListener, MouseMotionListener, ModelSaver<B
 	public Cropper(Model<BrickGraphicsState> model) {
 		model.addModelSaver(this);
 		state = Drag.NONE;
-		unitRect = (Rectangle2D.Double)model.get(BrickGraphicsState.PrepareCrop);		
+		cropRect = (Rectangle2D.Double)model.get(BrickGraphicsState.PrepareCrop);		
 		enabled = (Boolean)model.get(BrickGraphicsState.PrepareCropEnabled);
 		lastPress = null;
 		listeners = new LinkedList<ChangeListener>();
@@ -46,22 +46,22 @@ public class Cropper implements MouseListener, MouseMotionListener, ModelSaver<B
 		listeners.add(listener);
 	}
 	
-	public Rectangle getCrop(Dimension picture) {
-		return getCrop(picture.width, picture.height);
+	public Rectangle getCrop(Rectangle r) {
+		return getCrop(r.x, r.y, r.width, r.height);
 	}
 		
-	public Rectangle getCrop(int pw, int ph) {
-		int rx = (int)Math.round(unitRect.x*pw);
-		rx = cut(rx, 0, pw);
+	public Rectangle getCrop(int x, int y, int w, int h) {
+		int rx = (int)Math.round(cropRect.x*w);
+		rx = cut(rx, 0, w);
 		
-		int ry = (int)Math.round(unitRect.y*ph);
-		ry = cut(ry, 0, ph);
+		int ry = (int)Math.round(cropRect.y*h);
+		ry = cut(ry, 0, h);
 		
-		int rw = (int)Math.round(unitRect.width*pw);
-		rw = cut(rw, 0, pw-rx);
+		int rw = (int)Math.round(cropRect.width*w);
+		rw = cut(rw, 0, w-rx);
 		
-		int rh= (int)Math.round(unitRect.height*ph);
-		rh = cut(rh, 0, ph-ry);
+		int rh= (int)Math.round(cropRect.height*h);
+		rh = cut(rh, 0, h-ry);
 
 		return new Rectangle(rx, ry, rw, rh);
 	}
@@ -85,7 +85,7 @@ public class Cropper implements MouseListener, MouseMotionListener, ModelSaver<B
 	}
 	
 	public BufferedImage pollute(BufferedImage in) {
-		Rectangle rect = getCrop(in.getWidth(), in.getHeight());
+		Rectangle rect = getCrop(0, 0, in.getWidth(), in.getHeight());
 
 		int inW = in.getWidth();
 		int outW = inW+4;
@@ -297,28 +297,28 @@ public class Cropper implements MouseListener, MouseMotionListener, ModelSaver<B
 		double uh = (double)r.height / mouseImage.height;
 
 		// fix unitRect for keeping scale/aspect ratio:
-		double scaleWH = unitRect.width / unitRect.height;
-		double scaleHW = unitRect.height / unitRect.width;
+		double scaleWH = cropRect.width / cropRect.height;
+		double scaleHW = cropRect.height / cropRect.width;
 		if(scaleX) {
-			double dX = (uy-unitRect.y)*scaleWH;
-			ux = unitRect.x+dX;
-			uw = unitRect.width-dX;
+			double dX = (uy-cropRect.y)*scaleWH;
+			ux = cropRect.x+dX;
+			uw = cropRect.width-dX;
 		}
 		else if(scaleY) {
-			double dY = (uw-unitRect.width)*scaleHW;
-			uy = unitRect.y-dY;
-			uh = unitRect.height+dY;			
+			double dY = (uw-cropRect.width)*scaleHW;
+			uy = cropRect.y-dY;
+			uh = cropRect.height+dY;			
 		}
 		else if(scaleW) {
-			double dW = (uh-unitRect.height)*scaleWH;
-			uw = unitRect.width+dW;			
+			double dW = (uh-cropRect.height)*scaleWH;
+			uw = cropRect.width+dW;			
 		}
 		else if(scaleH) {
-			double dH = (uw-unitRect.width)*scaleHW;
-			uh = unitRect.height+dH;			
+			double dH = (uw-cropRect.width)*scaleHW;
+			uh = cropRect.height+dH;			
 		}
 
-		unitRect = new Rectangle2D.Double(ux, uy, uw, uh);
+		cropRect = new Rectangle2D.Double(ux, uy, uw, uh);
 		
 		lastPress = p;
 		notifyListeners();
@@ -327,18 +327,18 @@ public class Cropper implements MouseListener, MouseMotionListener, ModelSaver<B
 	@Override
 	public void mouseMoved(MouseEvent e) {
 		Point p = e.getPoint();
-		p.translate(-2, -2);
+		p.translate(-2-mouseImage.x, -2);
 		if(mouseImage != null && state != (state = Drag.intersecting(p, getCrop(mouseImage))))
 			notifyListeners();
 	}
 
-	public void setMouseImage(BufferedImage image) {
-		this.mouseImage = new Dimension(image.getWidth(), image.getHeight());
+	public void setMouseImage(Rectangle r) {
+		this.mouseImage = r;
 	}
 
 	@Override
 	public void save(Model<BrickGraphicsState> model) {
-		model.set(BrickGraphicsState.PrepareCrop, unitRect);
+		model.set(BrickGraphicsState.PrepareCrop, cropRect);
 		model.set(BrickGraphicsState.PrepareCropEnabled, enabled);
 	}
 }

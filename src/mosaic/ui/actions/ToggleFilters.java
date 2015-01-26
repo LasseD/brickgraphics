@@ -5,7 +5,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import javax.swing.AbstractAction;
 import javax.swing.KeyStroke;
-import mosaic.ui.prepare.ImagePreparingView;
+import mosaic.ui.ImagePreparingView;
 import icon.*;
 
 public class ToggleFilters extends AbstractAction {

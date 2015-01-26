@@ -11,7 +11,7 @@ import javax.swing.*;
 import griddy.*;
 import griddy.zoom.*;
 
-public class Ruler implements DisplayComponent, MouseListener, MouseMotionListener, ZoomListener, Serializable {
+public class Ruler implements DisplayComponent, MouseListener, MouseMotionListener, ZoomListener {
 	private static final long serialVersionUID = 4846393336196503759L;
 	private BorderRuler brh, brv; // callback vars
 	

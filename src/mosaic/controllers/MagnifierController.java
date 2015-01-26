@@ -9,7 +9,7 @@ import java.awt.*;
 import javax.swing.event.*;
 import transforms.ToBricksTransform;
 import mosaic.io.BrickGraphicsState;
-import mosaic.ui.prepare.Cropper;
+import mosaic.ui.Cropper;
 
 /**
  * Functions: 
@@ -20,9 +20,8 @@ import mosaic.ui.prepare.Cropper;
  * @author LD
  */
 public class MagnifierController implements ChangeListener, MouseListener, MouseMotionListener, KeyListener, ModelSaver<BrickGraphicsState> {
-	private boolean isEnabled, showColors, showLegend;
-
 	private List<ChangeListener> listeners; // such as GUI components (actual magnifier) and bricked view with rectangle.
+	private UIController uiController;
 
 	private Dimension sizeInMosaicBlocks; // with block size of core image as unit
 	
@@ -32,23 +31,14 @@ public class MagnifierController implements ChangeListener, MouseListener, Mouse
 	private Dimension shownImageSizeInPixels;
 	private Point mouseOffset;
 
-	public MagnifierController(Model<BrickGraphicsState> model) {
+	public MagnifierController(Model<BrickGraphicsState> model, UIController uiController) {
+		this.uiController = uiController;
+		uiController.addChangeListener(this);
 		listeners = new LinkedList<ChangeListener>();
-		isEnabled = false;
 		reloadModel(model);
 		corePositionInCoreUnits = new Point(0,0);
 		model.addModelSaver(this);
 		mouseOffset = new Point();
-	}
-	
-	public boolean isEnabled() {
-		return isEnabled;
-	}
-	public boolean showColors() {
-		return showColors;
-	}
-	public boolean enableLegend() {
-		return showLegend;
 	}
 	
 	public Dimension getSizeInMosaicBlocks() {
@@ -60,19 +50,13 @@ public class MagnifierController implements ChangeListener, MouseListener, Mouse
 	}
 
 	public void reloadModel(Model<BrickGraphicsState> model) {
-		//isEnabled = (Boolean)model.get(BrickGraphicsState.MagnifierShow);
-		showLegend = (Boolean)model.get(BrickGraphicsState.MagnifierShowLegend);
-		showColors = (Boolean)model.get(BrickGraphicsState.MagnifierShowColors);
 		sizeInMosaicBlocks = (Dimension)model.get(BrickGraphicsState.MagnifierSize);		
 	}
-
 	@Override
 	public void save(Model<BrickGraphicsState> model) {
-		//model.set(BrickGraphicsState.MagnifierShow, isEnabled);
-		model.set(BrickGraphicsState.MagnifierShowLegend, showLegend);
-		model.set(BrickGraphicsState.MagnifierShowColors, showColors);
 		model.set(BrickGraphicsState.MagnifierSize, sizeInMosaicBlocks);
 	}
+
 	public void updateColorsInMagnifier() {
 		notifyListeners(null);
 	}
@@ -85,36 +69,13 @@ public class MagnifierController implements ChangeListener, MouseListener, Mouse
 
 	public void changeSizeWidthInMosaicBlocks(int change) {
 		sizeInMosaicBlocks.width += change;
-		if(!isEnabled)
-			isEnabled = true;
 		sanify();
 		notifyListeners(null);
 	}
 
 	public void changeSizeHeightInMosaicBlocks(int change) {
 		sizeInMosaicBlocks.height += change;
-		if(!isEnabled)
-			isEnabled = true;
 		sanify();
-		notifyListeners(null);
-	}
-	
-	public void flipShowColors() {
-		showColors = !showColors;
-		if(!isEnabled)
-			isEnabled = true;
-		notifyListeners(null);
-	}
-	
-	public void flipEnabled() {
-		isEnabled = !isEnabled;
-		notifyListeners(null);
-	}
-	
-	public void flipLegendEnabled() {
-		showLegend = !showLegend;
-		if(!isEnabled)
-			isEnabled = true;
 		notifyListeners(null);
 	}
 	
@@ -249,7 +210,7 @@ public class MagnifierController implements ChangeListener, MouseListener, Mouse
 	 * @param canvas
 	 */
 	public void drawHighlightRect(Graphics2D g2) {
-		if(!isEnabled || coreImageInCoreUnits == null || shownImageSizeInPixels == null)
+		if(!uiController.showMagnifier() || coreImageInCoreUnits == null || shownImageSizeInPixels == null)
 			return;
 		// draw highlighting rectangle:
 		double scaleX = shownImageSizeInPixels.width / (double)coreImageInCoreUnits.getWidth();
@@ -269,9 +230,8 @@ public class MagnifierController implements ChangeListener, MouseListener, Mouse
 	 */
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		if(!isEnabled && e.getClickCount() > 1){
-			isEnabled = true;
-			notifyListeners(null);		
+		if(!uiController.showMagnifier() && e.getClickCount() > 1){
+			uiController.flipShowMagnifier();
 		}
 	}
 	

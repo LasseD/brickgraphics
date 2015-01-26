@@ -1,4 +1,4 @@
-package mosaic.ui.prepare;
+package mosaic.ui;
 
 import io.*;
 import mosaic.io.BrickGraphicsState;
@@ -104,7 +104,7 @@ public class ImagePreparingView extends JComponent implements ChangeListener, Mo
 		
 		int w = baseImage.getWidth();
 		int h = baseImage.getHeight();
-		Rectangle r = cropper.getCrop(w, h);
+		Rectangle r = cropper.getCrop(0, 0, w, h);
 		baseCrop = baseImage.getSubimage(r.x, r.y, r.width, r.height);		
 	}
 	
@@ -112,7 +112,7 @@ public class ImagePreparingView extends JComponent implements ChangeListener, Mo
 	public void updateBaseCrop() {
 		int w = baseImage.getWidth();
 		int h = baseImage.getHeight();
-		Rectangle r = cropper.getCrop(w, h);
+		Rectangle r = cropper.getCrop(0, 0, w, h);
 		if(baseCropRect == null || !baseCropRect.equals(r)) {
 			baseCropRect = r;
 			baseCrop = baseImage.getSubimage(r.x, r.y, r.width, r.height);		
@@ -290,24 +290,33 @@ public class ImagePreparingView extends JComponent implements ChangeListener, Mo
 		
 		fullScaler.setWidth(size.width);
 		fullScaler.setHeight(size.height);
-
+		
 		if(cropper.isEnabled()) {
 			BufferedImage full = ImagePreparingView.this.baseImage;
 			full = fullScaler.transform(full);
-			cropper.setMouseImage(full);
-			g2.drawImage(cropper.pollute(full), null, 0, 0);
-
+			int x = 0;
+			int y = 0;
 			int w = full.getWidth();
 			int h = full.getHeight();
-			Rectangle r = cropper.getCrop(w, h);
+			if(w < size.width) {
+				x = (size.width-w)/2;
+			}
+			cropper.setMouseImage(new Rectangle(x, y, w, h));
+			g2.drawImage(cropper.pollute(full), null, x, 0);
+
+			Rectangle r = cropper.getCrop(x, y, w, h);
 			cropScaler.setWidth(r.width);
 			cropScaler.setHeight(r.height);
 
-			g2.drawImage(cropScaler.transform(ImagePreparingView.this.prepared), null, r.x+2, r.y+2);
+			g2.drawImage(cropScaler.transform(ImagePreparingView.this.prepared), null, x+r.x+2, r.y+2);
 		}
 		else {
 			BufferedImage fullScaled = fullScaler.transform(ImagePreparingView.this.prepared);
-			cropper.setMouseImage(fullScaled);
+			int w = fullScaled.getWidth();
+			if(w < size.width) {
+				g2.translate((size.width-w)/2, 0);
+			}
+			cropper.setMouseImage(new Rectangle(0, 0, fullScaled.getWidth(), fullScaled.getHeight()));
 			g2.drawImage(fullScaled, null, 2, 2);
 		}
 	}

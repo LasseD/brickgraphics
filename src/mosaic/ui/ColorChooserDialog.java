@@ -1,5 +1,7 @@
 package mosaic.ui;
 
+import icon.Icons;
+
 import javax.swing.*;
 
 import colors.*;
@@ -10,17 +12,19 @@ import java.util.List;
 
 import javax.swing.event.*;
 import mosaic.controllers.*;
+import mosaic.ui.menu.ColorChooserToolBar;
 
 public class ColorChooserDialog extends JDialog implements ChangeListener {
 	private List<ColorGroupPanel> panels;
 	private boolean everEnabled, enabled;
 	private ColorController cc;
 	private JPanel mainPanel;
+	private JSplitPane splitPane;
 	
-	public ColorChooserDialog(final JFrame owner, ColorController cc) {
-		super(owner, "Colors", false);
+	public ColorChooserDialog(final MainWindow mw) {
+		super(mw, "Colors", false);
 
-		this.cc = cc;
+		this.cc = mw.getColorController();
 		mainPanel = new JPanel();
 		panels = new LinkedList<ColorGroupPanel>();
 
@@ -35,11 +39,28 @@ public class ColorChooserDialog extends JDialog implements ChangeListener {
 				enabled = false;				
 			}
 		});
-		getContentPane().add(new JScrollPane(mainPanel, 
+		
+		splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+		splitPane.add(new JScrollPane(mainPanel, 
 				 ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, 
 				 ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED));
+		splitPane.add(new ColorDistributionChart(mw));
+		
+		Container contentPane = getContentPane();
+		contentPane.setLayout(new BorderLayout());
+		contentPane.add(new ColorChooserToolBar(cc, mw.getUIController(), this), BorderLayout.NORTH);		
+		contentPane.add(splitPane, BorderLayout.CENTER);
 		
 		stateChanged(null);
+	}
+	
+	@Override
+	public void pack() {
+		halfPack();
+		super.pack();
+	}
+	public void halfPack() {
+		splitPane.setDividerLocation(mainPanel.getPreferredSize().height + splitPane.getDividerSize());
 	}
 	
 	public void switchEnabled() {
@@ -95,6 +116,20 @@ public class ColorChooserDialog extends JDialog implements ChangeListener {
 		if(isVisible())
 			setVisible(true); // Force repaint.
 		tellController();
+	}
+	
+	public Action createPackAction() {
+		Action a = new AbstractAction() {			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				pack();
+			}
+		};		
+		a.putValue(Action.SHORT_DESCRIPTION, "Pack the color chooser.");
+		a.putValue(Action.SMALL_ICON, Icons.pack(Icons.SIZE_SMALL));
+		a.putValue(Action.LARGE_ICON_KEY, Icons.pack(Icons.SIZE_LARGE));
+		a.putValue(Action.NAME, "Pack");		
+		return a;
 	}
 	
 	private static class ColorGroupPanel extends JPanel implements ActionListener {
