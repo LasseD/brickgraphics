@@ -521,6 +521,19 @@ public class PrintController implements Printable, ModelSaver<BrickGraphicsState
 		}
 	}
 	
+	public int getNumberOfPages() {
+		// Find out how big the magnifier is:
+		final int coreImageInCoreUnitsW = magnifierController.getCoreImageInCoreUnits().getWidth();
+		final int coreImageInCoreUnitsH = magnifierController.getCoreImageInCoreUnits().getHeight();
+		final Dimension magnifierSizeInCoreUnits = magnifierController.getSizeInUnits();
+		final int pageSizeInCoreUnitsW = magnifierSizeInCoreUnits.width * magnifiersPerPage.width;
+		final int pageSizeInCoreUnitsH = magnifierSizeInCoreUnits.height * magnifiersPerPage.height;
+
+		final int numPagesWidth = (coreImageInCoreUnitsW+pageSizeInCoreUnitsW-1) / pageSizeInCoreUnitsW;
+		final int numPagesHeight = (coreImageInCoreUnitsH+pageSizeInCoreUnitsH-1) / pageSizeInCoreUnitsH;		
+		return numPagesWidth*numPagesHeight; 		
+	}
+	
 	@Override
 	public int print(Graphics g, PageFormat pf, int page) throws PrinterException {
 		Graphics2D g2 = (Graphics2D)g;		

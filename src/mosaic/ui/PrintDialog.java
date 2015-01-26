@@ -1,6 +1,7 @@
 package mosaic.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
@@ -67,10 +68,13 @@ public class PrintDialog extends JDialog implements ChangeListener {
 		JPanel midTopPanel = new JPanel(new BorderLayout());
 		midTopPanel.setBorder(BorderFactory.createTitledBorder("Cover page"));
 		PrintPreviewPanel previewCover = new PrintPreviewPanel(true, pc);
+		pc.addListener(previewCover);
 		midTopPanel.add(previewCover, BorderLayout.EAST);
-		JPanel midTopLeftPanel = new JPanel(new GridLayout(7, 1));
+		JPanel midTopLeftPanel = new JPanel();
+		midTopLeftPanel.setLayout(new BoxLayout(midTopLeftPanel, BoxLayout.Y_AXIS));
 		// Settings for cover page:
 		cbCoverPageShow = new JCheckBox("Include cover page");
+		cbCoverPageShow.setAlignmentX(Component.LEFT_ALIGNMENT);
 		cbCoverPageShow.addActionListener(new ActionListener() {			
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -79,6 +83,7 @@ public class PrintDialog extends JDialog implements ChangeListener {
 		});
 		midTopLeftPanel.add(cbCoverPageShow);
 		cbCoverPageShowFileName = new JCheckBox("Show file name");
+		cbCoverPageShowFileName.setAlignmentX(Component.LEFT_ALIGNMENT);
 		cbCoverPageShowFileName.addActionListener(new ActionListener() {			
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -87,6 +92,7 @@ public class PrintDialog extends JDialog implements ChangeListener {
 		});
 		midTopLeftPanel.add(cbCoverPageShowFileName);
 		cbCoverPageShowLegend = new JCheckBox("Show complete parts callout");
+		cbCoverPageShowLegend.setAlignmentX(Component.LEFT_ALIGNMENT);
 		cbCoverPageShowLegend.addActionListener(new ActionListener() {			
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -95,11 +101,14 @@ public class PrintDialog extends JDialog implements ChangeListener {
 		});
 		midTopLeftPanel.add(cbCoverPageShowLegend);
 
+		JPanel topButtonGroupPanel = new JPanel();
+		topButtonGroupPanel.setLayout(new BoxLayout(topButtonGroupPanel, BoxLayout.Y_AXIS));
+		topButtonGroupPanel.setBorder(BorderFactory.createTitledBorder("Picture"));
 		ButtonGroup bgCoverPagePictureType = new ButtonGroup();
 		rbCoverPagePictureType = new JRadioButton[CoverPagePictureType.values().length];
 		int i = 0;
 		for(final CoverPagePictureType t : CoverPagePictureType.values()) {
-			rbCoverPagePictureType[i] = new JRadioButton("Cover picture: " + t.name());
+			rbCoverPagePictureType[i] = new JRadioButton(t.name());
 			rbCoverPagePictureType[i].addActionListener(new ActionListener() {				
 				@Override
 				public void actionPerformed(ActionEvent e) {
@@ -107,18 +116,22 @@ public class PrintDialog extends JDialog implements ChangeListener {
 				}
 			});
 			bgCoverPagePictureType.add(rbCoverPagePictureType[i]);
-			midTopLeftPanel.add(rbCoverPagePictureType[i]);
+			topButtonGroupPanel.add(rbCoverPagePictureType[i]);
 			++i;
 		}
+		midTopLeftPanel.add(topButtonGroupPanel);
 		midTopPanel.add(midTopLeftPanel, BorderLayout.WEST);
 		
 		JPanel midBottomPanel = new JPanel(new BorderLayout());
 		midBottomPanel.setBorder(BorderFactory.createTitledBorder("Page setup"));
 		PrintPreviewPanel previewPage = new PrintPreviewPanel(false, pc);
+		pc.addListener(previewPage);
 		midBottomPanel.add(previewPage, BorderLayout.EAST);			
-		JPanel midBottomLeftPanel = new JPanel(new GridLayout(8, 1));	
+		JPanel midBottomLeftPanel = new JPanel();	
+		midBottomLeftPanel.setLayout(new BoxLayout(midBottomLeftPanel, BoxLayout.Y_AXIS));
 
 		JPanel pMagnifiersPerPage = new JPanel(new FlowLayout());
+		pMagnifiersPerPage.setAlignmentX(Component.LEFT_ALIGNMENT);
 		pMagnifiersPerPage.add(new JLabel("Number of magnifiers per page: "));
 		tfMagnifiersPerPageWidth = new JTextField(3);		
 		pMagnifiersPerPage.add(tfMagnifiersPerPageWidth);
@@ -144,6 +157,7 @@ public class PrintDialog extends JDialog implements ChangeListener {
 		midBottomLeftPanel.add(pMagnifiersPerPage);
 		
 		cbShowLegend = new JCheckBox("Show parts callout for each page");
+		cbShowLegend.setAlignmentX(Component.LEFT_ALIGNMENT);
 		cbShowLegend.addActionListener(new ActionListener() {			
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -152,6 +166,7 @@ public class PrintDialog extends JDialog implements ChangeListener {
 		});
 		midBottomLeftPanel.add(cbShowLegend);
 		cbShowPageNumber = new JCheckBox("Show page numbers");
+		cbShowPageNumber.setAlignmentX(Component.LEFT_ALIGNMENT);
 		cbShowPageNumber.addActionListener(new ActionListener() {			
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -174,15 +189,19 @@ public class PrintDialog extends JDialog implements ChangeListener {
 			}
 		});
 		JPanel pFontSize = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		pFontSize.setAlignmentX(Component.LEFT_ALIGNMENT);
 		pFontSize.add(new JLabel("Text size"));
 		pFontSize.add(tfFontSize);
 		midBottomLeftPanel.add(pFontSize);
 		
+		JPanel bottomButtonGroupPanel = new JPanel();
+		bottomButtonGroupPanel.setLayout(new BoxLayout(bottomButtonGroupPanel, BoxLayout.Y_AXIS));
+		bottomButtonGroupPanel.setBorder(BorderFactory.createTitledBorder("Position"));
 		ButtonGroup bgShowPosition = new ButtonGroup();
 		rbShowPosition = new JRadioButton[ShowPosition.values().length];
 		i = 0;
 		for(final ShowPosition p : ShowPosition.values()) {
-			rbShowPosition[i] = new JRadioButton("Position: " + p.title);
+			rbShowPosition[i] = new JRadioButton(p.title);
 			rbShowPosition[i].addActionListener(new ActionListener() {				
 				@Override
 				public void actionPerformed(ActionEvent e) {
@@ -190,9 +209,10 @@ public class PrintDialog extends JDialog implements ChangeListener {
 				}
 			});
 			bgShowPosition.add(rbShowPosition[i]);
-			midBottomLeftPanel.add(rbShowPosition[i]);
+			bottomButtonGroupPanel.add(rbShowPosition[i]);
 			++i;
 		}
+		midBottomLeftPanel.add(bottomButtonGroupPanel);
 		midBottomPanel.add(midBottomLeftPanel, BorderLayout.WEST);		
 		
 		midPanel.add(midTopPanel);
