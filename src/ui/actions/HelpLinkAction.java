@@ -20,7 +20,7 @@ public class HelpLinkAction extends AbstractAction {
 	public HelpLinkAction(JFrame owner, String url) {
 		this.owner = owner;
 		this.url = url;
-		
+
 		putValue(SHORT_DESCRIPTION, "Open on-line help.");
 		putValue(Action.SMALL_ICON, Icons.get(Icons.SIZE_SMALL, "help"));
 		putValue(Action.LARGE_ICON_KEY, Icons.get(Icons.SIZE_LARGE, "help"));

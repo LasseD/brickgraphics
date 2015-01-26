@@ -43,6 +43,7 @@ public class PrintController implements Printable, ModelSaver<BrickGraphicsState
 		this.mw = mw;
 		magnifierController = mw.getMagnifierController();
 		colorController = mw.getColorController();
+		uiController = mw.getUIController();
 		listeners = new ArrayList<ChangeListener>();		
 		printerJob = PrinterJob.getPrinterJob();
 		pageFormat = printerJob.defaultPage();
