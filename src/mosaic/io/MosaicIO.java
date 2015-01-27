@@ -99,7 +99,7 @@ public class MosaicIO {
 					} catch (Exception e1) {
 						String message = "An error ocurred while opening file " + file.getName() + "\n" + e1.getMessage();
 						JOptionPane.showMessageDialog(parent, message, "Error when opening file", JOptionPane.ERROR_MESSAGE);
-						e1.printStackTrace();
+						Log.log(e1);
 					}
 				}
 			}

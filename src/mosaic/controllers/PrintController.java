@@ -1,6 +1,7 @@
 package mosaic.controllers;
 
 import io.*;
+
 import java.awt.*;
 import java.awt.print.*;
 import java.awt.event.*;
@@ -62,7 +63,7 @@ public class PrintController implements Printable, ModelSaver<BrickGraphicsState
 		    catch (PrinterException e2) {
 				String message = "An error ocurred while printing: " + e2.getMessage();
 				JOptionPane.showMessageDialog(mw, message, "Error when printing", JOptionPane.ERROR_MESSAGE);
-				e2.printStackTrace();
+				Log.log(e2);
 		    }
 		}
 	}

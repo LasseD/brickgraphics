@@ -1,5 +1,7 @@
 package mosaic.ui;
 
+import io.Log;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
@@ -146,7 +148,7 @@ public class ColorSettingsDialog extends JDialog implements ChangeListener {
 							loaded = cc.reloadColorTranslations(ColorSettingsDialog.this, true);
 						} catch (Exception e1) {
 							JOptionPane.showMessageDialog(ColorSettingsDialog.this, "Error while reloading translations: " + e1.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-							e1.printStackTrace();
+							Log.log(e1);
 							return;
 						}
 						JOptionPane.showMessageDialog(ColorSettingsDialog.this, (loaded==0?"No":""+loaded) + " translation(s) read!", "Translations reloaded", JOptionPane.PLAIN_MESSAGE);
@@ -166,7 +168,7 @@ public class ColorSettingsDialog extends JDialog implements ChangeListener {
 							cc.createColorTranslationFile(fileName);
 						} catch (Exception e1) {
 							JOptionPane.showMessageDialog(ColorSettingsDialog.this, "Error while creating color translations file: " + e1.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-							e1.printStackTrace();
+							Log.log(e1);
 							return;
 						}
 						JOptionPane.showMessageDialog(ColorSettingsDialog.this, "Color translation file " + fileName + " created.\nAdd it to LDDMC using 'Reload' once it has been filled.", "File created", JOptionPane.PLAIN_MESSAGE);

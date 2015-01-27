@@ -67,7 +67,7 @@ public class FloydSteinbergTransform extends BufferedLEGOColorTransform {
 	public LEGOColor[][] lcTransformUnbuffered(BufferedImage in) {		
 		int w = in.getWidth();
 		int h = in.getHeight();
-		io.Log.log("Floyd-Steinberg " + w + "x" + h + " with " + LEGOColorLookUp.size() + " colors: ");		
+		io.Log.log("Floyd-Steinberg " + w + "x" + h + " with " + LEGOColorLookUp.size() + " colors.");		
 		
 		int[] pixels = new int[w*h];
 		in.getRGB(0, 0, w, h, pixels, 0, w);

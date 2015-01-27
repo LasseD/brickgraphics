@@ -2,12 +2,14 @@ package mosaic.ui;
 
 import icon.*;
 import io.*;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.*;
+
 import javax.swing.*;
 import javax.swing.event.*;
 import colors.parsers.ColorSheetParser;
@@ -22,6 +24,7 @@ import mosaic.ui.menu.*;
 public class MainWindow extends JFrame implements ChangeListener, ModelSaver<BrickGraphicsState> {
 	public static final String APP_NAME = "LD Digital Mosaic Creator";
 	public static final String APP_NAME_SHORT = "LDDMC";
+	public static final String LOG_FILE_NAME = "lddmc.log";
 	public static final int VERSION_MAJOR = 0;
 	public static final int VERSION_MINOR = 9;
 	public static final int VERSION_MICRO = 2;
@@ -43,8 +46,13 @@ public class MainWindow extends JFrame implements ChangeListener, ModelSaver<Bri
 
 	public MainWindow() {
 		super(APP_NAME);
+		try {
+			Log.initializeLog(LOG_FILE_NAME);
+		} catch (IOException e1) {
+			JOptionPane.showMessageDialog(this, "The log file " + LOG_FILE_NAME + " could not be opened for writing.\nLDDMC might not have sufficient permissions.\nLog messages are written to console if available.\nThe error message:\n" + e1.getMessage(), "Failed to open/create log file", JOptionPane.WARNING_MESSAGE);
+		}
 		long startTime = System.currentTimeMillis();
-		System.out.println("Initiating components");
+		Log.log("Initiating components");
 		model = new Model<BrickGraphicsState>("lddmc.state", BrickGraphicsState.class);
 		model.addModelSaver(this);
 		
@@ -55,14 +63,14 @@ public class MainWindow extends JFrame implements ChangeListener, ModelSaver<Bri
 		saveDialog = new SaveDialog(this);
 		saveDialog.setParentFolder(getFile().getParentFile());
 		
-		System.out.println("Created controllers after " + (System.currentTimeMillis()-startTime) + "ms.");
+		Log.log("Created controllers after " + (System.currentTimeMillis()-startTime) + "ms.");
 
 		imagePreparingView = new ImagePreparingView(model);		
 		imagePreparingView.addChangeListener(this);
-		System.out.println("Created left view after " + (System.currentTimeMillis()-startTime) + "ms.");
+		Log.log("Created left view after " + (System.currentTimeMillis()-startTime) + "ms.");
 		
 		brickedView = new BrickedView(this, model);
-		System.out.println("Created right view after " + (System.currentTimeMillis()-startTime) + "ms.");
+		Log.log("Created right view after " + (System.currentTimeMillis()-startTime) + "ms.");
 
 		addWindowListener(new WindowAdapter() {
 			@Override
@@ -71,8 +79,9 @@ public class MainWindow extends JFrame implements ChangeListener, ModelSaver<Bri
 					model.saveToFile();
 				}
 				catch (IOException e2) {
-					e2.printStackTrace();
+					Log.log(e2);
 				}
+				Log.close();
 				System.exit(0);
 			}
 		});
@@ -148,7 +157,7 @@ public class MainWindow extends JFrame implements ChangeListener, ModelSaver<Bri
 			}
 		});
 
-		System.out.println("LDDMC main window operational after " + (System.currentTimeMillis()-startTime) + "ms.");
+		Log.log("LDDMC main window operational after " + (System.currentTimeMillis()-startTime) + "ms.");
 	}
 	
 	public ColorChooserDialog getColorChooser() {
@@ -176,7 +185,7 @@ public class MainWindow extends JFrame implements ChangeListener, ModelSaver<Bri
 				try {
 					UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 				} catch (Exception e) {
-					e.printStackTrace();
+					Log.log(e);
 				}
 				MainWindow mw = newWindow();
 				Action openAction = MosaicIO.createOpenAction(mw.model, mw);
@@ -185,7 +194,7 @@ public class MainWindow extends JFrame implements ChangeListener, ModelSaver<Bri
 					MosaicIO.load(mw, mw.model, file);
 				}
 				catch (Exception e) {
-					e.printStackTrace();
+					Log.log(e);
 					openAction.actionPerformed(null);
 				} 			
 			}
@@ -205,7 +214,7 @@ public class MainWindow extends JFrame implements ChangeListener, ModelSaver<Bri
 		try {
 			model.saveToFile();
 		} catch (IOException e) {
-			e.printStackTrace();
+			Log.log(e);
 		}
 		setVisible(false);
 		dispose();

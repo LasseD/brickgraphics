@@ -7,6 +7,7 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import icon.*;
+import io.Log;
 import io.Model;
 import mosaic.io.BrickGraphicsState;
 import mosaic.io.LXFPrinter;
@@ -41,7 +42,7 @@ public class ExportLXF extends AbstractAction {
 			} catch (Exception e1) {
 				String message = "An error ocurred while saving file " + file.getName() + "\n" + e1.getMessage();
 				JOptionPane.showMessageDialog(mw, message, "Error when saving file", JOptionPane.ERROR_MESSAGE);
-				e1.printStackTrace();
+				Log.log(e1);
 			}
 		}
 	}

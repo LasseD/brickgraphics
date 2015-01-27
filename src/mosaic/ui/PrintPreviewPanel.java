@@ -1,5 +1,7 @@
 package mosaic.ui;
 
+import io.Log;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -105,7 +107,7 @@ public class PrintPreviewPanel extends JPanel implements ChangeListener {
 		try {
 			pc.print(g2, pf, 0);
 		} catch (PrinterException e) {
-			e.printStackTrace();
+			Log.log(e);
 		}
 	}
 	
@@ -115,7 +117,7 @@ public class PrintPreviewPanel extends JPanel implements ChangeListener {
 		try {
 			pc.print(g2, pf, pc.getCoverPageShow() ? shownPage : shownPage-1);
 		} catch (PrinterException e) {
-			e.printStackTrace();
+			Log.log(e);
 		}
 	}
 	

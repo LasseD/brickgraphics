@@ -235,7 +235,7 @@ public class ColorController implements ModelSaver<BrickGraphicsState> {
 			colorsFromDisk = ColorSheetParser.readColorsFile();
 		} catch (IOException e) {
 			colorsFromDisk = generateBackupColors();
-			e.printStackTrace();
+			Log.log(e);
 			ok = false;
 		}
 		if(propagateChanges)
@@ -293,7 +293,7 @@ public class ColorController implements ModelSaver<BrickGraphicsState> {
 			ColorSheetParser.saveFromWeb(url, this);
 		} catch (IOException e) {
 			JOptionPane.showMessageDialog(toMoalizeOnError, "Error loading colors from web: " + e.getMessage(), "Error loading colors", JOptionPane.ERROR_MESSAGE);
-			e.printStackTrace();
+			Log.log(e);
 			return false;
 		}
 		loadRebrickableURL = url;
@@ -312,7 +312,7 @@ public class ColorController implements ModelSaver<BrickGraphicsState> {
 			ColorSheetParser.saveFromRebrickableFile(file, this);
 		} catch (IOException e) {
 			JOptionPane.showMessageDialog(toMoalizeOnError, "Error loading colors from file: " + e.getMessage(), "Error loading colors", JOptionPane.ERROR_MESSAGE);
-			e.printStackTrace();
+			Log.log(e);
 			return false;
 		}
 		loadRebrickableFile = file;
@@ -325,7 +325,7 @@ public class ColorController implements ModelSaver<BrickGraphicsState> {
 			ColorSheetParser.saveFromLDDXMLFile(file, this);
 		} catch (IOException e) {
 			JOptionPane.showMessageDialog(toMoalizeOnError, "Error loading ldraw.xml file: " + e.getMessage(), "Error loading file", JOptionPane.ERROR_MESSAGE);
-			e.printStackTrace();
+			Log.log(e);
 			return false;
 		}
 		loadLDDXMLFile = file;

@@ -1,5 +1,6 @@
 package mosaic.ui.actions;
 
+import io.Log;
 import io.Model;
 
 import java.awt.event.ActionEvent;
@@ -30,8 +31,9 @@ public class ExitAction extends AbstractAction {
 		try {
 			model.saveToFile();
 		} catch (IOException e2) {
-			e2.printStackTrace();
+			Log.log(e2);
 		}
+		Log.close();
 		System.exit(0);
 	}
 }
