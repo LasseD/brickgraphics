@@ -22,10 +22,11 @@ public class MosaicIO {
 	public static final String[] HTML_SUFFIXES = {"htm", "html", "xhtml"};
 	private static String[] IMG_SUFFIXES = null;
 
-	public static void saveMosaic(Model<BrickGraphicsState> model, BufferedImage image, File file) throws IOException {
+	public static void saveMosaic(MainController mc, Model<BrickGraphicsState> model, BufferedImage image, File file) throws IOException {
 		if(image == null)
 			throw new IllegalArgumentException("image null");
 		model.saveToFile(file);
+		mc.setMosaicFile(file);
 	}
 
 	public static void saveImage(BufferedImage bricked, File file) throws IOException {
@@ -150,10 +151,13 @@ public class MosaicIO {
 		Action save = new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				File file = mc.getFile();
-				file = ensureSuffix(file, MOSAIC_SUFFIX);
+				File file = mc.getMosaicFile();
+				if(file == null) {
+					createSaveAsAction(currentModel, mc, mw).actionPerformed(null);
+					return;
+				}
 				try {
-					saveMosaic(currentModel, mc.getInImage(), file);
+					saveMosaic(mc, currentModel, mc.getInImage(), file);
 				}
 				catch(IOException ex) {
 					String message = "An error ocurred while saving file " + file.getName() + "\n" + ex.getMessage();
@@ -192,7 +196,7 @@ public class MosaicIO {
 					file = ensureSuffix(file, MOSAIC_SUFFIX);
 					
 					try {
-						saveMosaic(currentModel, mc.getInImage(), file);
+						saveMosaic(mc, currentModel, mc.getInImage(), file);
 						JOptionPane.showMessageDialog(mw,  "Mosaic file saved sucessfully!", "File saved",JOptionPane.INFORMATION_MESSAGE);
 					} catch (Exception e1) {
 						String message = "An error ocurred while saving file " + file.getName() + "\n" + e1.getMessage();

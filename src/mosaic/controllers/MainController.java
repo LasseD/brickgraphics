@@ -41,9 +41,11 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 	private BufferedImage image;
 	private String imageFileName;
 	private DataFile imageDataFile;
+	private File mosaicFile;
 
 	public MainController() {		
 		listeners = new ArrayList<ChangeListener>();		
+		mosaicFile = null;
 
 		try {
 			Log.initializeLog(LOG_FILE_NAME);
@@ -113,7 +115,8 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 	public void setImage(BufferedImage image, File imageFile) throws IOException {
 		this.image = image;
 		imageDataFile = new DataFile(imageFile);
-		this.imageFileName = imageFile.getCanonicalPath();
+		imageFileName = imageFile.getCanonicalPath();
+		mosaicFile = null;
 		notifyListeners(this);
 	}
 	
@@ -124,7 +127,16 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 		br.close();
 		fis.close();
 		
+		mosaicFile = file;
 		notifyListeners(model);
+	}
+	
+	public File getMosaicFile() {
+		return mosaicFile;
+	}
+	
+	public void setMosaicFile(File file) {
+		this.mosaicFile = file;
 	}
 	
 	public SaveDialog getSaveDialog() {

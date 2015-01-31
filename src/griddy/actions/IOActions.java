@@ -37,7 +37,7 @@ public class IOActions {
 		ImageIO.write(bricked, suffix(file), file);		
 	}
 
-	public static void load(Griddy parent, Model<GriddyState> changingModel, File file) throws IOException, ClassCastException, ClassNotFoundException {
+	public static void load(Griddy parent, Model<GriddyState> changingModel, File file) throws IOException, ClassCastException {
 		FileType fileType = FileType.get(file);
 		switch(fileType) {
 		case griddy:

@@ -109,9 +109,6 @@ public class Griddy extends JFrame implements ModelHandler<GriddyState>, WindowL
 		} catch (ClassCastException e) {
 			e.printStackTrace();
 			openAction.actionPerformed(null);
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-			openAction.actionPerformed(null);
 		}
 		
 		JPanel scalePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
