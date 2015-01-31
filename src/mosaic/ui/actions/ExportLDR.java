@@ -3,11 +3,9 @@ package mosaic.ui.actions;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
-
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
-
 import icon.*;
 import io.Log;
 import io.Model;
@@ -15,13 +13,16 @@ import mosaic.io.BrickGraphicsState;
 import mosaic.io.LDRPrinter;
 import mosaic.ui.BrickedView;
 import mosaic.ui.MainWindow;
+import mosaic.controllers.*;
 
 public class ExportLDR extends AbstractAction {
 	public static final String LDR_SUFFIX = "ldr";
 
-	private MainWindow mw;	
+	private MainController mc;
+	private MainWindow mw;
 	
-	public ExportLDR(final Model<BrickGraphicsState> currentModel, final MainWindow mw) {
+	public ExportLDR(final Model<BrickGraphicsState> currentModel, final MainController mc, MainWindow mw) {
+		this.mc = mc;
 		this.mw = mw;
 
 		putValue(Action.SHORT_DESCRIPTION, "Export mosaic as an LDraw model.");
@@ -40,7 +41,7 @@ public class ExportLDR extends AbstractAction {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		final FileFilter ff = new FileNameExtensionFilter("LDraw model, ." + LDR_SUFFIX, LDR_SUFFIX);
-		File file = mw.getSaveDialog().showSaveDialog("Export mosaic to LDraw", ff);
+		File file = mc.getSaveDialog().showSaveDialog("Export mosaic to LDraw", ff);
 		
 		if(file != null) {			
 			try {

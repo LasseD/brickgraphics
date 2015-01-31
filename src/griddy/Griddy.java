@@ -2,7 +2,7 @@ package griddy;
 
 import io.Model;
 import io.ModelChangeListener;
-import io.ModelSaver;
+import io.ModelHandler;
 import icon.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -10,11 +10,12 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import griddy.actions.*;
 import javax.swing.*;
+
 import griddy.grid.*;
 import griddy.rulers.*;
 import griddy.zoom.*;
 
-public class Griddy extends JFrame implements ModelSaver<GriddyState>, WindowListener, ModelChangeListener {
+public class Griddy extends JFrame implements ModelHandler<GriddyState>, WindowListener, ModelChangeListener {
 	private static final long serialVersionUID = 4660154787655442818L;
 	private BufferedImage image;
 	private final Model<GriddyState> model;
@@ -58,16 +59,18 @@ public class Griddy extends JFrame implements ModelSaver<GriddyState>, WindowLis
 		scaleToolVertical.addScaleListener(displayArea, true);
 		scaleToolVertical.addScaleListener(scaleToolHorizontal, false);
 
-		model.addModelSaver(this);
+		model.addModelHandler(this);
 		
 		GridDialog gridDialog = new GridDialog(this, displayArea.getGrid());
 		Action openGridDialogAction = gridDialog.makeShowOptionsDialogAction(this, displayArea.getGrid());
 		
 		addWindowListener(this);
 		getContentPane().addHierarchyBoundsListener(new HierarchyBoundsListener(){
+			@Override
 			public void ancestorMoved(HierarchyEvent e) {
 				updateModel();				
 			}
+			@Override
 			public void ancestorResized(HierarchyEvent e) {
 				updateModel();				
 			}			
@@ -122,7 +125,7 @@ public class Griddy extends JFrame implements ModelSaver<GriddyState>, WindowLis
 		
 		Container contentPane = getContentPane();
 		contentPane.setLayout(new BorderLayout());
-		scrollPane = new JScrollPane(displayArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+		scrollPane = new JScrollPane(displayArea, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
 		scrollPane.setColumnHeaderView(scaleToolHorizontal.makeRuler());
 		scrollPane.setRowHeaderView(scaleToolVertical.makeRuler());
 		zoom.addZoomListener(new ZoomListener() {			
@@ -167,6 +170,7 @@ public class Griddy extends JFrame implements ModelSaver<GriddyState>, WindowLis
 
 	public static void main(String[] args) {
 		SwingUtilities.invokeLater(new Thread() {
+			@Override
 			public void run() {
 				try {
 					UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -212,9 +216,12 @@ public class Griddy extends JFrame implements ModelSaver<GriddyState>, WindowLis
 		model.set(GriddyState.MainWindowPlacement, getBounds());
 	}
 
+	@Override
 	public void windowActivated(WindowEvent e) {}
+	@Override
 	public void windowClosed(WindowEvent e) {}
 
+	@Override
 	public void windowClosing(WindowEvent e) {
 		try {
 			model.saveToFile();
@@ -225,13 +232,23 @@ public class Griddy extends JFrame implements ModelSaver<GriddyState>, WindowLis
 		System.exit(0);
 	}
 
+	@Override
 	public void windowDeactivated(WindowEvent e) {}
+	@Override
 	public void windowDeiconified(WindowEvent e) {}
+	@Override
 	public void windowIconified(WindowEvent e) {}
+	@Override
 	public void windowOpened(WindowEvent e) {}
 
 	@Override
 	public void modelChanged(Object stateValue) {
 		setBounds((Rectangle)model.get(GriddyState.MainWindowPlacement));
+	}
+
+	@Override
+	public void handleModelChange(Model<GriddyState> model) {
+		// TODO Auto-generated method stub
+		
 	}
 }

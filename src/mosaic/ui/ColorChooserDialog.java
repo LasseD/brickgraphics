@@ -21,10 +21,10 @@ public class ColorChooserDialog extends JDialog implements ChangeListener {
 	private JPanel mainPanel;
 	private JSplitPane splitPane;
 	
-	public ColorChooserDialog(final MainWindow mw) {
+	public ColorChooserDialog(final MainController mc, MainWindow mw) {
 		super(mw, "Colors", false);
 
-		this.cc = mw.getColorController();
+		this.cc = mc.getColorController();
 		mainPanel = new JPanel();
 		panels = new LinkedList<ColorGroupPanel>();
 
@@ -44,11 +44,11 @@ public class ColorChooserDialog extends JDialog implements ChangeListener {
 		splitPane.add(new JScrollPane(mainPanel, 
 				 ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, 
 				 ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED));
-		splitPane.add(new ColorDistributionChart(mw));
+		splitPane.add(new ColorDistributionChart(mc, mw));
 		
 		Container contentPane = getContentPane();
 		contentPane.setLayout(new BorderLayout());
-		contentPane.add(new ColorChooserToolBar(cc, mw.getUIController(), this), BorderLayout.NORTH);		
+		contentPane.add(new ColorChooserToolBar(cc, mc.getUIController(), this), BorderLayout.NORTH);		
 		contentPane.add(splitPane, BorderLayout.CENTER);
 		
 		stateChanged(null);

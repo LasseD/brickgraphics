@@ -24,8 +24,8 @@ import icon.*;
  * This class takes care of the printing mechanism
  * @author ld
  */
-public class PrintController implements Printable, ModelSaver<BrickGraphicsState> {
-	private MainWindow mw;
+public class PrintController implements Printable, ModelHandler<BrickGraphicsState> {
+	private MainController mc;
 	private List<ChangeListener> listeners;
 	private PrintDialog printDialog;
 	private PageFormat pageFormat;
@@ -39,17 +39,19 @@ public class PrintController implements Printable, ModelSaver<BrickGraphicsState
 	private ShowPosition showPosition;
 	private Dimension magnifiersPerPage;
 	private PrinterJob printerJob;
+	private MainWindow mw;
 	
-	public PrintController(Model<BrickGraphicsState> model, MainWindow mw) {
+	public PrintController(Model<BrickGraphicsState> model, MainController mc, MainWindow mw) {
+		this.mc = mc;
 		this.mw = mw;
-		magnifierController = mw.getMagnifierController();
-		colorController = mw.getColorController();
-		uiController = mw.getUIController();
+		magnifierController = mc.getMagnifierController();
+		colorController = mc.getColorController();
+		uiController = mc.getUIController();
 		listeners = new ArrayList<ChangeListener>();		
 		printerJob = PrinterJob.getPrinterJob();
 		pageFormat = printerJob.defaultPage();
-		model.addModelSaver(this);
-		loadModel(model);
+		model.addModelHandler(this);
+		handleModelChange(model);
 
 		printDialog = new PrintDialog(mw, this);
 	}
@@ -68,7 +70,8 @@ public class PrintController implements Printable, ModelSaver<BrickGraphicsState
 		}
 	}
 	
-	private void loadModel(Model<BrickGraphicsState> model) {
+	@Override
+	public void handleModelChange(Model<BrickGraphicsState> model) {
 		coverPageShow = (Boolean)model.get(BrickGraphicsState.PrintCoverPageShow);
 		coverPageShowFileName = (Boolean)model.get(BrickGraphicsState.PrintCoverPageShowFileName);
 		coverPageShowLegend = (Boolean)model.get(BrickGraphicsState.PrintCoverPageShowLegend);
@@ -188,7 +191,7 @@ public class PrintController implements Printable, ModelSaver<BrickGraphicsState
 		if(!coverPageShowFileName) 
 			return 0;
 						
-		String s = mw.getFileName();
+		String s = mc.getFileName();
 		Rectangle2D bounds = fm.getStringBounds(s, g2);
 		float x = xMin + (float)((xMax-xMin)-bounds.getWidth())/2;
 		float y = yMin + fontSizeIn1_72inches*8/10;

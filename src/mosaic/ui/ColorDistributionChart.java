@@ -11,6 +11,7 @@ import javax.swing.event.ChangeListener;
 
 import colors.LEGOColor;
 
+import mosaic.controllers.MainController;
 import mosaic.controllers.UIController;
 
 public class ColorDistributionChart extends JPanel implements ChangeListener {
@@ -20,12 +21,12 @@ public class ColorDistributionChart extends JPanel implements ChangeListener {
 	private LEGOColor.CountingLEGOColor[] colors;
 	private UIController uiController;	
 	
-	public ColorDistributionChart(MainWindow mw) {
-		uiController = mw.getUIController();
+	public ColorDistributionChart(MainController mc, MainWindow mw) {
+		uiController = mc.getUIController();
 		bw = mw.getBrickedView();
 		
 		uiController.addChangeListener(this);
-		mw.getMagnifierController().addChangeListener(this); // when everything changes!
+		mc.getMagnifierController().addChangeListener(this); // when everything changes!
 	}
 	
 	@Override

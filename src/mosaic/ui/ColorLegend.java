@@ -15,14 +15,14 @@ public class ColorLegend extends JList<LEGOColor.CountingLEGOColor> implements C
 	private ColorController cc;
 	private UIController uc;
 
-	public ColorLegend(MainWindow mw) {
-		cc = mw.getColorController();
-		uc = mw.getUIController();
+	public ColorLegend(MainController mc, MainWindow mw) {
+		cc = mc.getColorController();
+		uc = mc.getUIController();
 		brickedController = mw.getBrickedView();
 		setAutoscrolls(true);
 		setCellRenderer(new CellRenderer());
 		setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-		mw.getMagnifierController().addChangeListener(this);
+		mc.getMagnifierController().addChangeListener(this);
 	}
 
 	private class CellRenderer extends JLabel implements ListCellRenderer<LEGOColor.CountingLEGOColor> {

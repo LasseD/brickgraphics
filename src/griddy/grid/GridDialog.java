@@ -91,7 +91,7 @@ public class GridDialog extends JDialog {
 		
 		gridsPanel = new JPanel();
 		gridsPanel.setLayout(new BoxLayout(gridsPanel, BoxLayout.Y_AXIS));
-		JScrollPane scrollPane = new JScrollPane(gridsPanel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		JScrollPane scrollPane = new JScrollPane(gridsPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		//scrollPane.add(gridsPanel);
 		midPanel.add(scrollPane, BorderLayout.CENTER);
 
@@ -197,6 +197,7 @@ public class GridDialog extends JDialog {
 		Action a = new AbstractAction() {
 			private static final long serialVersionUID = 37932469441L;
 
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				showDialog(parent, grid);
 			}
@@ -210,7 +211,7 @@ public class GridDialog extends JDialog {
 		a.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_G);
 		a.putValue(Action.DISPLAYED_MNEMONIC_INDEX_KEY, "Grid Options".indexOf('G'));
 		a.putValue(Action.ACTION_COMMAND_KEY, "Grid Options");
-		a.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_G, KeyEvent.CTRL_DOWN_MASK));	
+		a.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_G, InputEvent.CTRL_DOWN_MASK));	
 		
 		return a;
 	}
@@ -235,6 +236,7 @@ public class GridDialog extends JDialog {
 		JButton ok = new JButton("OK");
 		
 		ok.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				setVisible(false);
 			}

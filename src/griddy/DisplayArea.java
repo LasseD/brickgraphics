@@ -11,7 +11,7 @@ import griddy.zoom.*;
 import griddy.rulers.*;
 import io.*;
 
-public class DisplayArea extends JPanel implements ModelSaver<GriddyState>, ZoomListener, BorderRulerListener, ModelChangeListener {
+public class DisplayArea extends JPanel implements ModelHandler<GriddyState>, ZoomListener, BorderRulerListener, ModelChangeListener {
 	private static final long serialVersionUID = 8055655787263638626L;
 	private BufferedImage image;
 	private double zoom; // factor
@@ -23,7 +23,7 @@ public class DisplayArea extends JPanel implements ModelSaver<GriddyState>, Zoom
 		zoom.addZoomListener(this);
 		
 		grid = (Grid)model.get(GriddyState.Grid);
-		model.addModelSaver(this);
+		model.addModelHandler(this);
 
 		displayComponents = new LinkedList<DisplayComponent>();
 		displayComponents.add(grid);
@@ -168,5 +168,11 @@ public class DisplayArea extends JPanel implements ModelSaver<GriddyState>, Zoom
 	@Override
 	public void modelChanged(Object stateValue) {
 		grid.conformTo((Grid)stateValue);
+	}
+
+	@Override
+	public void handleModelChange(Model<GriddyState> model) {
+		// TODO Auto-generated method stub
+		
 	}
 }

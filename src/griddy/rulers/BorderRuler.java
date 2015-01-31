@@ -204,7 +204,7 @@ public class BorderRuler implements Serializable, BorderRulerListener, ZoomListe
 				public Component getListCellRendererComponent(
 						JList<? extends LengthType> list, LengthType value,
 						int index, boolean isSelected, boolean cellHasFocus) {
-					JComponent component = ((LengthType)value).makeDisplayComponent();
+					JComponent component = value.makeDisplayComponent();
 					int width = Math.max(component.getPreferredSize().width, 32);
 					component.setPreferredSize(new Dimension(width, 32));
 					return component;

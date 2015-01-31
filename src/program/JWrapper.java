@@ -1,6 +1,6 @@
 package program;
 
-import mosaic.ui.MainWindow;
+import mosaic.controllers.*;
 
 public class JWrapper {
 	public static void main(String[] args) throws Exception {
@@ -48,7 +48,7 @@ public class JWrapper {
 			myJwVersion = "(not running inside JWrapper)";
 		}*/
 
-		MainWindow.main(null);
+		MainController.main(null);
 		//JOptionPane.showMessageDialog(null, "Example Minimal App ("+message+") "+JWSystem.getAppBundleVersion());
 	}
 

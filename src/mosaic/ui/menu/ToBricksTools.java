@@ -2,19 +2,19 @@ package mosaic.ui.menu;
 
 import icon.*;
 import icon.ToBricksIcon.ToBricksIconType;
-import mosaic.ui.*;
 import javax.swing.*;
 import java.awt.Insets;
 import java.awt.event.*;
 import io.*;
 import javax.swing.event.*;
+import mosaic.controllers.MainController;
 import mosaic.io.*;
 import transforms.*;
 import ui.IconizedTextfield;
 import java.util.*;
 import bricks.*;
 
-public class ToBricksTools implements ChangeListener, ModelSaver<BrickGraphicsState> {
+public class ToBricksTools implements ChangeListener, ModelHandler<BrickGraphicsState> {
 	private JButton[] toBricksTypeButtons;
 	private JTextField propagationPercentageField;
 	private IconizedTextfield sizeFieldWidth, sizeFieldHeight; 
@@ -29,12 +29,12 @@ public class ToBricksTools implements ChangeListener, ModelSaver<BrickGraphicsSt
 	private int propagationPercentage;
 	private volatile boolean uiReady;
 	
-	public ToBricksTools(final MainWindow mw, final Model<BrickGraphicsState> model) {
+	public ToBricksTools(final MainController mw, final Model<BrickGraphicsState> model) {
 		uiReady = false;
-		model.addModelSaver(this);
+		model.addModelHandler(this);
 		mw.getColorController().addChangeListener(this);
 
-		reloadModel(model);
+		handleModelChange(model);
 		listeners = new LinkedList<ChangeListener>();
 		toBricksTypeButtons = new JButton[ToBricksType.values().length];
 
@@ -222,9 +222,9 @@ public class ToBricksTools implements ChangeListener, ModelSaver<BrickGraphicsSt
 		model.set(BrickGraphicsState.ToBricksHeight, height);
 		model.set(BrickGraphicsState.ToBricksTypeIndex, toBricksType.ordinal());
 		model.set(BrickGraphicsState.ToBricksPropagationPercentage, propagationPercentage);
-	}
-	
-	public void reloadModel(Model<BrickGraphicsState> model) {
+	}	
+	@Override
+	public void handleModelChange(Model<BrickGraphicsState> model) {
 		this.width = (Integer)model.get(BrickGraphicsState.ToBricksWidth);
 		this.height = (Integer)model.get(BrickGraphicsState.ToBricksHeight);
 		propagationPercentage = (Integer)model.get(BrickGraphicsState.ToBricksPropagationPercentage);

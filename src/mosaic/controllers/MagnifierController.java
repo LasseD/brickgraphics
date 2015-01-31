@@ -1,6 +1,7 @@
 package mosaic.controllers;
 
 import io.*;
+
 import java.util.*;
 import java.util.List;
 import java.awt.event.*;
@@ -19,7 +20,7 @@ import mosaic.ui.Cropper;
  *  - switch view of symbols/colors (matching legend)
  * @author LD
  */
-public class MagnifierController implements ChangeListener, MouseListener, MouseMotionListener, KeyListener, ModelSaver<BrickGraphicsState> {
+public class MagnifierController implements ChangeListener, MouseListener, MouseMotionListener, KeyListener, ModelHandler<BrickGraphicsState> {
 	private List<ChangeListener> listeners; // such as GUI components (actual magnifier) and bricked view with rectangle.
 	private UIController uiController;
 
@@ -35,9 +36,9 @@ public class MagnifierController implements ChangeListener, MouseListener, Mouse
 		this.uiController = uiController;
 		uiController.addChangeListener(this);
 		listeners = new LinkedList<ChangeListener>();
-		reloadModel(model);
+		handleModelChange(model);
 		corePositionInCoreUnits = new Point(0,0);
-		model.addModelSaver(this);
+		model.addModelHandler(this);
 		mouseOffset = new Point();
 	}
 	
@@ -49,7 +50,8 @@ public class MagnifierController implements ChangeListener, MouseListener, Mouse
 						     sizeInMosaicBlocks.height * tbTransform.getToBricksType().getUnitHeight());
 	}
 
-	public void reloadModel(Model<BrickGraphicsState> model) {
+	@Override
+	public void handleModelChange(Model<BrickGraphicsState> model) {
 		sizeInMosaicBlocks = (Dimension)model.get(BrickGraphicsState.MagnifierSize);		
 	}
 	@Override
@@ -318,5 +320,5 @@ public class MagnifierController implements ChangeListener, MouseListener, Mouse
 	@Override
 	public void stateChanged(ChangeEvent e) {
 		notifyListeners(e);
-	}	
+	}
 }

@@ -25,12 +25,15 @@ public enum GriddyState implements ModelState {
 		this.defaultValue = defaultValue;
 		this.objectType = defaultValue.getClass();
 	}
+	@Override
 	public Class<?> getType() {
 		return objectType;
 	}
+	@Override
 	public Object getDefaultValue() {
 		return defaultValue;
 	}
+	@Override
 	public String getName() {
 		return name();
 	}

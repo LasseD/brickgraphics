@@ -2,11 +2,12 @@ package mosaic.ui.menu;
 
 import javax.swing.*;
 import ui.*;
+import mosaic.controllers.*;
 import mosaic.ui.*;
 import mosaic.ui.actions.*;
 
 public class Ribbon extends JToolBar {
-	public Ribbon(MainWindow mw) {
+	public Ribbon(MainController mc, MainWindow mw) {
 		setFloatable(true);
 		setLayout(new WrapLayout(0, 0));
 
@@ -16,7 +17,7 @@ public class Ribbon extends JToolBar {
 		add(new ToggleFilters(imagePreparingView));
 		add(new ToggleDivider(mw));
 		add(new ToggleColorChooser(mw.getColorChooser()));
-		add(new ToggleMagnifier(mw.getUIController()));
+		add(new ToggleMagnifier(mc.getUIController()));
 	}
 	
 	/*private static JButton makeButton(Action a) {

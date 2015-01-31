@@ -2,13 +2,14 @@ package io;
 
 import java.io.*;
 import java.util.*;
-import java.util.List;
 
 public class Model<S extends ModelState> {
 	private String modelFile;
-	private Map<S, Object> map;
-	private List<ModelSaver<S>> modelSavers;
+	private Map<S, Object> stateValueMap;
+	private List<ModelHandler<S>> modelHandlers;
 	private Class<S> modelStateClass;
+	private KVFileHandler<S> serializer;
+	private Set<S> savedValues;
 	
 	public boolean modelFileExists() {
 		return new File(modelFile).exists();
@@ -17,50 +18,40 @@ public class Model<S extends ModelState> {
 	public Model(String modelFile, Class<S> modelStateEnumClass ) {
 		this.modelStateClass = modelStateEnumClass;
 		this.modelFile = modelFile;
-		modelSavers = new LinkedList<ModelSaver<S>>();
+		serializer = new KVFileHandler<S>();
+		modelHandlers = new LinkedList<ModelHandler<S>>();
+
+		// Populate state value map with default values - then load from state file
+		stateValueMap = new HashMap<S, Object>();	
+		for(S state : modelStateClass.getEnumConstants()) {
+			stateValueMap.put(state, state.getDefaultValue());
+		}
+
 		try {
 			FileInputStream fis = new FileInputStream(modelFile);
-	        ObjectInputStream ois = new ObjectInputStream(fis);
-			loadFrom(ois);
-	        ois.close();
+	        BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+	        
+	        loadFrom(br);
+
+	        br.close();
 	        fis.close();	        
 	        return;
 		}
-		catch(ClassCastException e) {
-			e.printStackTrace();
-		}
-		catch(FileNotFoundException e) {
-			// expected.
-		} 
-		catch(InvalidObjectException e) {
-			// expected.
-		}
 		catch (IOException e) {
-			e.printStackTrace();
+			Log.log(e);
 		} 
-		catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		}
-		
-		map = new HashMap<S, Object>();	
-		for(S state : modelStateClass.getEnumConstants()) {
-			set(state, state.getDefaultValue());
-		}
 	}
 	
-	@SuppressWarnings("unchecked")
-	public void loadFrom(ObjectInputStream ois) throws ClassCastException, FileNotFoundException, InvalidObjectException, IOException, ClassNotFoundException {
-        map = (Map<S, Object>)ois.readObject();
-        Set<S> readKeys = map.keySet();
-        for(S s : modelStateClass.getEnumConstants()) {
-        	if(!readKeys.contains(s))
-        		throw new InvalidObjectException("State " + s + " not read!");
-        }
+	public void loadFrom(BufferedReader br) throws IOException {
+		serializer.readFile(br, stateValueMap);
+		for(ModelHandler<S> modelHandler : modelHandlers) {
+			modelHandler.handleModelChange(this);
+		}
 	}
 	
 	public Object get(S state) {
-		Object out = map.get(state);
-		if(out == null) // never return null
+		Object out = stateValueMap.get(state);
+		if(out == null)
 			return state.getDefaultValue();
 		return out;
 	}
@@ -69,7 +60,12 @@ public class Model<S extends ModelState> {
 		if(!aExtendsB(value.getClass(), state.getType()))
 			if(value.getClass() != state.getType())
 				throw new IllegalArgumentException("Wrong type: " + state.getType() + "!=" + value.getClass());
-		map.put(state, value);
+		if(savedValues != null && savedValues.contains(state)) {
+			Log.log(new IllegalStateException("State value " + state + " saved more than once!"));
+		}
+		stateValueMap.put(state, value);
+		if(savedValues != null)
+			savedValues.add(state);
 	}
 
 	/**
@@ -83,31 +79,43 @@ public class Model<S extends ModelState> {
 		return aExtendsB(a.getSuperclass(), b);
 	}
 	
-	public void addModelSaver(ModelSaver<S> modelSaver) {
-		modelSavers.add(modelSaver);
+	public void addModelHandler(ModelHandler<S> modelHandler) {
+		modelHandlers.add(modelHandler);
 	}
 	
-	private void save() {
-		for(ModelSaver<S> modelSaver : modelSavers) {
-			modelSaver.save(this);
+	/**
+	 * Saves using all registered modelSavers. 
+	 * Logs errors if any value is not saved exactly once
+	 */
+	private void runModelsavers() {
+		savedValues = new TreeSet<S>();
+		for(ModelHandler<S> modelHandler : modelHandlers) {
+			modelHandler.save(this);
 		}
+		// Check that everything got saved:
+		for(S s : stateValueMap.keySet()) {
+			if(!savedValues.contains(s)) {
+				Log.log(new IllegalStateException("State value " + s + " was not saved!"));				
+			}
+		}
+		savedValues = null;
 	}
 	
 	public void saveToFile() throws IOException {
-		save();
-		File outputFile = new File(modelFile);
+		saveToFile(new File(modelFile));
+	}
+
+	public void saveToFile(File outputFile) throws IOException {
+		runModelsavers();
 		if(!outputFile.exists())
 			outputFile.createNewFile();
-		FileOutputStream fos = new FileOutputStream(modelFile, false);
-		ObjectOutputStream oos = new ObjectOutputStream(fos);
+		FileOutputStream fos = new FileOutputStream(outputFile, false);
+		PrintWriter pw = new PrintWriter(fos);
 
-		saveTo(oos);
+		serializer.writeFile(pw, stateValueMap);
 
-		oos.close();
+		pw.flush();
+		pw.close();
 		fos.close();		
-	}
-	
-	public void saveTo(ObjectOutputStream oos) throws IOException {
-		oos.writeObject(map);
 	}
 }

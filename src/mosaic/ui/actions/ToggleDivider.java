@@ -2,7 +2,6 @@ package mosaic.ui.actions;
 
 import java.awt.event.*;
 import javax.swing.*;
-
 import mosaic.ui.MainWindow;
 import icon.*;
 

@@ -30,12 +30,7 @@ public class IOActions {
 	public static void saveGriddy(Model<GriddyState> model, BufferedImage image, File file) throws IOException {
 		if(image == null)
 			throw new IllegalArgumentException("image is null");
-		FileOutputStream fos = new FileOutputStream(file, false);
-		ObjectOutputStream oos = new ObjectOutputStream(fos);
-		model.saveTo(oos);
-		ImageIO.write(image, suffix((File)model.get(GriddyState.Image)), fos);
-		oos.close();
-		fos.close();
+		model.saveToFile(file);
 	}
 
 	public static void saveImage(BufferedImage bricked, File file) throws IOException {
@@ -48,7 +43,7 @@ public class IOActions {
 		case griddy:
 			FileInputStream fis = new FileInputStream(file);
 			ObjectInputStream ois = new ObjectInputStream(fis);
-			changingModel.loadFrom(ois);
+			//changingModel.loadFrom(ois); // TODO: Update!
 			String fileNameType = suffix((File)changingModel.get(GriddyState.Image));			
 			ImageInputStream iis = ImageIO.createImageInputStream(fis);
 			
@@ -92,6 +87,7 @@ public class IOActions {
 		Action load = new AbstractAction() {
 			private static final long serialVersionUID = -475310013680255L;
 
+			@Override
 			public void actionPerformed(ActionEvent e) {				
 				try {
 					Rectangle r = parent.getBounds();
@@ -130,7 +126,7 @@ public class IOActions {
 		load.putValue(Action.NAME, "Load screenshot");
 		load.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_L);
 		load.putValue(Action.DISPLAYED_MNEMONIC_INDEX_KEY, "Load".indexOf('L'));
-		load.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_L, KeyEvent.CTRL_DOWN_MASK));
+		load.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.CTRL_DOWN_MASK));
 
 		return load;
 	}
@@ -150,6 +146,7 @@ public class IOActions {
 		Action open = new AbstractAction() {
 			private static final long serialVersionUID = -475310013680255L;
 
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				int retVal = fileChooser.showOpenDialog(parent);
 				if(retVal == JFileChooser.APPROVE_OPTION) {
@@ -171,7 +168,7 @@ public class IOActions {
 		open.putValue(Action.NAME, "Open");
 		open.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_O);
 		open.putValue(Action.DISPLAYED_MNEMONIC_INDEX_KEY, "Open".indexOf('O'));
-		open.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.CTRL_DOWN_MASK));
+		open.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
 
 		return open;
 	}
@@ -180,6 +177,7 @@ public class IOActions {
 		Action save = new AbstractAction() {
 			private static final long serialVersionUID = -208104007018089L;
 
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				File file = (File)currentModel.get(GriddyState.Image);
 				file = ensureSuffix(file, GRIDDY_SUFFIX);
@@ -199,7 +197,7 @@ public class IOActions {
 		save.putValue(Action.NAME, "Save");
 		save.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_O);
 		save.putValue(Action.DISPLAYED_MNEMONIC_INDEX_KEY, "Save".indexOf('S'));
-		save.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK));
+		save.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK));
 
 		return save;
 	}
@@ -222,6 +220,7 @@ public class IOActions {
 		Action saveAs = new AbstractAction() {
 			private static final long serialVersionUID = -48023768855816648L;
 
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				fileChooser.setSelectedFile(ensureSuffix((File)currentModel.get(GriddyState.Image), GRIDDY_SUFFIX));
 				int retVal = fileChooser.showSaveDialog(parent);
@@ -245,7 +244,7 @@ public class IOActions {
 		saveAs.putValue(Action.NAME, "Save As");
 		saveAs.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_A);
 		saveAs.putValue(Action.DISPLAYED_MNEMONIC_INDEX_KEY, "Save As".indexOf('A'));
-		saveAs.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK | KeyEvent.SHIFT_DOWN_MASK));
+		saveAs.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
 
 		return saveAs;
 	}
@@ -269,6 +268,7 @@ public class IOActions {
 		Action export = new AbstractAction() {
 			private static final long serialVersionUID = 66031427278213561L;
 
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				fileChooser.setSelectedFile(((File)currentModel.get(GriddyState.Image)));
 				int retVal = fileChooser.showDialog(parent, "Save Screenshot");
@@ -295,7 +295,7 @@ public class IOActions {
 		export.putValue(Action.NAME, "Save Screenshot");
 		export.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_E);
 		export.putValue(Action.DISPLAYED_MNEMONIC_INDEX_KEY, "Save Screenshot".indexOf('e'));
-		export.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_E, KeyEvent.CTRL_DOWN_MASK));
+		export.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_DOWN_MASK));
 
 		return export;
 	}

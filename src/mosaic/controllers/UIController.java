@@ -7,15 +7,15 @@ import javax.swing.event.*;
 
 import mosaic.io.*;
 
-public class UIController implements ChangeListener, ModelSaver<BrickGraphicsState> {
+public class UIController implements ChangeListener, ModelHandler<BrickGraphicsState> {
 	private boolean showColorDistributionChart, showMagnifier, showColors, showLegend, showTotals;
 	
 	private List<ChangeListener> listeners;
 	
 	public UIController(Model<BrickGraphicsState> model) {
 		listeners = new LinkedList<ChangeListener>();
-		reloadModel(model);
-		model.addModelSaver(this);
+		handleModelChange(model);
+		model.addModelHandler(this);
 	}
 	
 	public boolean showColorDistributionChart() {
@@ -69,7 +69,8 @@ public class UIController implements ChangeListener, ModelSaver<BrickGraphicsSta
 		model.set(BrickGraphicsState.ColorDistributionChartShow, showColorDistributionChart);
 		model.set(BrickGraphicsState.MagnifierShow, showMagnifier);
 	}
-	public void reloadModel(Model<BrickGraphicsState> model) {
+	@Override
+	public void handleModelChange(Model<BrickGraphicsState> model) {
 		showLegend = (Boolean)model.get(BrickGraphicsState.MagnifierShowLegend);
 		showColors = (Boolean)model.get(BrickGraphicsState.MagnifierShowColors);
 		showTotals = (Boolean)model.get(BrickGraphicsState.MagnifierShowTotals);

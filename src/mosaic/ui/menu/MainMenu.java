@@ -5,6 +5,7 @@ import javax.swing.*;
 import icon.*;
 import ui.AboutDialog;
 import ui.actions.*;
+import mosaic.controllers.*;
 import mosaic.io.*;
 import mosaic.ui.*;
 import mosaic.ui.actions.*;
@@ -12,17 +13,17 @@ import mosaic.ui.actions.*;
 public class MainMenu extends JMenuBar {
 	private static final long serialVersionUID = 3921145264492575680L;
 
-	public MainMenu(MainWindow mw, Model<BrickGraphicsState> model, ColorSettingsDialog csd) {
+	public MainMenu(MainController mc, MainWindow mw, Model<BrickGraphicsState> model, ColorSettingsDialog csd) {
 		// File menu:
 		JMenu fileMenu = new JMenu("File");
 		fileMenu.setDisplayedMnemonicIndex(0);
 		fileMenu.setMnemonic('F');
-		fileMenu.add(MosaicIO.createOpenAction(model, mw));
-		fileMenu.add(MosaicIO.createSaveAction(model, mw));
-		fileMenu.add(MosaicIO.createSaveAsAction(model, mw));
-		fileMenu.add(new ExportLDR(model, mw));
-		fileMenu.add(new ExportLXF(model, mw));
-		fileMenu.add(mw.getPrintController().createPrintAction());
+		fileMenu.add(MosaicIO.createOpenAction(model, mc, mw));
+		fileMenu.add(MosaicIO.createSaveAction(model, mc, mw));
+		fileMenu.add(MosaicIO.createSaveAsAction(model, mc, mw));
+		fileMenu.add(new ExportLDR(model, mc, mw));
+		fileMenu.add(new ExportLXF(model, mc, mw));
+		fileMenu.add(mc.getPrintController().createPrintAction());
 		fileMenu.addSeparator();
 		fileMenu.add(new ExitAction(model));
 
@@ -36,23 +37,23 @@ public class MainMenu extends JMenuBar {
 		viewMenu.add(new ToggleFilters(ipv));
 		viewMenu.addSeparator();
 		viewMenu.add(new ToggleColorChooser(mw.getColorChooser()));
-		viewMenu.add(new ToggleMagnifier(mw.getUIController()));
+		viewMenu.add(new ToggleMagnifier(mc.getUIController()));
 
 		//Help menu:
 		JMenu helpMenu = new JMenu("Help");
 		helpMenu.setDisplayedMnemonicIndex(0);
 		helpMenu.setMnemonic('H');
-		helpMenu.add(new HelpLinkAction(mw, MainWindow.HELP_URL));
+		helpMenu.add(new HelpLinkAction(mw, MainController.HELP_URL));
 		helpMenu.addSeparator();
-		String appName = MainWindow.APP_NAME + " (" + MainWindow.APP_NAME_SHORT + ")";
-		String appVersion = MainWindow.APP_VERSION;
+		String appName = MainController.APP_NAME + " (" + MainController.APP_NAME_SHORT + ")";
+		String appVersion = MainController.APP_VERSION;
 		helpMenu.add(AboutDialog.createAction(mw, appName, appVersion, Icons.floydSteinberg(64), Icons.floydSteinberg(Icons.SIZE_SMALL)));
 		
 		// this menu bar:
 		add(fileMenu);
 		add(viewMenu);
-		add(new ColorMenu(csd, mw.getColorController()));
-		add(new MagnifierMenu(bv.getMagnifierController(), mw.getUIController()));
+		add(new ColorMenu(csd, mc.getColorController()));
+		add(new MagnifierMenu(bv.getMagnifierController(), mc.getUIController()));
 		add(helpMenu);
 	}
 }

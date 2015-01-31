@@ -5,17 +5,18 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.*;
 import io.*;
+
 import javax.swing.*;
 import griddy.*;
 
-public class Zoom implements ModelSaver<GriddyState>, ModelChangeListener {
+public class Zoom implements ModelHandler<GriddyState>, ModelChangeListener {
 	private double zoom;
 	private List<ZoomListener> listeners;
 	
 	public Zoom(Model<GriddyState> model) {
 		zoom = (Double)model.get(GriddyState.Zoom);
 		listeners = new LinkedList<ZoomListener>();
-		model.addModelSaver(this);
+		model.addModelHandler(this);
 	}
 	
 	public double getZoom() {
@@ -149,5 +150,11 @@ public class Zoom implements ModelSaver<GriddyState>, ModelChangeListener {
 	@Override
 	public void modelChanged(Object o) {
 		setZoom((Double)o);
+	}
+
+	@Override
+	public void handleModelChange(Model<GriddyState> model) {
+		// TODO Auto-generated method stub
+		
 	}
 }

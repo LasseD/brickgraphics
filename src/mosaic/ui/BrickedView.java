@@ -21,7 +21,7 @@ public class BrickedView extends JComponent implements ChangeListener {
 	private ColorController colorController;
 	private JComponent mainComponent;
 	
-	public BrickedView(MainWindow mw, Model<BrickGraphicsState> model) {
+	public BrickedView(MainController mw, Model<BrickGraphicsState> model) {
 		magnifierController = mw.getMagnifierController();
 		colorController = mw.getColorController();
 		// UI:		
@@ -96,11 +96,6 @@ public class BrickedView extends JComponent implements ChangeListener {
 		add(mainComponent, BorderLayout.CENTER);		
 	}
 	
-	public void reloadModel(Model<BrickGraphicsState> model) {
-		magnifierController.reloadModel(model);
-		toolBar.reloadModel(model);
-	}
-	
 	public void setImage(BufferedImage image) {
 		if(image == null)
 			throw new NullPointerException();
@@ -122,7 +117,7 @@ public class BrickedView extends JComponent implements ChangeListener {
 
 	@Override
 	public void stateChanged(ChangeEvent e) {
-		if(e != null && e.getSource() instanceof ToBricksTools) {
+		if(e != null && inImage != null && e.getSource() instanceof ToBricksTools) {
 			ToBricksTools toolBar = (ToBricksTools)e.getSource();
 			updateTransform(toolBar);
 			bricked = toBricksTransform.transform(inImage);

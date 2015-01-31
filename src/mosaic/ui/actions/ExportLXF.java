@@ -5,7 +5,7 @@ import java.io.File;
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
-
+import mosaic.controllers.*;
 import icon.*;
 import io.Log;
 import io.Model;
@@ -16,9 +16,11 @@ import mosaic.ui.MainWindow;
 public class ExportLXF extends AbstractAction {
 	public static final String LXF_SUFFIX = "lxf";
 
-	private MainWindow mw;	
+	private MainController mc;
+	private MainWindow mw;
 	
-	public ExportLXF(final Model<BrickGraphicsState> currentModel, final MainWindow mw) {
+	public ExportLXF(final Model<BrickGraphicsState> currentModel, final MainController mc, MainWindow mw) {
+		this.mc = mc;
 		this.mw = mw;
 
 		putValue(Action.SHORT_DESCRIPTION, "Export mosaic as an LDD model.");
@@ -33,7 +35,7 @@ public class ExportLXF extends AbstractAction {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		final FileFilter ff = new FileNameExtensionFilter("LDD model, ." + LXF_SUFFIX, LXF_SUFFIX);
-		File file = mw.getSaveDialog().showSaveDialog("Export mosaic to LDD", ff);
+		File file = mc.getSaveDialog().showSaveDialog("Export mosaic to LDD", ff);
 		
 		if(file != null) {			
 			try {

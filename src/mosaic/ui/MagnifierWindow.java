@@ -10,8 +10,6 @@ import transforms.ToBricksTransform;
 import bricks.ToBricksType;
 import colors.LEGOColor;
 import mosaic.controllers.*;
-import mosaic.ui.ColorLegend;
-import mosaic.ui.MainWindow;
 import mosaic.ui.menu.*;
 
 public class MagnifierWindow extends JDialog implements ChangeListener {
@@ -22,10 +20,10 @@ public class MagnifierWindow extends JDialog implements ChangeListener {
 	private ColorLegend legend;
 	private JSplitPane splitPane;
 
-	public MagnifierWindow(final MainWindow owner) {
-		super(owner, "Magnifier", false);
-		magnifierController = owner.getMagnifierController();
-		uiController = owner.getUIController();
+	public MagnifierWindow(final MainController mc, MainWindow mw) {
+		super(mw, "Magnifier", false);
+		magnifierController = mc.getMagnifierController();
+		uiController = mc.getUIController();
 		everShown = false;
 		setAlwaysOnTop(false);
 		setFocusableWindowState(false);
@@ -39,7 +37,7 @@ public class MagnifierWindow extends JDialog implements ChangeListener {
 		
 		add(new MagnifierToolBar(magnifierController, uiController), BorderLayout.NORTH);
 
-		legend = new ColorLegend(owner);
+		legend = new ColorLegend(mc, mw);
 		legend.setBackground(getBackground());
 		JScrollPane scrollPane = new JScrollPane(legend);
 		splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, canvas, scrollPane);

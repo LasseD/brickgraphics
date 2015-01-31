@@ -6,7 +6,6 @@ import java.util.List;
 import java.awt.event.*;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
-import java.io.Serializable;
 import javax.swing.*;
 import griddy.*;
 import griddy.zoom.*;

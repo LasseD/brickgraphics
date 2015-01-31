@@ -1,75 +1,39 @@
 package mosaic.ui;
 
-import icon.*;
-import io.*;
-
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.image.*;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.io.*;
-
+import java.awt.image.BufferedImage;
+import java.beans.*;
+import java.io.File;
+import java.io.IOException;
+import icon.Icons;
+import io.*;
 import javax.swing.*;
 import javax.swing.event.*;
-import colors.parsers.ColorSheetParser;
 import mosaic.controllers.*;
-import mosaic.io.*;
-import mosaic.controllers.PrintController;
+import mosaic.io.BrickGraphicsState;
 import mosaic.ui.menu.*;
 
-/**
- * @author LD
- */
-public class MainWindow extends JFrame implements ChangeListener, ModelSaver<BrickGraphicsState> {
-	public static final String APP_NAME = "LD Digital Mosaic Creator";
-	public static final String APP_NAME_SHORT = "LDDMC";
-	public static final String LOG_FILE_NAME = "lddmc.log";
-	public static final int VERSION_MAJOR = 0;
-	public static final int VERSION_MINOR = 9;
-	public static final int VERSION_MICRO = 2;
-	public static final String APP_VERSION = VERSION_MAJOR + "." + VERSION_MINOR + "." + VERSION_MICRO;
-	public static final String HELP_URL = "http://c-mt.dk/software/lddmc/help";
-	
+public class MainWindow extends JFrame implements ChangeListener, ModelHandler<BrickGraphicsState> {
 	private ImagePreparingView imagePreparingView;
 	private BrickedView brickedView;
-	private BufferedImage image;
 	private JSplitPane splitPane;
-	private Model<BrickGraphicsState> model;
-	private SaveDialog saveDialog;
 	private ColorChooserDialog colorChooser;
+	private MainController mc;
 
-	private MagnifierController magnifierController;
-	private UIController uiController;
-	private ColorController colorController;
-	private PrintController printController;
-
-	public MainWindow() {
-		super(APP_NAME);
-		try {
-			Log.initializeLog(LOG_FILE_NAME);
-		} catch (IOException e1) {
-			JOptionPane.showMessageDialog(this, "The log file " + LOG_FILE_NAME + " could not be opened for writing.\nLDDMC might not have sufficient permissions.\nLog messages are written to console if available.\nThe error message:\n" + e1.getMessage(), "Failed to open/create log file", JOptionPane.WARNING_MESSAGE);
-		}
+	public MainWindow(final MainController mc, final Model<BrickGraphicsState> model) {
+		super(MainController.APP_NAME);
+		this.mc = mc;
+		model.addModelHandler(this);
 		long startTime = System.currentTimeMillis();
-		Log.log("Initiating components");
-		model = new Model<BrickGraphicsState>("lddmc.state", BrickGraphicsState.class);
-		model.addModelSaver(this);
 		
-		colorController = ColorController.instance(model);
-		uiController = new UIController(model);
-		magnifierController = new MagnifierController(model, uiController);
-		printController = new PrintController(model, this);		
-		saveDialog = new SaveDialog(this);
-		saveDialog.setParentFolder(getFile().getParentFile());
+		setVisible(true);
 		
-		Log.log("Created controllers after " + (System.currentTimeMillis()-startTime) + "ms.");
-
-		imagePreparingView = new ImagePreparingView(model);		
+		imagePreparingView = new ImagePreparingView(model);
 		imagePreparingView.addChangeListener(this);
 		Log.log("Created left view after " + (System.currentTimeMillis()-startTime) + "ms.");
 		
-		brickedView = new BrickedView(this, model);
+		brickedView = new BrickedView(mc, model);
 		Log.log("Created right view after " + (System.currentTimeMillis()-startTime) + "ms.");
 
 		addWindowListener(new WindowAdapter() {
@@ -123,7 +87,7 @@ public class MainWindow extends JFrame implements ChangeListener, ModelSaver<Bri
 			public void propertyChange(PropertyChangeEvent evt) {
 				int dividerLocation = splitPane.getDividerLocation();
 				imagePreparingView.setVisible(dividerLocation >= getMinDividerLocation());
-				brickedView.setVisible(dividerLocation <= getMaxDividerLocation());
+				brickedView.setVisible(splitPane.getWidth() == 0 || dividerLocation <= getMaxDividerLocation());
 				brickedView.getToolBar().update();
 			}
 		});
@@ -142,30 +106,20 @@ public class MainWindow extends JFrame implements ChangeListener, ModelSaver<Bri
 		SwingUtilities.invokeLater(new Runnable() {			
 			@Override
 			public void run() {
-				ColorSettingsDialog csd = new ColorSettingsDialog(MainWindow.this, colorController);
-
-				colorChooser = new ColorChooserDialog(MainWindow.this); // Must be made before ribbon!
-				Ribbon ribbon = new Ribbon(MainWindow.this);
+				colorChooser = new ColorChooserDialog(mc, MainWindow.this); // Must be made before ribbon!
+				Ribbon ribbon = new Ribbon(mc, MainWindow.this);
 				brickedView.getToolBar().addComponents(ribbon, true);		
 				add(ribbon, BorderLayout.NORTH);
-				setJMenuBar(new MainMenu(MainWindow.this, model, csd));
+				ColorSettingsDialog csd = new ColorSettingsDialog(MainWindow.this, mc.getColorController());
+				setJMenuBar(new MainMenu(mc, MainWindow.this, model, csd));
 				setIconImage(Icons.get(32, "icon").getImage());
-				new MagnifierWindow(MainWindow.this); // Do your own thing little window.
-				if(colorController.usesBackupColors()) {
-					JOptionPane.showMessageDialog(MainWindow.this, "The file " + ColorSheetParser.COLORS_FILE + " could not be read.\nBackup colors are used.\nTo get all the functionality of this program, please make sure that the file exists and that the program is allowed to read the file.\nThis also applies to the other files and folders of the program.", "Error reading file", JOptionPane.WARNING_MESSAGE);
-				}
 			}
 		});
 
+		handleModelChange(model);
 		Log.log("LDDMC main window operational after " + (System.currentTimeMillis()-startTime) + "ms.");
 	}
-	
-	public ColorChooserDialog getColorChooser() {
-		if(colorChooser == null)
-			throw new IllegalStateException();
-		return colorChooser;
-	}
-	
+
 	private int getMinDividerLocation() {
 		return Math.max(32, imagePreparingView.getPreferredSize().width);
 	}
@@ -174,82 +128,10 @@ public class MainWindow extends JFrame implements ChangeListener, ModelSaver<Bri
 		return splitPane.getSize().width - splitPane.getDividerSize() - Math.max(32, brickedView.getPreferredSize().width) - 2;
 	}
 	
-	public SaveDialog getSaveDialog() {
-		return saveDialog;
-	}
-	
-	public static void main(String[] args) {
-		SwingUtilities.invokeLater(new Thread() {
-			@Override
-			public void run() {
-				try {
-					UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-				} catch (Exception e) {
-					Log.log(e);
-				}
-				MainWindow mw = newWindow();
-				Action openAction = MosaicIO.createOpenAction(mw.model, mw);
-				try {
-					File file = (File)mw.model.get(BrickGraphicsState.Image);
-					MosaicIO.load(mw, mw.model, file);
-				}
-				catch (Exception e) {
-					Log.log(e);
-					openAction.actionPerformed(null);
-				} 			
-			}
-		});
-	}
-	
-	private static MainWindow newWindow() {
-		MainWindow mw = new MainWindow();
-		Rectangle placement = (Rectangle)mw.model.get(BrickGraphicsState.MainWindowPlacement);
-		mw.setBounds(placement);
-		mw.setVisible(true);
-		mw.splitPane.setDividerLocation((Integer)mw.model.get(BrickGraphicsState.MainWindowDividerLocation));
-		return mw;
-	}
-	
-	public void softReset() {
-		try {
-			model.saveToFile();
-		} catch (IOException e) {
-			Log.log(e);
-		}
-		setVisible(false);
-		dispose();
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				newWindow();
-			}
-		});
-	}
-
-	public void mosaicLoaded(BufferedImage image) {
-		this.image = image;
-		imagePreparingView.loadModel(model);
-		imagePreparingView.setImage(image);				
-		
-		BufferedImage toBrick = imagePreparingView.getFullyPreparredImage();
-
-		brickedView.reloadModel(model);
-		brickedView.setImage(toBrick);
-
-		if(splitPane != null)
-			repaint();
-	}
-	
-	public String getFileName() {
-		return ((File)model.get(BrickGraphicsState.Image)).getName();
-	}
-
-	public File getFile() {
-		return (File)model.get(BrickGraphicsState.Image);
-	}
-
-	public BufferedImage getInImage() {
-		return image;
+	public ColorChooserDialog getColorChooser() {
+		if(colorChooser == null)
+			throw new IllegalStateException();
+		return colorChooser;
 	}
 	
 	public BrickedView getBrickedView() {
@@ -274,31 +156,32 @@ public class MainWindow extends JFrame implements ChangeListener, ModelSaver<Bri
 		return brickedView.getMagnifierController().getCoreImageInCoreUnits();
 	}
 	
-	public ColorController getColorController() {
-		return colorController;
-	}
-	
-	public PrintController getPrintController() {
-		return printController;
-	}
-	
-	public MagnifierController getMagnifierController() {
-		return magnifierController;
-	}
-
-	public UIController getUIController() {
-		return uiController;
-	}
-
 	@Override
 	public void stateChanged(ChangeEvent e) {
-		File file = (File)model.get(BrickGraphicsState.Image);
-		setTitle(APP_NAME + " - " + file.getName());
-		if(image == null)
+		if(mc.getInImage() == null || e == null || e.getSource() == this) {
 			return;
+		}
+		
+		File file = mc.getFile();
+		if(file == null)
+			setTitle(MainController.APP_NAME);
+		else
+			setTitle(MainController.APP_NAME + " - " + mc.getFile().getName());
+
+		imagePreparingView.setImage(mc.getInImage(), this);						
 		BufferedImage toBrick = imagePreparingView.getFullyPreparredImage();
 		brickedView.setImage(toBrick);
+
+		if(splitPane == null)
+			return;
 		repaint();
+	}
+	
+	@Override
+	public void handleModelChange(Model<BrickGraphicsState> model) {
+		Rectangle placement = (Rectangle)model.get(BrickGraphicsState.MainWindowPlacement);
+		setBounds(placement);
+		splitPane.setDividerLocation((Integer)model.get(BrickGraphicsState.MainWindowDividerLocation));
 	}
 	
 	@Override

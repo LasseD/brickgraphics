@@ -1,15 +1,16 @@
 package mosaic.io;
 
+import io.DataFile;
 import io.ModelState;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
-import java.io.File;
 import mosaic.controllers.*;
 
 public enum BrickGraphicsState implements ModelState {
 	MainWindowPlacement(new Rectangle(0, 0, 860, 430)),
 	MainWindowDividerLocation(412),
-	Image(new File("mosaic_sample_input.jpg")),
+	ImageFileName("mosaic_sample_input.jpg"),
+	ImageFile(new DataFile()),
 
 	// How to display colors:
 	ColorsShownNumber(ColorController.ShownID.ID.ordinal()),
@@ -67,8 +68,8 @@ public enum BrickGraphicsState implements ModelState {
 	ToBricksWidth(480),
 	ToBricksHeight(160),
 	ToBricksPropagationPercentage(50),
-	SelectedColors(new String[]{}),
-	SelectedColorGroups(new String[]{"Basic", "Modern"}),
+	SelectedColors(new int[]{}),
+	SelectedColorGroups(new int[]{0, 1}),
 	ToBricksTypeIndex(0);
 	//ToBricksHalfToneTypeIndex(0),
 	//ToBricksSizeTypeWidthIndex(2),
@@ -76,7 +77,7 @@ public enum BrickGraphicsState implements ModelState {
 		
 	private Object defaultValue;
 	private Class<?> objectType;
-	BrickGraphicsState(Object defaultValue) {
+	private BrickGraphicsState(Object defaultValue) {
 		this.defaultValue = defaultValue;
 		this.objectType = defaultValue.getClass();
 	}

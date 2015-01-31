@@ -6,11 +6,12 @@ import java.awt.geom.*;
 import java.awt.image.*;
 import javax.swing.event.*;
 import mosaic.io.*;
+
 import java.util.*;
 import java.util.List;
 import io.*;
 
-public class Cropper implements MouseListener, MouseMotionListener, ModelSaver<BrickGraphicsState> {
+public class Cropper implements MouseListener, MouseMotionListener, ModelHandler<BrickGraphicsState> {
 	public static final int TOLERANCE = 3;
 
 	private Rectangle mouseImage;
@@ -21,12 +22,11 @@ public class Cropper implements MouseListener, MouseMotionListener, ModelSaver<B
 	private boolean enabled;
 	
 	public Cropper(Model<BrickGraphicsState> model) {
-		model.addModelSaver(this);
+		model.addModelHandler(this);
 		state = Drag.NONE;
-		cropRect = (Rectangle2D.Double)model.get(BrickGraphicsState.PrepareCrop);		
-		enabled = (Boolean)model.get(BrickGraphicsState.PrepareCropEnabled);
 		lastPress = null;
 		listeners = new LinkedList<ChangeListener>();
+		handleModelChange(model);
 	}
 	
 	public Cursor getCursor() {
@@ -326,9 +326,11 @@ public class Cropper implements MouseListener, MouseMotionListener, ModelSaver<B
 
 	@Override
 	public void mouseMoved(MouseEvent e) {
+		if(mouseImage == null)
+			return;
 		Point p = e.getPoint();
 		p.translate(-2-mouseImage.x, -2);
-		if(mouseImage != null && state != (state = Drag.intersecting(p, getCrop(mouseImage))))
+		if(state != (state = Drag.intersecting(p, getCrop(mouseImage))))
 			notifyListeners();
 	}
 
@@ -340,5 +342,11 @@ public class Cropper implements MouseListener, MouseMotionListener, ModelSaver<B
 	public void save(Model<BrickGraphicsState> model) {
 		model.set(BrickGraphicsState.PrepareCrop, cropRect);
 		model.set(BrickGraphicsState.PrepareCropEnabled, enabled);
+	}
+
+	@Override
+	public void handleModelChange(Model<BrickGraphicsState> model) {
+		cropRect = (Rectangle2D.Double)model.get(BrickGraphicsState.PrepareCrop);		
+		enabled = (Boolean)model.get(BrickGraphicsState.PrepareCropEnabled);
 	}
 }
