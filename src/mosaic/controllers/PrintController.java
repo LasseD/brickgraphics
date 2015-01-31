@@ -345,6 +345,23 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		g2.drawLine(x, bottomY, x-arrowSize, bottomY-arrowSize);
 	}
 	
+	private BufferedImage grayImage;
+	private BufferedImage grayImageIn;
+	private BufferedImage getGrayImage(BufferedImage orig, int width, int height) {
+		if(grayImageIn == orig && grayImage != null && grayImage.getWidth() == width && grayImage.getHeight() == height) {
+			return grayImage;
+		}
+		// Build and return gray Image:
+		grayImageIn = orig;
+		grayImage = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_GRAY);				
+		AffineTransform at = AffineTransform.getScaleInstance(width/(double)orig.getWidth(), height/(double)orig.getHeight());
+
+		Graphics2D g2 = grayImage.createGraphics();
+	    g2.drawImage(orig, at, null);
+		
+		return grayImage;
+	}
+	
 	private double drawShowPosition(int page, int numPagesWidth, int numPagesHeight, FontMetrics fm, int xMin, int xMax, int yMin, int yMax, 
 			Graphics2D g2, int unit, Dimension coreImageInCoreUnits, Dimension pageSizeInCoreUnits) {
 		// Nothing:
@@ -405,6 +422,13 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 			double innerBoxWidth = outerBoxWidth/(double)numPagesWidth;
 			// boxes and lines:
 			int outerBoxX = xMid - outerBoxWidth/2;
+			
+			// Draw gray picture:
+			BufferedImage finalImage = mw.getFinalImage();
+			int grayWidth = (int)Math.round(outerBoxWidth * coreImageInCoreUnits.width/((double)pageSizeInCoreUnits.width*numPagesWidth));
+			int grayHeight = (int)Math.round(outerBoxHeight * coreImageInCoreUnits.height/((double)pageSizeInCoreUnits.height*numPagesHeight));
+			g2.drawImage(getGrayImage(finalImage, grayWidth, grayHeight), null, outerBoxX, yMin);			
+			
 			g2.drawRect(outerBoxX, yMin, outerBoxWidth, outerBoxHeight);
 			int xLeft = outerBoxX + (int)((fromLeft-1)*innerBoxWidth);
 			int xRight = outerBoxX + (int)(fromLeft*innerBoxWidth);
