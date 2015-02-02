@@ -34,8 +34,8 @@ public class ImagePreparingView extends JComponent implements ChangeListener, Mo
 		setLayout(new BorderLayout());
 		listeners = new LinkedList<ChangeListener>();
 
-		fullScaler = new ScaleTransform(ScaleTransform.Type.bounded, AffineTransformOp.TYPE_BILINEAR, 2);
-		cropScaler = new ScaleTransform(ScaleTransform.Type.bounded, AffineTransformOp.TYPE_BILINEAR);
+		fullScaler = new ScaleTransform(ScaleTransform.Type.bounded, RenderingHints.VALUE_INTERPOLATION_BILINEAR, 2);
+		cropScaler = new ScaleTransform(ScaleTransform.Type.bounded, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 		
 		cropper = new Cropper(model);		
 		cropper.addChangeListener(this);

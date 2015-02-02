@@ -35,7 +35,6 @@ public class KVFileHandler<S extends ModelState> {
 		// Read and save all key/value pars:
 		String line;
 		while((line = br.readLine()) != null) {
-			System.out.println(line);
 			int indexOfColon = line.indexOf(':');
 			String k = line.substring(0, indexOfColon);
 			String v = line.substring(indexOfColon+1);

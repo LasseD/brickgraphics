@@ -13,4 +13,4 @@ CIELab implementation was slightly changed to fit into the framework of LDDMC.
 
 ldraw.xml taken from LDD installation and http://gallaghersart.com
 
-The source of this software is included in the /src folder.
+The source of this software is avilable at GitHub here: https://github.com/LasseD/brickgraphics

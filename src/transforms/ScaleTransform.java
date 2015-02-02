@@ -1,59 +1,56 @@
 package transforms;
 
-import java.awt.geom.*;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+//import java.awt.Transparency;
+//import java.awt.geom.*;
 import java.awt.image.*;
 
 public class ScaleTransform extends BufferedTransform {
 	public enum Type {
 		width {
 			@Override
-			public AffineTransformOp op(double inX, double inY, ScaleTransform st) {
+			public Scale getScale(double inX, double inY, ScaleTransform st) {
 				double scaleX = st.width / inX;
-				AffineTransform scaler = AffineTransform.getScaleInstance(scaleX, scaleX);
-				return new AffineTransformOp(scaler, st.quality);
+				return new Scale(scaleX, scaleX);
 			}
 		},
 		height {
 			@Override
-			public AffineTransformOp op(double inX, double inY, ScaleTransform st) {
+			public Scale getScale(double inX, double inY, ScaleTransform st) {
 				double scaleY = st.height / inY;				
-				AffineTransform scaler = AffineTransform.getScaleInstance(scaleY, scaleY);
-				return new AffineTransformOp(scaler, st.quality);
+				return new Scale(scaleY, scaleY);
 			}
 		}, 
 		dims {
 			@Override
-			public AffineTransformOp op(double inX, double inY, ScaleTransform st) {
+			public Scale getScale(double inX, double inY, ScaleTransform st) {
 				double scaleX = st.width / inX;
 				double scaleY = st.height / inY;
-				AffineTransform scaler = AffineTransform.getScaleInstance(scaleX, scaleY);
-				return new AffineTransformOp(scaler, st.quality);
+				return new Scale(scaleX, scaleY);
 			}
 		}, 
 		scaleX {
 			@Override
-			public AffineTransformOp op(double inX, double inY, ScaleTransform st) {
-				AffineTransform scaler = AffineTransform.getScaleInstance(st.scaleX, st.scaleX);
-				return new AffineTransformOp(scaler, st.quality);
+			public Scale getScale(double inX, double inY, ScaleTransform st) {
+				return new Scale(st.scaleX, st.scaleX);
 			}
 		}, 
 		scaleY {
 			@Override
-			public AffineTransformOp op(double inX, double inY, ScaleTransform st) {
-				AffineTransform scaler = AffineTransform.getScaleInstance(st.scaleY, st.scaleY);
-				return new AffineTransformOp(scaler, st.quality);
+			public Scale getScale(double inX, double inY, ScaleTransform st) {
+				return new Scale(st.scaleY, st.scaleY);
 			}
 		}, 
 		scale {
 			@Override
-			public AffineTransformOp op(double inX, double inY, ScaleTransform st) {
-				AffineTransform scaler = AffineTransform.getScaleInstance(st.scaleX, st.scaleY);
-				return new AffineTransformOp(scaler, st.quality);
+			public Scale getScale(double inX, double inY, ScaleTransform st) {
+				return new Scale(st.scaleX, st.scaleY);
 			}
 		}, 
 		bounded {
 			@Override
-			public AffineTransformOp op(double inX, double inY, ScaleTransform st) {
+			public Scale getScale(double inX, double inY, ScaleTransform st) {
 				double scaleX = st.width / inX;
 				double scaleY = st.height / inY;
 				double scale;
@@ -63,32 +60,32 @@ public class ScaleTransform extends BufferedTransform {
 				else {
 					scale = scaleY;
 				}
-				AffineTransform scaler = AffineTransform.getScaleInstance(scale, scale);
-				return new AffineTransformOp(scaler, st.quality);
+				return new Scale(scale, scale);
 			}
 		};		
 
-		public abstract AffineTransformOp op(double inX, double inY, ScaleTransform st);
+		public abstract Scale getScale(double inX, double inY, ScaleTransform st);
 	}
-	private int quality, width, height;
+	private int width, height;
 	private double scaleX, scaleY;
 	private Type type;
+	private Object quality;
 
 	public ScaleTransform(int quality) {
 		this(null, quality, 1);
 	}
 	
-	public ScaleTransform(Type type, int quality, int bufferSize) {
+	public ScaleTransform(Type type, Object quality, int bufferSize) {
 		super(bufferSize);
-		if(!(quality == AffineTransformOp.TYPE_NEAREST_NEIGHBOR || 
-			 quality == AffineTransformOp.TYPE_BICUBIC || 
-			 quality == AffineTransformOp.TYPE_BILINEAR))
+		if(!(quality == RenderingHints.VALUE_INTERPOLATION_BICUBIC || 
+			 quality == RenderingHints.VALUE_INTERPOLATION_BILINEAR || 
+			 quality == RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR))
 			throw new IllegalArgumentException("quality not known!");
 		this.type = type;
 		this.quality = quality;
 	}
 
-	public ScaleTransform(Type type, int quality) {
+	public ScaleTransform(Type type, Object quality) {
 		this(type, quality, 1);
 	}
 	
@@ -130,6 +127,28 @@ public class ScaleTransform extends BufferedTransform {
 		int h = in.getHeight();
 		if(w <= 0 || h <= 0 || width <= 0 || height <= 0)
 			return in;
-		return type.op(w, h, this).filter(in, null);
+		Scale scale = type.getScale(w, h, this);
+		//AffineTransform scaler = AffineTransform.getScaleInstance(scale.w, scale.h);
+		//AffineTransformOp op = new AffineTransformOp(scaler, quality);
+		
+		w = (int)Math.round(scale.w*w);
+		h = (int)Math.round(scale.h*h);
+		//BufferedImage outImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+
+        BufferedImage resized = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = resized.createGraphics();
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, quality);
+        g2.drawImage(in, 0, 0, w, h, null);
+        g2.dispose();
+		
+		return resized;//op.filter(in, outImage);
+	}
+	
+	private static class Scale {
+		public Scale(double w, double h) {
+			this.w = w;
+			this.h = h;
+		}
+		public double w, h;
 	}
 }

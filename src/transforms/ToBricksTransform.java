@@ -32,14 +32,14 @@ public class ToBricksTransform implements InstructionsTransform {
 	
 	public ToBricksTransform(LEGOColor[] colors, ToBricksType toBricksType, HalfToneType halfToneType, int propagationPercentage, ColorController cc) {
 		this.cc = cc;
-		studTileTransform = new ScaleTransform(ScaleTransform.Type.dims, AffineTransformOp.TYPE_BILINEAR);
-		twoByTwoTransform = new ScaleTransform(ScaleTransform.Type.dims, AffineTransformOp.TYPE_BILINEAR);
-		brickTransform = new ScaleTransform(ScaleTransform.Type.dims, AffineTransformOp.TYPE_BILINEAR);
-		plateTransform = new ScaleTransform(ScaleTransform.Type.dims, AffineTransformOp.TYPE_BILINEAR);
-		sidePlateTransform = new ScaleTransform(ScaleTransform.Type.dims, AffineTransformOp.TYPE_BILINEAR);
+		studTileTransform = new ScaleTransform(ScaleTransform.Type.dims, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+		twoByTwoTransform = new ScaleTransform(ScaleTransform.Type.dims, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+		brickTransform = new ScaleTransform(ScaleTransform.Type.dims, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+		plateTransform = new ScaleTransform(ScaleTransform.Type.dims, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+		sidePlateTransform = new ScaleTransform(ScaleTransform.Type.dims, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 
-		basicTransform = new ScaleTransform(ScaleTransform.Type.dims, AffineTransformOp.TYPE_BILINEAR);
-		rTransform = new ScaleTransform(ScaleTransform.Type.dims, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+		basicTransform = new ScaleTransform(ScaleTransform.Type.dims, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+		rTransform = new ScaleTransform(ScaleTransform.Type.dims, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
 		
 		LEGOColorLookUp.setColors(colors);
 

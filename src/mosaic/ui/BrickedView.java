@@ -48,7 +48,7 @@ public class BrickedView extends JComponent implements ChangeListener {
 			private static final long serialVersionUID = 5749886635907597779L;
 			private ScaleTransform scaler = new ScaleTransform(
 					ScaleTransform.Type.bounded, 
-					AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+					RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
 
 			@Override 
 			public void paintComponent(Graphics g) {				
@@ -78,8 +78,8 @@ public class BrickedView extends JComponent implements ChangeListener {
 				}
 				else
 					magnifierController.setMouseOffset(1, 1);
-				g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-				g2.drawImage(shownImage, null, 0, 0);
+				//g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+				g2.drawImage(shownImage, null, null);
 				magnifierController.drawHighlightRect(g2);
 			}
 		};

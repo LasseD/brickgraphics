@@ -1,5 +1,12 @@
 package program;
 
+/*
+import javax.swing.JOptionPane;
+import utils.ostools.OS;
+import jwrapper.*;
+import jwrapper.hidden.events.*;
+import jwrapper.jwutils.*;
+import jwrapper.updater.JWApp;//*/
 import mosaic.controllers.*;
 
 public class JWrapper {
@@ -24,14 +31,14 @@ public class JWrapper {
 				}				
 			});
 
-			String url = JWMacOS.getRequestedURL(); // URL CAN NOW BE HANDLED
+			//String url = JWMacOS.getRequestedURL(); // URL CAN NOW BE HANDLED
 		}
 		else if (OS.isWindows()) {
 			String vappName = JWApp.getMyVirtualApp().getUserVisibleName();
 
 			JWWindowsOS.registerURLSchemeForVirtualApp("jwsample", vappName);
 
-			String url = JWWindowsOS.getRequestedURL(); // URL CAN NOW BE HANDLED
+			//String url = JWWindowsOS.getRequestedURL(); // URL CAN NOW BE HANDLED
 		}
 
 		String message = JWSystem.getAppLaunchProperty("message"); //message from launch properties - such as from the shortcut.
@@ -46,10 +53,9 @@ public class JWrapper {
 		} catch (Exception x) {
 			//App is running outside of JWrapper
 			myJwVersion = "(not running inside JWrapper)";
-		}*/
-
+		}
+		JOptionPane.showMessageDialog(null, "App "+message+","+myJwVersion+","+JWSystem.getAppBundleVersion());//*/		
 		MainController.main(null);
-		//JOptionPane.showMessageDialog(null, "Example Minimal App ("+message+") "+JWSystem.getAppBundleVersion());
 	}
 
 	/**
