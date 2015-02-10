@@ -43,7 +43,6 @@ public class BrickedView extends JComponent implements ChangeListener {
 	
 	private void setUI() {
 		setLayout(new BorderLayout());
-		//add(toolBar, BorderLayout.NORTH);
 		mainComponent = new JComponent() {
 			private static final long serialVersionUID = 5749886635907597779L;
 			private ScaleTransform scaler = new ScaleTransform(

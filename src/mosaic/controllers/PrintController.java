@@ -191,7 +191,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		if(!coverPageShowFileName) 
 			return 0;
 						
-		String s = mc.getFileName();
+		String s = mc.getFile().getName();
 		Rectangle2D bounds = fm.getStringBounds(s, g2);
 		float x = xMin + (float)((xMax-xMin)-bounds.getWidth())/2;
 		float y = yMin + fontSizeIn1_72inches*8/10;

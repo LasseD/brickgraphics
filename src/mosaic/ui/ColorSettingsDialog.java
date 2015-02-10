@@ -7,6 +7,10 @@ import java.awt.event.*;
 import java.io.*;
 import javax.swing.*;
 import javax.swing.event.*;
+
+import ui.LividTextField;
+
+import colors.parsers.ColorSheetParser;
 import mosaic.controllers.ColorController;
 import mosaic.io.MosaicIO;
 
@@ -15,7 +19,8 @@ import mosaic.io.MosaicIO;
  */
 public class ColorSettingsDialog extends JDialog implements ChangeListener {
 	private ColorController cc;
-	private JTextField tfLoadRebrickableURL, tfLoadRebrickableFile, tfLoadLDDXMLFile, tfFromYear, tfToYear, tfMinSets, tfMinParts;
+	private JTextField tfLoadRebrickableURL, tfLoadRebrickableFile, tfLoadLDDXMLFile;
+	private LividTextField tfFromYear, tfToYear, tfMinSets, tfMinParts;
 	private JCheckBox cbShowMetallic, cbShowTransparent, cbShowOnlyLDD;
 	private static final String DIALOG_TITLE = "Color Settings";
 
@@ -30,7 +35,14 @@ public class ColorSettingsDialog extends JDialog implements ChangeListener {
 	
 	private void setupUI() {
 		Container cp = getContentPane();
-		cp.setLayout(new BoxLayout(cp, BoxLayout.Y_AXIS));
+		cp.setLayout(new BorderLayout());
+		
+		JTabbedPane tabs = new JTabbedPane();
+		
+		JPanel setupPanel = new JPanel();
+		setupPanel.setLayout(new BoxLayout(setupPanel, BoxLayout.Y_AXIS));
+		JPanel filterPanel = new JPanel();
+		filterPanel.setLayout(new BoxLayout(filterPanel, BoxLayout.Y_AXIS));
 		
 		// Load options:
 		{
@@ -49,7 +61,7 @@ public class ColorSettingsDialog extends JDialog implements ChangeListener {
 			});
 			titlePanel.add(tfLoadRebrickableURL);
 			titlePanel.add(loadURLButton);
-			cp.add(titlePanel);
+			setupPanel.add(titlePanel);
 		}
 		{
 			// Rebrickable File:
@@ -70,7 +82,7 @@ public class ColorSettingsDialog extends JDialog implements ChangeListener {
 			titlePanel.add(tfLoadRebrickableFile);
 			titlePanel.add(findButton);
 			titlePanel.add(loadFileButton);
-			cp.add(titlePanel);
+			setupPanel.add(titlePanel);
 		}
 		{
 			// LDD XML File:
@@ -91,7 +103,7 @@ public class ColorSettingsDialog extends JDialog implements ChangeListener {
 			titlePanel.add(tfLoadLDDXMLFile);
 			titlePanel.add(findButton);
 			titlePanel.add(loadFileButton);
-			cp.add(titlePanel);
+			setupPanel.add(titlePanel);
 		}
 		/*{
 			// colors.txt:
@@ -181,16 +193,37 @@ public class ColorSettingsDialog extends JDialog implements ChangeListener {
 
 			titlePanel.add(topPanel, BorderLayout.NORTH);
 			titlePanel.add(bottomPanel, BorderLayout.SOUTH);
-			cp.add(titlePanel);
+			setupPanel.add(titlePanel);
 		}
+		{
+			// backup of colors.txt:
+			JPanel titlePanel = new JPanel(new FlowLayout());
+			titlePanel.setBorder(BorderFactory.createTitledBorder("Restore original colors using the backup file (" + ColorSheetParser.BACKUP_COLORS_FILE +")"));
+			JButton loadButton = new JButton("Restore");
+			loadButton.addActionListener(new ActionListener() {				
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					boolean ok = cc.reloadBackupColorsFile(ColorSettingsDialog.this);
+					if(ok)
+						JOptionPane.showMessageDialog(ColorSettingsDialog.this, ColorSheetParser.COLORS_FILE + " backed up successfully!", ColorSheetParser.COLORS_FILE + " backed up", JOptionPane.PLAIN_MESSAGE);
+					else
+						JOptionPane.showMessageDialog(ColorSettingsDialog.this, "Problem encountered while reloading " + ColorSheetParser.BACKUP_COLORS_FILE + ".", ColorSheetParser.BACKUP_COLORS_FILE + " not reloaded!", JOptionPane.WARNING_MESSAGE);
+				}
+			});
+			titlePanel.add(loadButton);
+			titlePanel.add(new JLabel("Notice: This replaces the current " + ColorSheetParser.COLORS_FILE + " file!"));
+			setupPanel.add(titlePanel);
+		}
+		
+		
 		
 		// Filters:
 		{
 			// Year:
 			JPanel titlePanel = new JPanel(new FlowLayout());
-			titlePanel.setBorder(BorderFactory.createTitledBorder("Only show colors active between these years"));
-			tfFromYear = new JTextField(5);
-			tfToYear = new JTextField(5);
+			titlePanel.setBorder(BorderFactory.createTitledBorder("Show only colors active between these years"));
+			tfFromYear = new LividTextField(5);
+			tfToYear = new LividTextField(5);
 			ActionListener a = new ActionListener() {				
 				@Override
 				public void actionPerformed(ActionEvent e) {
@@ -202,14 +235,14 @@ public class ColorSettingsDialog extends JDialog implements ChangeListener {
 			titlePanel.add(tfFromYear);
 			titlePanel.add(new JLabel("-"));
 			titlePanel.add(tfToYear);
-			cp.add(titlePanel);
+			filterPanel.add(titlePanel);
 		}
 		{
 			// Quantities:
 			JPanel titlePanel = new JPanel(new FlowLayout());
-			titlePanel.setBorder(BorderFactory.createTitledBorder("Only show colors that have appeared in at least"));
-			tfMinSets = new JTextField(5);
-			tfMinParts = new JTextField(5);
+			titlePanel.setBorder(BorderFactory.createTitledBorder("Show only colors that have appeared in at least"));
+			tfMinSets = new LividTextField(5);
+			tfMinParts = new LividTextField(5);
 			ActionListener a = new ActionListener() {				
 				@Override
 				public void actionPerformed(ActionEvent e) {
@@ -222,7 +255,7 @@ public class ColorSettingsDialog extends JDialog implements ChangeListener {
 			titlePanel.add(new JLabel("sets and"));
 			titlePanel.add(tfMinParts);
 			titlePanel.add(new JLabel("parts (use 0 to include all)"));
-			cp.add(titlePanel);
+			filterPanel.add(titlePanel);
 		}
 		{
 			// Exclusions:
@@ -252,8 +285,9 @@ public class ColorSettingsDialog extends JDialog implements ChangeListener {
 				}
 			});
 			titlePanel.add(cbShowOnlyLDD);
-			cp.add(titlePanel);			
+			filterPanel.add(titlePanel);			
 		}
+		
 		{
 			// Close
 			JPanel panel = new JPanel(new FlowLayout());
@@ -265,8 +299,12 @@ public class ColorSettingsDialog extends JDialog implements ChangeListener {
 				}
 			});
 			panel.add(closeButton);
-			cp.add(panel);
+			cp.add(panel, BorderLayout.SOUTH);
 		}
+		
+		tabs.addTab("Setup", setupPanel);
+		tabs.addTab("Filters", filterPanel);
+		cp.add(tabs, BorderLayout.CENTER);
 		
 		stateChanged(null);
 	}
@@ -280,10 +318,20 @@ public class ColorSettingsDialog extends JDialog implements ChangeListener {
 		tfLoadRebrickableURL.setText(cc.getLoadRebrickableURL());
 		tfLoadRebrickableFile.setText(cc.getLoadRebrickableFile());
 		tfLoadLDDXMLFile.setText(cc.getLoadLDDXMLFile());
-		tfFromYear.setText("" + cc.getFromYear());
-		tfToYear.setText("" + cc.getToYear());
-		tfMinSets.setText("" + cc.getMinSets());
-		tfMinParts.setText("" + cc.getMinParts());
+		
+		String fy = "" + cc.getFromYear();
+		if(!tfFromYear.getText().trim().equals(fy))
+			tfFromYear.setText(fy);
+		String ty = "" + cc.getToYear();
+		if(!tfToYear.getText().trim().equals(ty))
+			tfToYear.setText(ty);
+		String ms = "" + cc.getMinSets();
+		if(!tfMinSets.getText().trim().equals(ms))
+			tfMinSets.setText(ms);
+		String mp = "" + cc.getMinParts();
+		if(!tfMinParts.getText().trim().equals(mp))
+			tfMinParts.setText(mp);
+		
 		cbShowOnlyLDD.setSelected(cc.getShowOnlyLDD());
 		cbShowTransparent.setSelected(cc.getShowTransparent());
 		cbShowMetallic.setSelected(cc.getShowMetallic());

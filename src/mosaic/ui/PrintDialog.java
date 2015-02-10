@@ -12,6 +12,8 @@ import java.awt.print.PrinterJob;
 
 import javax.swing.*;
 import javax.swing.event.*;
+
+import ui.LividTextField;
 import mosaic.controllers.*;
 import mosaic.controllers.PrintController.CoverPagePictureType;
 import mosaic.controllers.PrintController.ShowPosition;
@@ -30,7 +32,7 @@ public class PrintDialog extends JDialog implements ChangeListener {
 	private static final long serialVersionUID = -1834122366997009709L;
 	private PrintController pc;
 	// Input boxes:
-	private JTextField tfMagnifiersPerPageWidth, tfMagnifiersPerPageHeight, tfFontSize;
+	private LividTextField tfMagnifiersPerPageWidth, tfMagnifiersPerPageHeight, tfFontSize;
 	private JCheckBox cbCoverPageShow, cbCoverPageShowFileName, cbCoverPageShowLegend, cbShowLegend, cbShowPageNumber;
 	private JRadioButton[] rbCoverPagePictureType, rbShowPosition;
 	
@@ -133,10 +135,10 @@ public class PrintDialog extends JDialog implements ChangeListener {
 		JPanel pMagnifiersPerPage = new JPanel(new FlowLayout());
 		pMagnifiersPerPage.setAlignmentX(Component.LEFT_ALIGNMENT);
 		pMagnifiersPerPage.add(new JLabel("Number of magnifiers per page: "));
-		tfMagnifiersPerPageWidth = new JTextField(3);		
+		tfMagnifiersPerPageWidth = new LividTextField(3);		
 		pMagnifiersPerPage.add(tfMagnifiersPerPageWidth);
 		pMagnifiersPerPage.add(new JLabel("X"));
-		tfMagnifiersPerPageHeight = new JTextField(3);		
+		tfMagnifiersPerPageHeight = new LividTextField(3);		
 		pMagnifiersPerPage.add(tfMagnifiersPerPageHeight);	
 		ActionListener aMagnifiersPerPage = new ActionListener() {			
 			@Override
@@ -144,12 +146,13 @@ public class PrintDialog extends JDialog implements ChangeListener {
 				try {
 					int w = Integer.parseInt(tfMagnifiersPerPageWidth.getText());
 					int h = Integer.parseInt(tfMagnifiersPerPageHeight.getText());
-					if(w > 0 && h > 0)
-						pc.setMagnifiersPerPage(new Dimension(w, h), PrintDialog.this);
+					if(w <= 0 || h <= 0)
+						return;
+					pc.setMagnifiersPerPage(new Dimension(w, h), PrintDialog.this);
+					update();
 				}
 				catch(NumberFormatException ignore) {
 				}
-				update();
 			}
 		};
 		tfMagnifiersPerPageWidth.addActionListener(aMagnifiersPerPage);
@@ -174,18 +177,19 @@ public class PrintDialog extends JDialog implements ChangeListener {
 			}
 		});
 		midBottomLeftPanel.add(cbShowPageNumber);
-		tfFontSize = new JTextField(3);
+		tfFontSize = new LividTextField(3);
 		tfFontSize.addActionListener(new ActionListener() {			
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				try {
 					float s = Float.parseFloat(tfFontSize.getText());
-					if(s >= 1)
-						pc.setFontSize(s, PrintDialog.this);
+					if(s < 0.2)
+						return;
+					pc.setFontSize(s, PrintDialog.this);
+					update();
 				}
 				catch(NumberFormatException ignore) {
 				}
-				update();
 			}
 		});
 		JPanel pFontSize = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -242,9 +246,15 @@ public class PrintDialog extends JDialog implements ChangeListener {
 	}
 	
 	private void update() {
-		tfFontSize.setText("" + pc.getFontSize());
-		tfMagnifiersPerPageWidth.setText(""+pc.getMagnifiersPerPage().width);
-		tfMagnifiersPerPageHeight.setText(""+pc.getMagnifiersPerPage().height);
+		String fs = "" + pc.getFontSize();
+		if(!tfFontSize.getText().trim().equals(fs))
+			tfFontSize.setText(fs);
+		String w = ""+pc.getMagnifiersPerPage().width;
+		if(!tfMagnifiersPerPageWidth.getText().trim().equals(w))
+			tfMagnifiersPerPageWidth.setText(w);
+		String h = ""+pc.getMagnifiersPerPage().height;
+		if(!tfMagnifiersPerPageHeight.getText().trim().equals(h))
+			tfMagnifiersPerPageHeight.setText(h);
 		cbShowLegend.setSelected(pc.getShowLegend());
 		cbShowPageNumber.setSelected(pc.getShowPageNumber());
 		int i = 0;

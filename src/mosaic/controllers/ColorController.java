@@ -56,7 +56,12 @@ public class ColorController implements ModelHandler<BrickGraphicsState> {
 		try {
 			reloadColorTranslations(null, false);
 		} catch (IOException e) {
-			//e.printStackTrace(); // OK - now we just don't have any translations...
+			Log.log(e);
+		}
+		try {
+			ColorSheetParser.ensureBackupColorsFile();
+		} catch (IOException e) {
+			Log.log(e);
 		}
 	}
 	
@@ -174,9 +179,12 @@ public class ColorController implements ModelHandler<BrickGraphicsState> {
 		this.colorChooserSelectedGroups = selectedGroups;
 		
 		Set<LEGOColor> selectedColorsMerged = new TreeSet<LEGOColor>();
+		Set<LEGOColor> availableColors = new TreeSet<LEGOColor>(filteredColors);		
 		for(ColorGroup group : selectedGroups) {
-			for(LEGOColor c : group.getColors())
-				selectedColorsMerged.add(c);
+			for(LEGOColor c : group.getColors()) {
+				if(availableColors.contains(c))
+					selectedColorsMerged.add(c);				
+			}
 		}
 		for(LEGOColor c : selectedColors)
 			selectedColorsMerged.add(c);
@@ -187,6 +195,15 @@ public class ColorController implements ModelHandler<BrickGraphicsState> {
 		notifyListeners(e);
 	}
 	
+	public boolean reloadBackupColorsFile(Object source) {
+		try {
+			ColorSheetParser.copyBackupColorsFile();
+		} catch (IOException e) {
+			Log.log(e);
+			return false;
+		}
+		return reloadColorsFile(source, true);
+	}
 	public boolean reloadColorsFile(Object source) {
 		return reloadColorsFile(source, true);
 	}
@@ -305,14 +322,14 @@ public class ColorController implements ModelHandler<BrickGraphicsState> {
 			int from = Integer.parseInt(fromYear);
 			int to = Integer.parseInt(toYear);
 			if(from > to)
-				throw new IllegalArgumentException("The first number may not be larger than the second.");
+				return;
 			this.fromYear = from;
 			this.toYear = to;
+			updateColorListsAndFilters(toMoalizeOnError, true);
 		}
-		catch(Exception e) { // also exceptions from parseInt!
-			JOptionPane.showMessageDialog(toMoalizeOnError, "Error setting range of years: " + e.getMessage(), "Error setting range of years", JOptionPane.ERROR_MESSAGE);			
+		catch(NumberFormatException e) { // also exceptions from parseInt!
+			// NOP!
 		}
-		updateColorListsAndFilters(toMoalizeOnError, true);
 	}
 	public int getMinSets() {
 		return minSets;
@@ -325,14 +342,14 @@ public class ColorController implements ModelHandler<BrickGraphicsState> {
 			int s = Integer.parseInt(minSets);
 			int p = Integer.parseInt(minParts);
 			if(s < 0 || p < 0)
-				throw new IllegalArgumentException("Please use 0 or a positive quantity.");
+				return;
 			this.minSets = s;
 			this.minParts = p;
+			updateColorListsAndFilters(toMoalizeOnError, true);
 		}
 		catch(Exception e) { // also exceptions from parseInt!
-			JOptionPane.showMessageDialog(toMoalizeOnError, "Error setting quantities: " + e.getMessage(), "Error setting quantities", JOptionPane.ERROR_MESSAGE);			
+			// NOP!
 		}
-		updateColorListsAndFilters(toMoalizeOnError, true);
 	}
 	public boolean getShowOnlyLDD() {
 		return showOnlyLDD;

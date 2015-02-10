@@ -9,6 +9,8 @@ import java.awt.geom.AffineTransform;
 import java.awt.print.*;
 import javax.swing.*;
 import javax.swing.event.*;
+
+import ui.LividTextField;
 import mosaic.controllers.PrintController;
 
 /**
@@ -19,7 +21,7 @@ public class PrintPreviewPanel extends JPanel implements ChangeListener {
 	
 	private boolean isCoverPage;
 	private PrintController pc;
-	private JTextField tf;
+	private LividTextField tf;
 	private int shownPage;
 	
 	public PrintPreviewPanel(boolean isCoverPage, final PrintController pc) {
@@ -37,8 +39,7 @@ public class PrintPreviewPanel extends JPanel implements ChangeListener {
 			JPanel navPanel = new JPanel(new BorderLayout());
 
 			// Text field:
-			tf = new JTextField();
-			tf.setText("1");
+			tf = new LividTextField("1");
 			tf.setHorizontalAlignment(SwingConstants.CENTER);
 			navPanel.add(tf, BorderLayout.CENTER);
 			tf.addActionListener(new ActionListener() {				
@@ -46,11 +47,11 @@ public class PrintPreviewPanel extends JPanel implements ChangeListener {
 				public void actionPerformed(ActionEvent e) {
 					try {
 						shownPage = Integer.parseInt(tf.getText());
+						update();
 					}
 					catch(NumberFormatException e2) {
 						// Nop
 					}
-					update();
 				}
 			});
 			navPanel.add(tf, BorderLayout.CENTER);
@@ -93,8 +94,9 @@ public class PrintPreviewPanel extends JPanel implements ChangeListener {
 	
 	private void update() {
 		sanitizePage();
-		if(tf != null) {
-			tf.setText("" + shownPage);
+		String sp = "" + shownPage;
+		if(tf != null && !tf.getText().trim().equals(sp)) {
+			tf.setText(sp);
 		}
 		repaint();
 	}

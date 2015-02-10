@@ -3,6 +3,7 @@ package mosaic.ui.menu;
 import icon.*;
 import icon.ToBricksIcon.ToBricksIconType;
 import javax.swing.*;
+
 import java.awt.Insets;
 import java.awt.event.*;
 import io.*;
@@ -11,12 +12,14 @@ import mosaic.controllers.MainController;
 import mosaic.io.*;
 import transforms.*;
 import ui.IconizedTextfield;
+import ui.LividTextField;
+
 import java.util.*;
 import bricks.*;
 
 public class ToBricksTools implements ChangeListener, ModelHandler<BrickGraphicsState> {
 	private JButton[] toBricksTypeButtons;
-	private JTextField propagationPercentageField;
+	private LividTextField propagationPercentageField;
 	private IconizedTextfield sizeFieldWidth, sizeFieldHeight; 
 	private JButton buttonLessPP, buttonMorePP;
 	private List<ChangeListener> listeners;
@@ -56,6 +59,7 @@ public class ToBricksTools implements ChangeListener, ModelHandler<BrickGraphics
 		toolBar.add(Box.createHorizontalStrut(10));
 		toolBar.add(buttonLessPP);
 		toolBar.add(propagationPercentageField);
+		toolBar.add(new JLabel("%"));
 		toolBar.add(buttonMorePP);		
 		toolBar.add(Box.createHorizontalStrut(10));
 		toolBar.add(sizeFieldWidth);
@@ -86,22 +90,22 @@ public class ToBricksTools implements ChangeListener, ModelHandler<BrickGraphics
 			}
 		});		
 		final int PAD = IconizedTextfield.PADDING;
-		propagationPercentageField = new JTextField(propagationPercentage + "%", 4);
+		propagationPercentageField = new LividTextField(propagationPercentage + "", 3);
 		propagationPercentageField.setMargin(new Insets(PAD, PAD, PAD, PAD));
 		propagationPercentageField.addActionListener(new ActionListener() {			
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// Get percentage:
-				String s = propagationPercentageField.getText().trim();
-				int sum = 0;
-				for(int i = 0; i < s.length(); ++i) {
-					char c = s.charAt(i);
-					if(c < '0' || c > '9')
-						break;
-					sum = 10*sum + (c-'0');
+				try {
+					int sum = Integer.parseInt(propagationPercentageField.getText().trim());
+					if(propagationPercentage == sum)
+						return;
+					propagationPercentage = sum;
+					update();
 				}
-				propagationPercentage = sum;				
-				update();
+				catch(NumberFormatException e2) {
+					// nop.
+				}
 			}
 		});
 		buttonMorePP = new JButton(Icons.floydSteinberg(Icons.SIZE_LARGE));
@@ -120,12 +124,15 @@ public class ToBricksTools implements ChangeListener, ModelHandler<BrickGraphics
 			public void actionPerformed(ActionEvent e) {
 				sizeChoiceFromWidth = true;
 				try {
-					ToBricksTools.this.width = toBricksType.getUnitWidth()*Integer.parseInt(sizeFieldWidth.getText().trim());
+					int w = toBricksType.getUnitWidth()*Integer.parseInt(sizeFieldWidth.getText().trim());
+					if(w == ToBricksTools.this.width)
+						return;
+					ToBricksTools.this.width = w;
+					update();
 				}
 				catch(NumberFormatException ex) {
 					// don't change width.
 				}
-				update();
 			}
 		});
 		sizeFieldHeight = new IconizedTextfield(4, toBricksType.getIcon().get(ToBricksIconType.MeasureHeight, Icons.SIZE_SMALL));
@@ -135,12 +142,15 @@ public class ToBricksTools implements ChangeListener, ModelHandler<BrickGraphics
 			public void actionPerformed(ActionEvent e) {
 				sizeChoiceFromWidth = false;
 				try {
-					ToBricksTools.this.height = toBricksType.getUnitHeight()*Integer.parseInt(sizeFieldHeight.getText().trim());
+					int h = toBricksType.getUnitHeight()*Integer.parseInt(sizeFieldHeight.getText().trim());
+					if(ToBricksTools.this.height == h)
+						return;
+					ToBricksTools.this.height = h;
+					update();
 				}
 				catch(NumberFormatException ex) {
 					// don't change width.
 				}
-				update();
 			}
 		});
 				
@@ -192,7 +202,8 @@ public class ToBricksTools implements ChangeListener, ModelHandler<BrickGraphics
 			propagationPercentage = 0;
 		else if(propagationPercentage > 100)
 			propagationPercentage = 100;
-		propagationPercentageField.setText(propagationPercentage + "%");
+		if(!propagationPercentageField.getText().trim().equals(propagationPercentage+""))
+			propagationPercentageField.setText(propagationPercentage+"");
 		halfToneType = propagationPercentage == 0 ? HalfToneType.Threshold : HalfToneType.FloydSteinberg;
 
 		
@@ -204,8 +215,12 @@ public class ToBricksTools implements ChangeListener, ModelHandler<BrickGraphics
 			height = toBricksType.closestCompatibleHeight(height, toBricksType.getUnitHeight());		
 			width = toBricksType.closestCompatibleWidth(Math.round(originalScale*height), toBricksType.getUnitWidth());
 		}
-		sizeFieldWidth.setText("" + (width/toBricksType.getUnitWidth()));
-		sizeFieldHeight.setText("" + (height/toBricksType.getUnitHeight()));
+		String w = "" + (width/toBricksType.getUnitWidth());
+		if(!sizeFieldWidth.getText().trim().equals(w))
+			sizeFieldWidth.setText(w);
+		String h = "" + (height/toBricksType.getUnitHeight());
+		if(!sizeFieldHeight.getText().trim().equals(h))
+			sizeFieldHeight.setText(h);
 		ChangeEvent e = new ChangeEvent(this);
 		for(ChangeListener l : listeners) {
 			l.stateChanged(e);

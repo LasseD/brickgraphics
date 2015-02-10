@@ -7,6 +7,8 @@ import java.util.List;
 import javax.swing.*;
 import javax.swing.border.*;
 
+import ui.LividTextField;
+
 public class GridDialog extends JDialog {
 	private static final long serialVersionUID = -4153803597071144909L;
 	private JRadioButton[] gridTypeButtons;
@@ -120,10 +122,10 @@ public class GridDialog extends JDialog {
 			// top (size):
 			JPanel topPanel = new JPanel(new FlowLayout());
 			topPanel.add(new JLabel("Grid size"));
-			final JTextField tx = new JTextField(gl.getXSize() + "", 4);
+			final LividTextField tx = new LividTextField(gl.getXSize() + "", 4);
 			topPanel.add(tx);
 			topPanel.add(new JLabel("x"));
-			final JTextField ty = new JTextField(gl.getYSize() + "", 4);
+			final LividTextField ty = new LividTextField(gl.getYSize() + "", 4);
 			topPanel.add(ty);
 			glPanel.add(topPanel, BorderLayout.NORTH);
 			// bottom (colour, contrast, remove)
@@ -151,40 +153,17 @@ public class GridDialog extends JDialog {
 					try {
 						gl.setXSize(Integer.parseInt(tx.getText().trim()));
 						gl.setYSize(Integer.parseInt(ty.getText().trim()));						
-					}
-					catch(Exception e2) {
-						tx.setText(gl.getXSize() + "");
-						ty.setText(gl.getYSize() + "");
-					}
-					gl.setDrawContrasting(contrastButton.isSelected());
-					parent.repaint();
-				}				
-			};
-			KeyListener keyListener = new KeyListener() {				
-				@Override
-				public void keyTyped(KeyEvent arg0) {}
-				
-				@Override
-				public void keyReleased(KeyEvent arg0) {
-					try {
-						gl.setXSize(Integer.parseInt(tx.getText().trim()));
-						gl.setYSize(Integer.parseInt(ty.getText().trim()));						
 						gl.setDrawContrasting(contrastButton.isSelected());
 						parent.repaint();
 					}
 					catch(Exception e2) {
-						// nop
+						// NOP!
 					}
-				}
-				
-				@Override
-				public void keyPressed(KeyEvent arg0) {}
+				}				
 			};
 			colorButton.addActionListener(actionListener);
 			tx.addActionListener(actionListener);
-			tx.addKeyListener(keyListener);
 			ty.addActionListener(actionListener);
-			ty.addKeyListener(keyListener);
 			contrastButton.addActionListener(actionListener);
 			
 			gridsPanel.add(glPanel);

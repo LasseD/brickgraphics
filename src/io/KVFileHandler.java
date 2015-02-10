@@ -36,11 +36,13 @@ public class KVFileHandler<S extends ModelState> {
 		String line;
 		while((line = br.readLine()) != null) {
 			int indexOfColon = line.indexOf(':');
+			if(indexOfColon == -1)
+				continue; // not a valid line.
 			String k = line.substring(0, indexOfColon);
 			String v = line.substring(indexOfColon+1);
 			
 			// Build longer v if necessary:
-			if(v.charAt(0) == '"') {
+			if(v.length() > 0 && v.charAt(0) == '"') {
 				while(v.charAt(v.length()-1) != '"') {
 					v+=br.readLine();
 				}

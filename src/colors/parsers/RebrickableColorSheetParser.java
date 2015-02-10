@@ -24,13 +24,27 @@ public class RebrickableColorSheetParser implements ColorSheetParserI {
 		ParserHelper.skipPastLineStartingWith(br, "<table class=", true);
 		ParserHelper.skipPastLine(br, "</tr>", true);
 		// Now we are at the line with non-transparent colors:
-		String tr = br.readLine();
-		readTRs(out, tr, map);
+		String line;
+		br.readLine();
+		while(true) {
+			br.readLine();
+			line = br.readLine();
+			if(line == null || line.endsWith("</td>"))
+				break;
+			readTRs(out, line, map);			
+		}
 		
 		ParserHelper.skipPastLine(br, "</tr>", true);
 		// Now we are at the line with transparent colors:
-		tr = br.readLine();
-		readTRs(out, tr, map);		
+
+		br.readLine();
+		while(true) {
+			br.readLine();
+			line = br.readLine();
+			if(line == null || line.endsWith("</div>"))
+				break;
+			readTRs(out, line, map);			
+		}
 		
 		return out;
 	}
@@ -40,9 +54,9 @@ public class RebrickableColorSheetParser implements ColorSheetParserI {
 			return;
 		char[] cs = trs.toCharArray();
 		int csi = 0;
-		while(csi < cs.length) {
+		//while(csi < cs.length) {
 			// Spool past <tr><td><img /></td><td>:
-			csi = eatTags(cs, csi, 5);
+			csi = eatTags(cs, csi, 2);
 			if(csi >= cs.length)
 				return;
 			// retrieve 11 pieces of data:
@@ -82,7 +96,7 @@ public class RebrickableColorSheetParser implements ColorSheetParserI {
 			else
 				sb.append("-1");
 			out.add(sb.toString());
-		}
+		//}
 	}
 	
 	private static int eatTags(char[] cs, int csi, int numTags) {

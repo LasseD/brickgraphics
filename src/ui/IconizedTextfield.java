@@ -3,7 +3,7 @@ package ui;
 import java.awt.*;
 import javax.swing.*;
 
-public class IconizedTextfield extends JTextField {
+public class IconizedTextfield extends LividTextField {
 	public static final int PADDING = 3;
 	private Icon icon;
 	
