@@ -2,6 +2,7 @@ package mosaic.ui;
 
 import io.*;
 import mosaic.io.BrickGraphicsState;
+import mosaic.ui.menu.ImagePreparingToolBar;
 import java.awt.image.*;
 import java.awt.*;
 import java.util.*;

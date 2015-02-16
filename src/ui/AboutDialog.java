@@ -51,7 +51,9 @@ public class AboutDialog extends JDialog {
 		add(ta, BorderLayout.SOUTH);
 		
 		pack();
-		setLocation(parent.getLocation().x+(parent.getWidth()-getWidth())/2, parent.getLocation().y+(parent.getHeight()-getHeight())/2);
+		int x = Math.max(0, parent.getLocation().x+(parent.getWidth()-getWidth())/2);
+		int y = Math.max(0, parent.getLocation().y+(parent.getHeight()-getHeight())/2);
+		setLocation(x, y);
 	}
 	
 	public static Action createAction(final JFrame parent, final String programName, final String version, final Icon icon, final Icon smallIcon) {

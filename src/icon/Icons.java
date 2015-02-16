@@ -4,7 +4,12 @@ import java.awt.*;
 import java.awt.geom.*;
 import javax.swing.*;
 import java.io.*;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
+import java.util.Set;
+import java.util.TreeSet;
+
 import colors.*;
 import mosaic.controllers.ColorController;
 import mosaic.ui.*;
@@ -13,10 +18,26 @@ public class Icons {
 	public static final int SIZE_LARGE = 32;
 	public static final int SIZE_SMALL = 16;
 	public static final Color DISABLED_COLOR = Color.LIGHT_GRAY;
-	private static ColorGroup[] colorGroups = ColorGroup.generateBackupColorGroups();
+	private static LEGOColor[][] colorGroups = null;
+	private static LEGOColor[] colors = ColorController.generateBackupColors().toArray(new LEGOColor[]{});
 
 	public static void colorControllerLoaded(ColorController cc) {
-		colorGroups = cc.getColorGroupsFromDisk();			
+		List<LEGOColor> colorList = cc.getFilteredColors();
+		colors = colorList.toArray(new LEGOColor[colorList.size()]);
+		ColorGroup[] groups = cc.getColorGroupsFromDisk();
+		colorGroups = new LEGOColor[groups.length][];
+		Set<LEGOColor> unused = new TreeSet<LEGOColor>(colorList);
+		int i = 0;
+		for(ColorGroup group : groups) {
+			List<LEGOColor> gList = new LinkedList<LEGOColor>();
+			for(LEGOColor c : unused) {
+				if(group.containsColor(c)) {
+					gList.add(c);
+				}
+			}
+			unused.removeAll(gList);
+			colorGroups[i++] = gList.toArray(new LEGOColor[gList.size()]);
+		}
 	}
 	
 	public static ImageIcon get(int size, String image) {
@@ -29,18 +50,18 @@ public class Icons {
 		int hash = 0;
 		for(Object o : seeds)
 			hash += o.hashCode();
-		ColorGroup group = colorGroups[Math.abs(hash) % colorGroups.length];
-		LEGOColor[] colors = group.getColors();
 		return colors[Math.abs(hash) % colors.length].getRGB();
 	}
 
-	public static Icon colors(final int size) {
+	public static Icon colorsChooserDialog(final int size) {
 		return new BrickGraphicsIcon(size) {
 			@Override
 			public void paint(Graphics2D g2) {
+				if(colorGroups == null)
+					return;
 				int w = 8;
 				for(int y = 0; w*y < Math.min(colorGroups.length*w, size); y++) {
-					LEGOColor[] colors = colorGroups[y].getColors();
+					LEGOColor[] colors = colorGroups[y];
 					for(int x = 0; w*x < Math.min(colors.length*w, size); x++) {
 						g2.setColor(colors[x].getRGB());
 						g2.fillRect(w*x, w*y, w, w);
@@ -408,10 +429,12 @@ public class Icons {
 		return new BrickGraphicsIcon(size) {
 			@Override
 			public void paint(Graphics2D g2) {
+				if(colorGroups == null)
+					return;
+				
 				int w = 8;
-				for(int y = 0; w*y < Math.min(colorGroups.length*w, size); y++) {
-					LEGOColor[] colors = colorGroups[y].getColors();
-					LEGOColor color = colors.length > 0 ? colors[0] : LEGOColor.WHITE;
+				for(int y = 0; w*y < size; y++) {
+					LEGOColor color = y >= colorGroups.length || colorGroups[y].length == 0 ? LEGOColor.WHITE : colorGroups[y][0];
 					g2.setColor(color.getRGB());
 					g2.fillRect(0, w*y, w, w);
 					g2.setColor(Color.BLACK);
@@ -544,7 +567,7 @@ public class Icons {
 			public void paint(Graphics2D g2) {
 				int angle = 0;
 				int angleAdd = 100;
-				for(LEGOColor color : colorGroups[0].getColors()) {
+				for(LEGOColor color : colors) {
 					g2.setColor(color.getRGB());
 					g2.fillArc(0, 0, size, size, angle, angleAdd); 
 					angle += angleAdd;
@@ -684,6 +707,20 @@ public class Icons {
 				g2.setColor(Color.BLACK);
 				g2.drawOval(0, 0, size-1, size-1);
 				g2.drawLine(mid, 0, mid, size-1);
+			}
+		};
+	}
+	
+
+	public static BrickGraphicsIcon checkbox(final int size, final boolean selected) {
+		return new BrickGraphicsIcon(size) {
+			@Override
+			public void paint(Graphics2D g2) {
+				g2.translate(-2, 0);
+				JCheckBox cb = new JCheckBox();
+				cb.setSelected(selected);
+				cb.setSize(size, size);
+				cb.print(g2);
 			}
 		};
 	}

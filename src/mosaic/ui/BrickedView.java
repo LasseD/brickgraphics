@@ -36,7 +36,7 @@ public class BrickedView extends JComponent implements ChangeListener {
 			}
 		});
 		
-		toBricksTransform = new ToBricksTransform(colorController.getColors(), 
+		toBricksTransform = new ToBricksTransform(colorController.getColorChooserSelectedColors(), 
 				toolBar.getToBricksType(), toolBar.getHalfToneType(), toolBar.getPropagationPercentage(), colorController);			
 		magnifierController.setTBTransform(toBricksTransform);
 	}
@@ -110,7 +110,7 @@ public class BrickedView extends JComponent implements ChangeListener {
 		toBricksTransform.setPropagationPercentage(toolBar.getPropagationPercentage());
 		toBricksTransform.setToBricksType(toolBar.getToBricksType());
 		toBricksTransform.setHalfToneType(toolBar.getHalfToneType());
-		toBricksTransform.setColors(colorController.getColors());
+		toBricksTransform.setColors(colorController.getColorChooserSelectedColors());
 		toBricksTransform.setBasicUnitSize(toolBar.getBasicWidth(), toolBar.getBasicHeight());		
 	}
 

@@ -25,12 +25,10 @@ public class ColorController implements ModelHandler<BrickGraphicsState> {
 	private ShownName shownName;
 	private String localizedFileNameNoTXT;
 	private int fromYear, toYear, minParts, minSets;
-	private boolean showMetallic, showTransparent, showOnlyLDD;
+	private boolean showMetallic, showTransparent, showOnlyLDD, showOtherColorsGroup;
 	private String loadRebrickableURL, loadRebrickableFile, loadLDDXMLFile;
 	// Color Chooser state:
-	private Set<LEGOColor> colorChooserSelectedColors;
-	private Set<ColorGroup> colorChooserSelectedGroups;
-	private LEGOColor[] selectedColorsMerged;
+	private LEGOColor[] colorChooserSelectedColors;
 	private boolean usesBackupColors;
 	
 	private static volatile ColorController instance = null;
@@ -46,8 +44,6 @@ public class ColorController implements ModelHandler<BrickGraphicsState> {
 		listeners = new LinkedList<ChangeListener>();
 		incrementalIDs = new TreeMap<LEGOColor, Integer>();
 		allLocalizedColors = new TreeMap<String, Map<LEGOColor, String> >(); // other two localization attributes null is ok.
-		colorChooserSelectedColors = new TreeSet<LEGOColor>();
-		colorChooserSelectedGroups = new TreeSet<ColorGroup>();
 		filteredColors = new ArrayList<LEGOColor>(150);
 		model.addModelHandler(this);
 		
@@ -65,10 +61,10 @@ public class ColorController implements ModelHandler<BrickGraphicsState> {
 		}
 	}
 	
-	public LEGOColor[] getColors() {
-		if(selectedColorsMerged == null || selectedColorsMerged.length < 2)
+	public LEGOColor[] getColorChooserSelectedColors() {
+		if(colorChooserSelectedColors == null || colorChooserSelectedColors.length < 2)
 			return LEGOColor.BW;
-		return selectedColorsMerged;
+		return colorChooserSelectedColors;
 	}
 	
 	public boolean usesBackupColors() {
@@ -165,36 +161,25 @@ public class ColorController implements ModelHandler<BrickGraphicsState> {
 			notifyListeners(null);
 		return ok;
 	}
-	public Set<ColorGroup> getColorChooserSelectedColorGroups() {
-		return colorChooserSelectedGroups;
-	}
 	public ColorGroup[] getColorGroupsFromDisk() {
 		return groupsFromDisk;
 	}
-	public Set<LEGOColor> getColorChooserSelectedColors() {
-		return colorChooserSelectedColors;
-	}
-	public void setColorChooserSelectedColorsAndGroups(Set<LEGOColor> selectedColors, Set<ColorGroup> selectedGroups, ChangeEvent e) {
-		this.colorChooserSelectedColors = selectedColors;
-		this.colorChooserSelectedGroups = selectedGroups;
+	public void setColorChooserSelectedColors(Set<LEGOColor> selectedColors, ChangeEvent e) {
+		this.colorChooserSelectedColors = selectedColors.toArray(new LEGOColor[selectedColors.size()]);
 		
-		Set<LEGOColor> selectedColorsMerged = new TreeSet<LEGOColor>();
-		Set<LEGOColor> availableColors = new TreeSet<LEGOColor>(filteredColors);		
-		for(ColorGroup group : selectedGroups) {
-			for(LEGOColor c : group.getColors()) {
-				if(availableColors.contains(c))
-					selectedColorsMerged.add(c);				
-			}
-		}
-		for(LEGOColor c : selectedColors)
-			selectedColorsMerged.add(c);
-		this.selectedColorsMerged =  selectedColorsMerged.toArray(new LEGOColor[selectedColorsMerged.size()]);
-		
-		updateIncrementalIDs();
-				
+		updateIncrementalIDs();				
 		notifyListeners(e);
 	}
 	
+	public static boolean copyColorsFileToBackup(Object source) {
+		try {
+			ColorSheetParser.copyColorsFileToBackup();
+		} catch (IOException e) {
+			Log.log(e);
+			return false;
+		}
+		return true;
+	}
 	public boolean reloadBackupColorsFile(Object source) {
 		try {
 			ColorSheetParser.copyBackupColorsFile();
@@ -224,7 +209,7 @@ public class ColorController implements ModelHandler<BrickGraphicsState> {
 	private void updateIncrementalIDs() {
 		incrementalIDs.clear();
 		int i = 1;
-		for(LEGOColor c : selectedColorsMerged) {
+		for(LEGOColor c : colorChooserSelectedColors) {
 			incrementalIDs.put(c, i++);
 		}		
 	}
@@ -360,6 +345,9 @@ public class ColorController implements ModelHandler<BrickGraphicsState> {
 	public boolean getShowTransparent() {
 		return showTransparent;
 	}
+	public boolean getShowOtherColorsGroup() {
+		return showOtherColorsGroup;
+	}
 	public void setShowOnlyLDD(boolean s, Object source) {
 		showOnlyLDD = s;
 		updateColorListsAndFilters(source, true);
@@ -370,6 +358,10 @@ public class ColorController implements ModelHandler<BrickGraphicsState> {
 	}
 	public void setShowMetallic(boolean sm, Object source) {
 		showMetallic = sm;
+		updateColorListsAndFilters(source, true);
+	}
+	public void setShowOtherColorsGroup(boolean so, Object source) {
+		showOtherColorsGroup = so;
 		updateColorListsAndFilters(source, true);
 	}
 	
@@ -532,6 +524,7 @@ public class ColorController implements ModelHandler<BrickGraphicsState> {
 		showOnlyLDD = (Boolean)model.get(BrickGraphicsState.ColorsShowOnlyLDD);
 		showMetallic = (Boolean)model.get(BrickGraphicsState.ColorsShowMetallic);
 		showTransparent = (Boolean)model.get(BrickGraphicsState.ColorsShowTransparent);
+		showOtherColorsGroup = (Boolean)model.get(BrickGraphicsState.ColorsShowOtherColorsGroup);
 		minParts = (Integer)model.get(BrickGraphicsState.ColorsMinParts);
 		minSets = (Integer)model.get(BrickGraphicsState.ColorsMinSets);
 		loadRebrickableURL = (String)model.get(BrickGraphicsState.ColorsLoadRebrickableURL);
@@ -541,31 +534,18 @@ public class ColorController implements ModelHandler<BrickGraphicsState> {
 
 		// Stuff for color chooser:
 		reloadColorGroups(false);
-		colorChooserSelectedGroups.clear();
-		colorChooserSelectedColors.clear();
-		{
-			int[] selectedColorGroups = (int[])model.get(BrickGraphicsState.SelectedColorGroups);
-			Set<Integer> selectedColorGroupsFromModel = new TreeSet<Integer>();
-			for(int i : selectedColorGroups) {
-				selectedColorGroupsFromModel.add(i);
-			}
-			int i = 0;
-			for(ColorGroup group : groupsFromDisk) {
-				if(selectedColorGroupsFromModel.contains(i))
-					colorChooserSelectedGroups.add(group);
-				++i;
-			}			
-		}
 		{
 			int[] selectedColors = (int[])model.get(BrickGraphicsState.SelectedColors);
+			List<LEGOColor> selectedColorList = new LinkedList<LEGOColor>();
 			Set<Integer> selectedColorsFromModel = new TreeSet<Integer>();
 			for(int i : selectedColors) {
 				selectedColorsFromModel.add(i);
 			}
 			for(LEGOColor color : colorsFromDisk) {
 				if(selectedColorsFromModel.contains(color.getIDRebrickable()))
-					colorChooserSelectedColors.add(color);
+					selectedColorList.add(color);
 			}
+			this.colorChooserSelectedColors = selectedColorList.toArray(new LEGOColor[selectedColors.length]);
 		}
 		
 		notifyListeners(null);		
@@ -581,22 +561,15 @@ public class ColorController implements ModelHandler<BrickGraphicsState> {
 		model.set(BrickGraphicsState.ColorsShowOnlyLDD, showOnlyLDD);
 		model.set(BrickGraphicsState.ColorsShowMetallic, showMetallic);
 		model.set(BrickGraphicsState.ColorsShowTransparent, showTransparent);
+		model.set(BrickGraphicsState.ColorsShowOtherColorsGroup, showOtherColorsGroup);
 		model.set(BrickGraphicsState.ColorsMinParts, minParts);
 		model.set(BrickGraphicsState.ColorsMinSets, minSets);
 		model.set(BrickGraphicsState.ColorsLoadRebrickableURL, loadRebrickableURL);
 		model.set(BrickGraphicsState.ColorsLoadRebrickableFile, loadRebrickableFile);
 		model.set(BrickGraphicsState.ColorsLoadLDDXMLFile, loadLDDXMLFile);
 		// Color chooser:		
-		int[] sg = new int[colorChooserSelectedGroups.size()]; 
-		int sgi = 0;
-		for(int i = 0; i < groupsFromDisk.length; ++i) {
-			if(colorChooserSelectedGroups.contains(groupsFromDisk[i])) {
-				sg[sgi++] = i;
-			}
-		}
-		model.set(BrickGraphicsState.SelectedColorGroups, sg);
 		
-		int[] sc = new int[colorChooserSelectedColors.size()];
+		int[] sc = new int[colorChooserSelectedColors.length];
 		int i = 0;
 		for(LEGOColor color: colorChooserSelectedColors) {
 			sc[i++] = color.getIDRebrickable();

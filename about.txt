@@ -1,6 +1,9 @@
 Created by Lasse Deleuran (lassedeleuran@gmail.com)
 License: Creative Commons CC BY-SA 2.5: creativecommons.org/licenses/by-sa/2.5/
 
+With special thanks to
+Joel Hoornbeek (classicsmiley@gmail.com) for testing, bug finding, and several improvements to the interface.
+
 WrapLayout taken from Rob Camick (tips4java.wordpress.com)
 
 Colors taken from Rebrickable (rebrickable.com)

@@ -75,11 +75,10 @@ public class ColorChooserDialog extends JDialog implements ChangeListener {
 	}
 	
 	public void tellController() {
-		Set<ColorGroup> selectedGroups = new TreeSet<ColorGroup>();
 		Set<LEGOColor> selectedColors = new TreeSet<LEGOColor>();
 		
 		for(ColorGroupPanel panel : panels) {
-			panel.getSelected(selectedGroups, selectedColors);
+			panel.getSelected(selectedColors);
 		}
 
 		if(selectedColors.size() < 2) {
@@ -88,7 +87,7 @@ public class ColorChooserDialog extends JDialog implements ChangeListener {
 			selectedColors.add(LEGOColor.BW[1]);
 		}
 
-		cc.setColorChooserSelectedColorsAndGroups(selectedColors, selectedGroups, new ChangeEvent(ColorChooserDialog.this));
+		cc.setColorChooserSelectedColors(selectedColors, new ChangeEvent(ColorChooserDialog.this));
 	}
 	
 	@Override
@@ -106,9 +105,14 @@ public class ColorChooserDialog extends JDialog implements ChangeListener {
 			widest = Math.max(widest, label.getPreferredSize().width+2);
 		}
 		Set<LEGOColor> filteredColors = new TreeSet<LEGOColor>(cc.getFilteredColors());
+		Set<LEGOColor> colorChooserSelectedColors = new TreeSet<LEGOColor>();
+		for(LEGOColor c : cc.getColorChooserSelectedColors())
+			colorChooserSelectedColors.add(c);
 		for(ColorGroup group : colorGroups) {
-			ColorGroupPanel panel = ColorGroupPanel.create(this, group, widest, cc, filteredColors);
-			if(panel == null)
+			if(!cc.getShowOtherColorsGroup() && group.isOtherColorsGroup())
+				continue;
+			ColorGroupPanel panel = new ColorGroupPanel(group, widest, filteredColors, colorChooserSelectedColors);
+			if(panel.isEmpty())
 				continue;
 			mainPanel.add(panel);
 			panels.add(panel);
@@ -132,21 +136,39 @@ public class ColorChooserDialog extends JDialog implements ChangeListener {
 		return a;
 	}
 	
-	private static class ColorGroupPanel extends JPanel implements ActionListener {
-		private static final long serialVersionUID = 9097335036243041400L;
+	private class ColorGroupPanel extends JPanel implements ActionListener {
 		private List<ColorCheckBox> boxes;
-		private JCheckBox mainBox;
-		private volatile boolean ignoreEvents;
-		private ColorGroup group;
-		private ColorChooserDialog ccd;
+		private boolean ignoreEvents;
 		
-		public static ColorGroupPanel create(ColorChooserDialog ccd, ColorGroup group, int labelWidth, ColorController cc, Set<LEGOColor> allowedColors) {
-			ColorGroupPanel out = new ColorGroupPanel();
-			out.ccd = ccd;
-			out.group = group;
-			out.mainBox = new JCheckBox();
-			out.mainBox.setSelected(cc.getColorChooserSelectedColorGroups().contains(group));
-			out.mainBox.addActionListener(out);
+		private ColorGroupPanel(ColorGroup group, int labelWidth, Set<LEGOColor> remainingColors, Set<LEGOColor> colorChooserSelectedColors) {
+			ignoreEvents = true;
+			
+			JButton buttonAll = new JButton(Icons.checkbox(Icons.SIZE_SMALL, true));//"\u2200");
+			buttonAll.setToolTipText("Select all colors in this row.");
+			buttonAll.setPreferredSize(new Dimension(24, 40));
+			buttonAll.addActionListener(new ActionListener() {				
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					ignoreEvents = true;
+					for(ColorCheckBox box : boxes)
+						box.setSelected(true);
+					ignoreEvents = false;
+					ColorGroupPanel.this.actionPerformed(e);
+				}
+			});
+			JButton buttonNone = new JButton(Icons.checkbox(Icons.SIZE_SMALL, false));//"\u2205");
+			buttonNone.setToolTipText("Deselect all colors in this row.");
+			buttonNone.setPreferredSize(new Dimension(24, 40));
+			buttonNone.addActionListener(new ActionListener() {				
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					ignoreEvents = true;
+					for(ColorCheckBox box : boxes)
+						box.setSelected(false);
+					ignoreEvents = false;
+					ColorGroupPanel.this.actionPerformed(e);
+				}
+			});
 			
 			// Set up label:
 			JLabel label = new JLabel(group.getName());
@@ -154,56 +176,50 @@ public class ColorChooserDialog extends JDialog implements ChangeListener {
 			label.setHorizontalAlignment(SwingConstants.RIGHT);
 
 			// Set up self:
-			out.setLayout(new FlowLayout(FlowLayout.LEADING, 0, 0));
-			out.add(label);
-			out.add(out.mainBox);
+			setLayout(new FlowLayout(FlowLayout.LEADING, 0, 0));
+			add(label);
+			add(buttonAll);
+			add(buttonNone);
 
-			out.boxes = new LinkedList<ColorCheckBox>();
-			for(LEGOColor color : group.getColors()) {
-				if(!allowedColors.contains(color))
-					continue;
-				ColorCheckBox box = new ColorCheckBox(group, color, cc);
-				out.boxes.add(box);
-				out.add(box);
-				box.addActionListener(out);
+			boxes = new LinkedList<ColorCheckBox>();
+			for(LEGOColor color : remainingColors) {
+				if(group.containsColor(color)) {
+					ColorCheckBox box = new ColorCheckBox(colorChooserSelectedColors.contains(color), color, cc);
+					boxes.add(box);
+					add(box);
+					box.addActionListener(this);					
+				}					
 			}
-			if(out.boxes.isEmpty())
-				return null;
-			return out;
+			for(ColorCheckBox box : boxes) {
+				remainingColors.remove(box.color);
+			}
+
+			ignoreEvents = false;
 		}
 		
-		private ColorGroupPanel() {}
+		public boolean isEmpty() {
+			return boxes.isEmpty();
+		}
 		
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			if(ignoreEvents)
 				return;
-			if(e.getSource() == mainBox) {
-				ignoreEvents = true;
-				for(ColorCheckBox box : boxes) {
-					box.setEnabled(!mainBox.isSelected());
-				}
-				ignoreEvents = false;
-			}
-			ccd.tellController();
+			tellController();
 		}
 		
-		public void getSelected(Set<ColorGroup> selectedGroups, Set<LEGOColor> selectedColors) {
-			if(mainBox.isSelected())
-				selectedGroups.add(group);
+		public void getSelected(Set<LEGOColor> selectedColors) {
 			for(ColorCheckBox box : boxes) {
-				if(box.shouldBeSaved())
+				if(box.isSelected())
 					selectedColors.add(box.getColor());
 			}
 		}
 	}
 
 	private static class ColorCheckBox extends JCheckBox {
-		private static final long serialVersionUID = -2531084719234352355L;
 		private LEGOColor color;
-		private boolean selectedWhenNotSupressed;
 		
-		public ColorCheckBox(ColorGroup group, LEGOColor color, ColorController cc) {
+		public ColorCheckBox(boolean selected, LEGOColor color, ColorController cc) {
 			this.color = color;
 			int size = getPreferredSize().width*2;
 			setToolTipText(ColorController.getLongIdentifier(color));
@@ -211,30 +227,11 @@ public class ColorChooserDialog extends JDialog implements ChangeListener {
 			setPreferredSize(new Dimension(size, size));
 			setBackground(color.getRGB());
 			
-			selectedWhenNotSupressed = cc.getColorChooserSelectedColors().contains(color);
-			boolean supressed = cc.getColorChooserSelectedColorGroups().contains(group);
-			super.setEnabled(!supressed);
-			setSelected(supressed || selectedWhenNotSupressed);
-		}
-		
-		@Override
-		public void setEnabled(boolean enabled) {
-			super.setEnabled(enabled);				
-			if(enabled) {
-				setSelected(selectedWhenNotSupressed);
-			}
-			else {
-				selectedWhenNotSupressed = isSelected();
-				setSelected(true);
-			}
+			setSelected(selected);
 		}
 		
 		public LEGOColor getColor() {
 			return color;
-		}
-
-		public boolean shouldBeSaved() {
-			return isEnabled() ? isSelected() : selectedWhenNotSupressed;
 		}
 	}
 }

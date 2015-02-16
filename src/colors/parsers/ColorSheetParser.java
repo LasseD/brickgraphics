@@ -89,6 +89,9 @@ public class ColorSheetParser {
 	public static void copyBackupColorsFile() throws IOException {
 		Files.copy(Paths.get(BACKUP_COLORS_FILE), Paths.get(COLORS_FILE), StandardCopyOption.REPLACE_EXISTING);
 	}		
+	public static void copyColorsFileToBackup() throws IOException {
+		Files.copy(Paths.get(COLORS_FILE), Paths.get(BACKUP_COLORS_FILE), StandardCopyOption.REPLACE_EXISTING);
+	}		
 	
 	public static List<LEGOColor> readColorsFile() throws IOException {
 		InputStream is = null;

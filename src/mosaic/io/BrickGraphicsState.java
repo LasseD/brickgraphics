@@ -18,9 +18,10 @@ public enum BrickGraphicsState implements ModelState {
 	ColorsLocalizedFileName("Danish"),
 	ColorsFromYear(1900),
 	ColorsToYear(2100), // Although it would be cool if this code was used so far into the future
-	ColorsShowMetallic(false),
+	ColorsShowMetallic(true),
 	ColorsShowOnlyLDD(false),
 	ColorsShowTransparent(false),
+	ColorsShowOtherColorsGroup(true),
 	ColorsMinParts(1),
 	ColorsMinSets(100),
 	ColorsLoadRebrickableURL("http://rebrickable.com/colors"),
@@ -69,7 +70,6 @@ public enum BrickGraphicsState implements ModelState {
 	ToBricksHeight(160),
 	ToBricksPropagationPercentage(50),
 	SelectedColors(new int[]{}),
-	SelectedColorGroups(new int[]{0, 1}),
 	ToBricksTypeIndex(0);
 	//ToBricksHalfToneTypeIndex(0),
 	//ToBricksSizeTypeWidthIndex(2),

@@ -21,7 +21,7 @@ public class ColorSettingsDialog extends JDialog implements ChangeListener {
 	private ColorController cc;
 	private JTextField tfLoadRebrickableURL, tfLoadRebrickableFile, tfLoadLDDXMLFile;
 	private LividTextField tfFromYear, tfToYear, tfMinSets, tfMinParts;
-	private JCheckBox cbShowMetallic, cbShowTransparent, cbShowOnlyLDD;
+	private JCheckBox cbShowMetallic, cbShowTransparent, cbShowOnlyLDD, cbShowOtherColorsGroup;
 	private static final String DIALOG_TITLE = "Color Settings";
 
 	public ColorSettingsDialog(JFrame parent, ColorController cc) {
@@ -197,21 +197,38 @@ public class ColorSettingsDialog extends JDialog implements ChangeListener {
 		}
 		{
 			// backup of colors.txt:
-			JPanel titlePanel = new JPanel(new FlowLayout());
-			titlePanel.setBorder(BorderFactory.createTitledBorder("Restore original colors using the backup file (" + ColorSheetParser.BACKUP_COLORS_FILE +")"));
-			JButton loadButton = new JButton("Restore");
-			loadButton.addActionListener(new ActionListener() {				
+			JPanel titlePanel = new JPanel(new BorderLayout());
+			titlePanel.setBorder(BorderFactory.createTitledBorder("Restore colors from the backup file " + ColorSheetParser.BACKUP_COLORS_FILE + " in case of import with undetected errors"));
+			JPanel topPanel = new JPanel(new FlowLayout());
+			JButton button1 = new JButton("Restore colors from backup file");
+			button1.addActionListener(new ActionListener() {				
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					boolean ok = cc.reloadBackupColorsFile(ColorSettingsDialog.this);
 					if(ok)
-						JOptionPane.showMessageDialog(ColorSettingsDialog.this, ColorSheetParser.COLORS_FILE + " backed up successfully!", ColorSheetParser.COLORS_FILE + " backed up", JOptionPane.PLAIN_MESSAGE);
+						JOptionPane.showMessageDialog(ColorSettingsDialog.this, ColorSheetParser.COLORS_FILE + " restored from backup!", ColorSheetParser.COLORS_FILE + " restored", JOptionPane.PLAIN_MESSAGE);
 					else
 						JOptionPane.showMessageDialog(ColorSettingsDialog.this, "Problem encountered while reloading " + ColorSheetParser.BACKUP_COLORS_FILE + ".", ColorSheetParser.BACKUP_COLORS_FILE + " not reloaded!", JOptionPane.WARNING_MESSAGE);
 				}
 			});
-			titlePanel.add(loadButton);
-			titlePanel.add(new JLabel("Notice: This replaces the current " + ColorSheetParser.COLORS_FILE + " file!"));
+			topPanel.add(button1);
+			topPanel.add(new JLabel("Notice: This replaces the current " + ColorSheetParser.COLORS_FILE + " file!"));
+			titlePanel.add(topPanel, BorderLayout.NORTH);
+			JPanel bottomPanel = new JPanel(new FlowLayout());
+			JButton button2 = new JButton("Make new backup file");
+			button2.addActionListener(new ActionListener() {				
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					boolean ok = ColorController.copyColorsFileToBackup(ColorSettingsDialog.this);
+					if(ok)
+						JOptionPane.showMessageDialog(ColorSettingsDialog.this, ColorSheetParser.COLORS_FILE + " backed up successfully!", ColorSheetParser.COLORS_FILE + " backed up", JOptionPane.PLAIN_MESSAGE);
+					else
+						JOptionPane.showMessageDialog(ColorSettingsDialog.this, "Problem encountered while overwriting " + ColorSheetParser.BACKUP_COLORS_FILE + ".", ColorSheetParser.BACKUP_COLORS_FILE + " not overwritten!", JOptionPane.WARNING_MESSAGE);
+				}
+			});
+			bottomPanel.add(button2);
+			bottomPanel.add(new JLabel("Notice: The old backup file will be deleted!"));
+			titlePanel.add(bottomPanel, BorderLayout.SOUTH);
 			setupPanel.add(titlePanel);
 		}
 		
@@ -259,9 +276,9 @@ public class ColorSettingsDialog extends JDialog implements ChangeListener {
 		}
 		{
 			// Exclusions:
-			JPanel titlePanel = new JPanel(new FlowLayout());
+			JPanel titlePanel = new JPanel(new GridLayout(4, 1));
 			titlePanel.setBorder(BorderFactory.createTitledBorder("Additional color filters"));
-			cbShowMetallic = new JCheckBox("Show metallic colors");
+			cbShowMetallic = new JCheckBox("Show copper/silver/gold/metallic/chrome colors");
 			cbShowMetallic.addActionListener(new ActionListener() {				
 				@Override
 				public void actionPerformed(ActionEvent e) {
@@ -277,6 +294,14 @@ public class ColorSettingsDialog extends JDialog implements ChangeListener {
 				}
 			});
 			titlePanel.add(cbShowTransparent);
+			cbShowOtherColorsGroup = new JCheckBox("Show other colors group (contains all remaining colors)");
+			cbShowOtherColorsGroup.addActionListener(new ActionListener() {				
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					cc.setShowOtherColorsGroup(cbShowOtherColorsGroup.isSelected(), ColorSettingsDialog.this);
+				}
+			});
+			titlePanel.add(cbShowOtherColorsGroup);
 			cbShowOnlyLDD = new JCheckBox("Show only colors available in LDD");
 			cbShowOnlyLDD.addActionListener(new ActionListener() {				
 				@Override
@@ -334,6 +359,7 @@ public class ColorSettingsDialog extends JDialog implements ChangeListener {
 		
 		cbShowOnlyLDD.setSelected(cc.getShowOnlyLDD());
 		cbShowTransparent.setSelected(cc.getShowTransparent());
+		cbShowOtherColorsGroup.setSelected(cc.getShowOtherColorsGroup());
 		cbShowMetallic.setSelected(cc.getShowMetallic());
 	}
 }
