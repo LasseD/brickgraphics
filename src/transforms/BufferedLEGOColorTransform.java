@@ -137,7 +137,7 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform, 
 
 	@Override
 	public Set<LEGOColor> drawLastColors(Graphics2D g2, 
-			Rectangle unitBounds, int blockWidth, int blockHeight, Dimension toSize, int numStuds) {		
+			Rectangle unitBounds, int blockWidth, int blockHeight, Dimension toSize, int numStudsWide, int numStudsTall) {		
 		// Find scaling parameters:
 		int w = unitBounds.width/blockWidth;
 		int h = unitBounds.height/blockHeight;
@@ -163,18 +163,15 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform, 
 					g2.setColor(color.getRGB());
 					g2.fill(r);
 					
-					if(numStuds > 0) {				      
+					if(numStudsWide > 0) {
 					  g2.setColor(color.getRGB() == Color.BLACK ? Color.WHITE : Color.BLACK);
-					  if(numStuds == 1)
-						  g2.drawOval(xIndent+cellW/6, yIndent+cellH/6, cellW*2/3, cellH*2/3);
-					  else {
-						  final int cell = cellW/numStuds;
-						  final int stud = cellW*2/3/numStuds;
-						  final int gap = cellW/6/numStuds;
-						  for(int xx = 0; xx < numStuds; ++xx) {
-							  for(int yy = 0; yy < numStuds; ++yy) {
-								  	g2.drawOval(xIndent+cell*xx+gap, yIndent+cell*yy+gap, stud, stud);
-							  }
+					  // Draw studs:s
+					  final int cell = cellW/numStudsWide;
+					  final int stud = cellW*2/3/numStudsWide;
+					  final int gap = cellW/6/numStudsWide;
+					  for(int xx = 0; xx < numStudsWide; ++xx) {
+						  for(int yy = 0; yy < numStudsTall; ++yy) {
+							  	g2.drawOval(xIndent+cell*xx+gap, yIndent+cell*yy+gap, stud, stud);
 						  }
 					  }
 					}

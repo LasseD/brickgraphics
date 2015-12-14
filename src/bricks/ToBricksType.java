@@ -9,7 +9,7 @@ import transforms.*;
  * @author ld
  */
 public enum ToBricksType {
-	STUD_FROM_TOP(Icons.studFromTop(1), SizeInfo.BRICK_WIDTH, SizeInfo.BRICK_WIDTH) {
+	STUD_FROM_TOP(Icons.studsFromTop(1, 1), SizeInfo.BRICK_WIDTH, SizeInfo.BRICK_WIDTH, 1, 1) {
 		@Override
 		public BufferedImage transform(BufferedImage in, ToBricksTransform tbt) {
 			in = tbt.getStudTileTransform().transform(in);
@@ -18,7 +18,16 @@ public enum ToBricksType {
 			return in;
 		}
 	}, 
-	TILE_FROM_TOP(Icons.tileFromTop(), SizeInfo.BRICK_WIDTH, SizeInfo.BRICK_WIDTH) {
+	TWO_STUDS_FROM_TOP(Icons.studsFromTop(2, 1), 2*SizeInfo.BRICK_WIDTH, SizeInfo.BRICK_WIDTH, 2, 1) {
+		@Override
+		public BufferedImage transform(BufferedImage in, ToBricksTransform tbt) {
+			in = tbt.getTwoByOneTransform().transform(in);
+			in = tbt.getMainTransform().transform(in);
+			in = tbt.getRTransform().transform(in);
+			return in;
+		}
+	}, 
+	TILE_FROM_TOP(Icons.tileFromTop(), SizeInfo.BRICK_WIDTH, SizeInfo.BRICK_WIDTH, 0, 0) {
 		@Override
 		public BufferedImage transform(BufferedImage in, ToBricksTransform tbt) {
 			in = tbt.getStudTileTransform().transform(in);
@@ -27,7 +36,7 @@ public enum ToBricksType {
 			return in;
 		}
 	}, 
-	PLATE_FROM_SIDE(Icons.plateFromSide(), SizeInfo.BRICK_WIDTH, SizeInfo.PLATE_HEIGHT) {
+	PLATE_FROM_SIDE(Icons.plateFromSide(), SizeInfo.BRICK_WIDTH, SizeInfo.PLATE_HEIGHT, 0, 0) {
 		@Override
 		public BufferedImage transform(BufferedImage in, ToBricksTransform tbt) {
 			in = tbt.getPlateTransform().transform(in);
@@ -36,7 +45,7 @@ public enum ToBricksType {
 			return in;
 		}
 	}, 
-	BRICK_FROM_SIDE(Icons.brickFromSide(), SizeInfo.BRICK_WIDTH, SizeInfo.BRICK_HEIGHT) {
+	BRICK_FROM_SIDE(Icons.brickFromSide(), SizeInfo.BRICK_WIDTH, SizeInfo.BRICK_HEIGHT, 0, 0) {
 		@Override
 		public BufferedImage transform(BufferedImage in, ToBricksTransform tbt) {
 			in = tbt.getBrickTransform().transform(in);
@@ -45,7 +54,7 @@ public enum ToBricksType {
 			return in;
 		}
 	},
-	SNOT_IN_2_BY_2(Icons.snot(), SizeInfo.SNOT_BLOCK_WIDTH, SizeInfo.SNOT_BLOCK_WIDTH) {
+	SNOT_IN_2_BY_2(Icons.snot(), SizeInfo.SNOT_BLOCK_WIDTH, SizeInfo.SNOT_BLOCK_WIDTH, 0, 0) {
 		@Override
 		public BufferedImage transform(BufferedImage in, ToBricksTransform tbt) {
 			//long start = System.currentTimeMillis();
@@ -64,7 +73,7 @@ public enum ToBricksType {
 			return res;
 		}
 	}, 
-	TWO_BY_TWO_PLATES_FROM_TOP(Icons.studFromTop(2), SizeInfo.SNOT_BLOCK_WIDTH, SizeInfo.SNOT_BLOCK_WIDTH) {
+	TWO_BY_TWO_PLATES_FROM_TOP(Icons.studsFromTop(2, 2), SizeInfo.SNOT_BLOCK_WIDTH, SizeInfo.SNOT_BLOCK_WIDTH, 2, 2) {
 		@Override
 		public BufferedImage transform(BufferedImage in, ToBricksTransform tbt) {
 			in = tbt.getTwoByTwoTransform().transform(in);
@@ -78,12 +87,14 @@ public enum ToBricksType {
 	/**
 	 * Unit width and height is the indivisible size of the ToBricksType
 	 */
-	private int unitWidth, unitHeight;
+	private int unitWidth, unitHeight, studsShownWide, studsShownTall;
 
-	private ToBricksType(ToBricksIcon icon, int dw, int dh) {
+	private ToBricksType(ToBricksIcon icon, int dw, int dh, int studsShownWide, int studsShownTall) {
 		this.icon = icon;
 		unitWidth = dw;
 		unitHeight = dh;
+		this.studsShownWide = studsShownWide;
+		this.studsShownTall = studsShownTall;
 	}
 
 	/**
@@ -98,6 +109,13 @@ public enum ToBricksType {
 	 */
 	public int getUnitHeight() {
 		return unitHeight;
+	}
+	
+	public int getStudsShownWide() {
+		return studsShownWide;
+	}
+	public int getStudsShownTall() {
+		return studsShownTall;
 	}
 	
 	/**

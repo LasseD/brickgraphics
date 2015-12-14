@@ -372,6 +372,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		int fromLeft = (page % numPagesWidth)+1;
 		int fromTop = (page / numPagesWidth)+1;
 		if(showPosition == ShowPosition.Written) {
+			//String pageNumberString = "" + fromLeft + " mod højre, " + fromTop + " ned.";
 			String pageNumberString = fromLeft + ". from left, " + fromTop + ". from top.";
 			Rectangle2D pageNumberStringBounds = fm.getStringBounds(pageNumberString, g2);
 			float x = xMin + (float)((xMax-xMin)-pageNumberStringBounds.getWidth())/2;
@@ -491,18 +492,14 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		
 		if(tbTransform.getToBricksType() == ToBricksType.SNOT_IN_2_BY_2) {
 			if(uiController.showColors())
-				used.addAll(tbTransform.drawLastColors(g2, basicUnitRect, basicUnitWidth, basicUnitHeight, shownMagnifierSize, 0));
+				used.addAll(tbTransform.drawLastColors(g2, basicUnitRect, basicUnitWidth, basicUnitHeight, shownMagnifierSize, 0, 0));
 			else
 				used.addAll(tbTransform.drawLastInstructions(g2, basicUnitRect, basicUnitWidth, basicUnitHeight, shownMagnifierSize));
 		}
 		else {
 			if(uiController.showColors()) {
-				int numStuds = 0;
-				if(tbTransform.getToBricksType() == ToBricksType.STUD_FROM_TOP)
-					numStuds = 1;
-				else if(tbTransform.getToBricksType() == ToBricksType.TWO_BY_TWO_PLATES_FROM_TOP)
-					numStuds = 2;
-				used.addAll(tbTransform.getMainTransform().drawLastColors(g2, basicUnitRect, basicUnitWidth, basicUnitHeight, shownMagnifierSize, numStuds));
+				ToBricksType tbt = tbTransform.getToBricksType();
+				used.addAll(tbTransform.getMainTransform().drawLastColors(g2, basicUnitRect, basicUnitWidth, basicUnitHeight, shownMagnifierSize, tbt.getStudsShownWide(), tbt.getStudsShownTall()));
 			}
 			else
 				used.addAll(tbTransform.getMainTransform().drawLastInstructions(g2, basicUnitRect, basicUnitWidth, basicUnitHeight, shownMagnifierSize));
@@ -544,7 +541,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 			g2.setColor(Color.BLACK);
 			g2.drawRect(xIndent, yIndent, fontSizeIn1_72inches, fontSizeIn1_72inches);
 			int maxWidth = columnWidth-rowHeight;
-			g2.drawString(cut(colorController.getNormalIdentifier(c), g2, maxWidth), xMin + x*columnWidth + rowHeight, yMin + y*rowHeight + fontSizeIn1_72inches*9/10);
+			g2.drawString(colorController.getNormalIdentifier(c), xMin + x*columnWidth + rowHeight, yMin + y*rowHeight + fontSizeIn1_72inches*9/10);
 			++i;
 		}
 	}

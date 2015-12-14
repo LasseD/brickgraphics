@@ -16,12 +16,10 @@ import griddy.rulers.*;
 import griddy.zoom.*;
 
 public class Griddy extends JFrame implements ModelHandler<GriddyState>, WindowListener, ModelChangeListener {
-	private static final long serialVersionUID = 4660154787655442818L;
 	private BufferedImage image;
 	private final Model<GriddyState> model;
 	private final DisplayArea displayArea;
 	private final Zoom zoom; // factor
-	private final BorderRuler scaleToolHorizontal, scaleToolVertical;
 	private final JScrollPane scrollPane;
 	private final Ruler measurer;
 
@@ -244,8 +242,5 @@ public class Griddy extends JFrame implements ModelHandler<GriddyState>, WindowL
 	}
 
 	@Override
-	public void handleModelChange(Model<GriddyState> model) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void handleModelChange(Model<GriddyState> model) {}
 }

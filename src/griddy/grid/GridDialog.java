@@ -22,10 +22,10 @@ public class GridDialog extends JDialog {
 		//setIconImage(Icons.get(Icons.SIZE_LARGE, "preferences.png").getImage()); TODO: pic
 		
 		// Main type:
-		gridTypeButtons = new JRadioButton[SizeType.values().length];
+		gridTypeButtons = new JRadioButton[GridCellType.values().length];
 		ButtonGroup gridTypeButtonGroup = new ButtonGroup();
 		int i = 0;
-		for(final SizeType sizeType : SizeType.values()) {
+		for(final GridCellType sizeType : GridCellType.values()) {
 			JRadioButton b = new JRadioButton(sizeType.icon(16));
 			b.setToolTipText("Set grid type: " + sizeType.name());
 			b.addActionListener(new ActionListener() {

@@ -11,7 +11,6 @@ import java.util.List;
 import javax.swing.*;
 
 public class ColorButton extends JButton {
-	private static final long serialVersionUID = 7379914358059569001L;
 	private static final int ICON_SIZE = 10;
 	private Color color;
 	private List<ActionListener> actionListeners;

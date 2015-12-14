@@ -82,7 +82,7 @@ public class ScaleTransform extends BufferedTransform {
 			 quality == RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR))
 			throw new IllegalArgumentException("quality not known!");
 		this.type = type;
-		this.quality = quality;
+		this.quality = quality;//RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR;
 	}
 
 	public ScaleTransform(Type type, Object quality) {

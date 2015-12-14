@@ -181,7 +181,7 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 		imageDataFile = (DataFile)model.get(BrickGraphicsState.ImageFile);
 		if(imageDataFile.isValid()) {
 			try {
-				image = ImageIO.read(imageDataFile.fakeStream());
+				image = MosaicIO.removeAlpha(ImageIO.read(imageDataFile.fakeStream()));
 			} catch (IOException e) {
 				Log.log(e);
 			}			

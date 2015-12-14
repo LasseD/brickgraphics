@@ -1,8 +1,11 @@
 package mosaic.io;
 
 import java.io.*;
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.event.*;
 import java.awt.image.*;
+
 import javax.imageio.*;
 import javax.swing.*;
 import javax.swing.filechooser.*;
@@ -32,6 +35,16 @@ public class MosaicIO {
 	public static void saveImage(BufferedImage bricked, File file) throws IOException {
 		ImageIO.write(bricked, suffix(file), file);		
 	}
+	
+	public static BufferedImage removeAlpha(BufferedImage image) {
+		BufferedImage copy = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
+		Graphics2D g2 = copy.createGraphics();
+		g2.setColor(Color.WHITE);
+		g2.fillRect(0, 0, copy.getWidth(), copy.getHeight());
+		g2.drawImage(image, 0, 0, null);
+		g2.dispose();
+		return copy;
+	}
 
 	public static void load(MainController mc, Model<BrickGraphicsState> changingModel, File file) throws IOException {
 		FileType fileType = FileType.get(file);
@@ -45,7 +58,7 @@ public class MosaicIO {
 			}
 			break;
 		case img:
-			BufferedImage read = ImageIO.read(file);
+			BufferedImage read = removeAlpha(ImageIO.read(file));
 			//System.out.println(read);
 			if(read.getType() == BufferedImage.TYPE_CUSTOM) {
 				int w = read.getWidth();

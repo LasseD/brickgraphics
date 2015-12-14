@@ -12,7 +12,6 @@ import griddy.rulers.*;
 import io.*;
 
 public class DisplayArea extends JPanel implements ModelHandler<GriddyState>, ZoomListener, BorderRulerListener, ModelChangeListener {
-	private static final long serialVersionUID = 8055655787263638626L;
 	private BufferedImage image;
 	private double zoom; // factor
 	private Grid grid;

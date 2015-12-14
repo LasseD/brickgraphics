@@ -138,9 +138,11 @@ public class ColorChooserDialog extends JDialog implements ChangeListener {
 	
 	private class ColorGroupPanel extends JPanel implements ActionListener {
 		private List<ColorCheckBox> boxes;
+		private Set<LEGOColor> mixChoosen;
 		private boolean ignoreEvents;
 		
 		private ColorGroupPanel(ColorGroup group, int labelWidth, Set<LEGOColor> remainingColors, Set<LEGOColor> colorChooserSelectedColors) {
+			mixChoosen = new TreeSet<LEGOColor>();
 			ignoreEvents = true;
 			
 			JButton buttonAll = new JButton(Icons.checkbox(Icons.SIZE_SMALL, true));//"\u2200");
@@ -150,8 +152,24 @@ public class ColorChooserDialog extends JDialog implements ChangeListener {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					ignoreEvents = true;
-					for(ColorCheckBox box : boxes)
-						box.setSelected(true);
+					
+					Set<LEGOColor> choosen = new TreeSet<LEGOColor>();
+					for(ColorCheckBox box : boxes) {
+						if(box.isSelected())
+							choosen.add(box.color);
+					}
+					
+					if(choosen.size() == boxes.size()) {
+						for(ColorCheckBox box : boxes)
+							box.setSelected(mixChoosen.contains(box.color));						
+					}
+					else {
+						if(!choosen.isEmpty())
+							mixChoosen = choosen;
+						for(ColorCheckBox box : boxes)
+							box.setSelected(true);						
+					}
+					
 					ignoreEvents = false;
 					ColorGroupPanel.this.actionPerformed(e);
 				}
@@ -163,8 +181,24 @@ public class ColorChooserDialog extends JDialog implements ChangeListener {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					ignoreEvents = true;
-					for(ColorCheckBox box : boxes)
-						box.setSelected(false);
+
+					Set<LEGOColor> choosen = new TreeSet<LEGOColor>();
+					for(ColorCheckBox box : boxes) {
+						if(box.isSelected())
+							choosen.add(box.color);
+					}
+					
+					if(choosen.isEmpty()) {
+						for(ColorCheckBox box : boxes)
+							box.setSelected(mixChoosen.contains(box.color));						
+					}
+					else {
+						if(choosen.size() != boxes.size())
+							mixChoosen = choosen;
+						for(ColorCheckBox box : boxes)
+							box.setSelected(false);						
+					}
+					
 					ignoreEvents = false;
 					ColorGroupPanel.this.actionPerformed(e);
 				}

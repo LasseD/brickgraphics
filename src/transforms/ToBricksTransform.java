@@ -18,7 +18,8 @@ public class ToBricksTransform implements InstructionsTransform {
 	private ToBricksType toBricksType;
 	private HalfToneType halfToneType;
 	private ScaleTransform studTileTransform, 
-						   twoByTwoTransform,
+	   					   twoByOneTransform,
+              	           twoByTwoTransform,
 						   brickTransform, 
 						   plateTransform, 
 						   sidePlateTransform, 
@@ -33,6 +34,7 @@ public class ToBricksTransform implements InstructionsTransform {
 	public ToBricksTransform(LEGOColor[] colors, ToBricksType toBricksType, HalfToneType halfToneType, int propagationPercentage, ColorController cc) {
 		this.cc = cc;
 		studTileTransform = new ScaleTransform(ScaleTransform.Type.dims, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+		twoByOneTransform = new ScaleTransform(ScaleTransform.Type.dims, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 		twoByTwoTransform = new ScaleTransform(ScaleTransform.Type.dims, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 		brickTransform = new ScaleTransform(ScaleTransform.Type.dims, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 		plateTransform = new ScaleTransform(ScaleTransform.Type.dims, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
@@ -81,6 +83,10 @@ public class ToBricksTransform implements InstructionsTransform {
 		return studTileTransform;
 	}
 
+	public Transform getTwoByOneTransform() {
+		return twoByOneTransform;
+	}
+
 	public Transform getTwoByTwoTransform() {
 		return twoByTwoTransform;
 	}
@@ -127,6 +133,9 @@ public class ToBricksTransform implements InstructionsTransform {
 
 		twoByTwoTransform.setWidth(width/SizeInfo.SNOT_BLOCK_WIDTH);
 		twoByTwoTransform.setHeight(height/SizeInfo.SNOT_BLOCK_WIDTH);
+
+		twoByOneTransform.setWidth(width/SizeInfo.SNOT_BLOCK_WIDTH);
+		twoByOneTransform.setHeight(height/SizeInfo.BRICK_WIDTH);
 
 		brickTransform.setWidth(width/SizeInfo.BRICK_WIDTH);
 		brickTransform.setHeight(height/SizeInfo.BRICK_HEIGHT);
@@ -267,8 +276,7 @@ public class ToBricksTransform implements InstructionsTransform {
 	 * Only for SNOT
 	 */
 	@Override
-	public Set<LEGOColor> drawLastColors(Graphics2D g2, 
-			Rectangle basicUnitRect, int blockWidth, int blockHeight, Dimension toSize, int ignore) {
+	public Set<LEGOColor> drawLastColors(Graphics2D g2, Rectangle basicUnitRect, int blockWidth, int blockHeight, Dimension toSize, int numStudsWide, int numStudsTall) {
 		if(blockWidth != 10 || blockHeight != 10)
 			throw new IllegalArgumentException("Block 10x10");
 			

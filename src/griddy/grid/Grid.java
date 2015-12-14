@@ -12,7 +12,7 @@ import griddy.rulers.*;
 public class Grid implements DisplayComponent, BorderRulerListener {
 	private static final long serialVersionUID = -8151492927599986064L;
 	private Point gridStart;
-	private SizeType sizeType;
+	private GridCellType sizeType;
 	private List<GridLevel> gridLevels;
 	private double gridScale;
 	private transient Point mousePressed, currentTranslate;
@@ -20,7 +20,7 @@ public class Grid implements DisplayComponent, BorderRulerListener {
 	
 	public Grid() {
 		gridStart = new Point();
-		sizeType = SizeType.plate;
+		sizeType = GridCellType.plate;
 		gridLevels = new LinkedList<GridLevel>();
 		GridLevel level0 = new GridLevel(Color.BLACK, 1, 1, false);
 		gridLevels.add(level0);
@@ -55,12 +55,12 @@ public class Grid implements DisplayComponent, BorderRulerListener {
 		gridScale = scale;
 	}
 	
-	public void setSizeType(SizeType sizeType) {
+	public void setSizeType(GridCellType sizeType) {
 		isSlowValid = false;
 		this.sizeType = sizeType;
 	}
 	
-	public SizeType getSizeType() {
+	public GridCellType getSizeType() {
 		return sizeType;
 	}
 	

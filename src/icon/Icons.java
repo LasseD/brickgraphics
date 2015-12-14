@@ -321,7 +321,7 @@ public class Icons {
 		};
 	}
 
-	public static ToBricksIcon studFromTop(final int bricksWide) {
+	public static ToBricksIcon studsFromTop(final int bricksWide, final int bricksTall) {
 		return new ToBricksIcon() {
 			@Override
 			public void paint(Graphics2D g2, ToBricksIconType type, int size) {
@@ -334,7 +334,7 @@ public class Icons {
 				case MeasureHeight:
 					baseX = 4;
 					baseY = 0;
-					drawVerticalMeasure(g2, 1, 0, m.brickWidth*bricksWide);
+					drawVerticalMeasure(g2, 1, 0, m.brickWidth*bricksTall);
 					break;
 				case MeasureWidth:
 					baseX = 4;
@@ -346,19 +346,19 @@ public class Icons {
 					// Fall through intended:
 				case Enabled:
 					baseX = m.mid-m.brickWidth/2*bricksWide;
-					baseY = m.mid-m.brickWidth/2*bricksWide;
+					baseY = m.mid-m.brickWidth/2*bricksTall;
 					break;
 				default:
 					throw new IllegalStateException("Enum broken: " + type);
 				}				
 				
-				g2.fillRect(baseX, baseY, m.brickWidth*bricksWide, m.brickWidth*bricksWide);
+				g2.fillRect(baseX, baseY, m.brickWidth*bricksWide, m.brickWidth*bricksTall);
 				g2.setColor(Color.BLACK);
-				g2.drawRect(baseX, baseY, m.brickWidth*bricksWide, m.brickWidth*bricksWide);
+				g2.drawRect(baseX, baseY, m.brickWidth*bricksWide, m.brickWidth*bricksTall);
 				// studs:
 				for(int x = 0; x < bricksWide; ++x) {
 					int indentX = baseX + x*m.brickWidth + (m.brickWidth-m.studWidth)/2;
-					for(int y = 0; y < bricksWide; ++y) {
+					for(int y = 0; y < bricksTall; ++y) {
 						int indentY = baseY + y*m.brickWidth + (m.brickWidth-m.studWidth)/2;
 						g2.drawOval(indentX, indentY, m.studWidth, m.studWidth);
 					}

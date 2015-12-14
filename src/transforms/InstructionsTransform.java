@@ -17,9 +17,7 @@ public interface InstructionsTransform extends Transform {
 	 * @param numStuds Number of studs to draw on a single block
 	 * @return a set with the colors used.
 	 */
-	public Set<LEGOColor> drawLastInstructions(Graphics2D g2, 
-			Rectangle unitBounds, int blockWidth, int blockHeight, Dimension toSize);
-	public Set<LEGOColor> drawLastColors(Graphics2D g2, 
-			Rectangle unitBounds, int blockWidth, int blockHeight, Dimension toSize, int numStuds);
+	public Set<LEGOColor> drawLastInstructions(Graphics2D g2, Rectangle unitBounds, int blockWidth, int blockHeight, Dimension toSize);
+	public Set<LEGOColor> drawLastColors(Graphics2D g2, Rectangle unitBounds, int blockWidth, int blockHeight, Dimension toSize, int numStudsWide, int numStudsTall);
 	public LEGOColor.CountingLEGOColor[] lastUsedColorCounts();
 }

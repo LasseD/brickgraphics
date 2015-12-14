@@ -93,18 +93,14 @@ public class MagnifierWindow extends JDialog implements ChangeListener {
 			Set<LEGOColor> used;
 			if(tbTransform.getToBricksType() == ToBricksType.SNOT_IN_2_BY_2) {
 				if(uiController.showColors())
-					used = tbTransform.drawLastColors(g2, basicUnitRect, basicUnitWidth, basicUnitHeight, shownMagnifierSize, 0);
+					used = tbTransform.drawLastColors(g2, basicUnitRect, basicUnitWidth, basicUnitHeight, shownMagnifierSize, 0, 0);
 				else
 					used = tbTransform.drawLastInstructions(g2, basicUnitRect, basicUnitWidth, basicUnitHeight, shownMagnifierSize);
 			}
 			else {
 				if(uiController.showColors()) {
-					int numStuds = 0;
-					if(tbTransform.getToBricksType() == ToBricksType.STUD_FROM_TOP)
-						numStuds = 1;
-					else if(tbTransform.getToBricksType() == ToBricksType.TWO_BY_TWO_PLATES_FROM_TOP)
-						numStuds = 2;
-					used = tbTransform.getMainTransform().drawLastColors(g2, basicUnitRect, basicUnitWidth, basicUnitHeight, shownMagnifierSize, numStuds);
+					ToBricksType tbt = tbTransform.getToBricksType();
+					used = tbTransform.getMainTransform().drawLastColors(g2, basicUnitRect, basicUnitWidth, basicUnitHeight, shownMagnifierSize, tbt.getStudsShownWide(), tbt.getStudsShownTall());
 				}
 				else
 					used = tbTransform.getMainTransform().drawLastInstructions(g2, basicUnitRect, basicUnitWidth, basicUnitHeight, shownMagnifierSize);
