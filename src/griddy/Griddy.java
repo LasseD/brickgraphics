@@ -1,5 +1,6 @@
 package griddy;
 
+import io.Log;
 import io.Model;
 import io.ModelChangeListener;
 import io.ModelHandler;
@@ -8,29 +9,49 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
+
 import griddy.actions.*;
+import griddy.zoom.*;
 import javax.swing.*;
 
 import griddy.grid.*;
+import griddy.io.GriddyState;
 import griddy.rulers.*;
-import griddy.zoom.*;
+import griddy.zoom.Zoom;
 
 public class Griddy extends JFrame implements ModelHandler<GriddyState>, WindowListener, ModelChangeListener {
+	public static final String APP_NAME = "Griddy - The grid overlay program";
+	public static final String APP_NAME_SHORT = "Griddy";
+	public static final String LOG_FILE_NAME = "griddy.log";
+	public static final String STATE_FILE_NAME = "griddy.kvm";
+	public static final int VERSION_MAJOR = 0;
+	public static final int VERSION_MINOR = 9;
+	public static final int VERSION_MICRO = 3;
+	public static final String APP_VERSION = VERSION_MAJOR + "." + VERSION_MINOR + "." + VERSION_MICRO;
+	public static final String HELP_URL = "http://c-mt.dk/software/griddy/help";
+	
 	private BufferedImage image;
 	private final Model<GriddyState> model;
 	private final DisplayArea displayArea;
 	private final Zoom zoom; // factor
 	private final JScrollPane scrollPane;
 	private final Ruler measurer;
+	private BorderRuler scaleToolHorizontal, scaleToolVertical;
 
 	public Griddy() {
-		super("Griddy");
+		super(APP_NAME_SHORT);
+		try {
+			Log.initializeLog(LOG_FILE_NAME);
+		} catch (IOException e1) {
+			JOptionPane.showMessageDialog(null, "The log file " + LOG_FILE_NAME + " could not be opened for writing.\nLDDMC might not have sufficient permissions.\nLog messages are written to console if available.\nThe error message:\n" + e1.getMessage(), "Failed to open/create log file", JOptionPane.WARNING_MESSAGE);
+		}
+
 		setIconImage(Icons.get(32, "icon").getImage());
-		model = new Model<GriddyState>("Griddy.state", GriddyState.class);
+		model = new Model<GriddyState>(STATE_FILE_NAME, GriddyState.class);
 		zoom = new Zoom(model);
 		displayArea = new DisplayArea(model, zoom); // will add itself as zoom listener.
-		scaleToolHorizontal = (BorderRuler)model.get(GriddyState.ScaleToolHorizontal);
-		scaleToolVertical = (BorderRuler)model.get(GriddyState.ScaleToolVertical);
+		scaleToolHorizontal = new BorderRuler(true);
+		scaleToolVertical = new BorderRuler(false);
 		measurer = new Ruler(zoom, scaleToolHorizontal, scaleToolVertical);
 
 		displayArea.addDisplayComponent(scaleToolHorizontal.makeDisplayLineComponent());
@@ -99,7 +120,7 @@ public class Griddy extends JFrame implements ModelHandler<GriddyState>, WindowL
 
 		// components:
 		try {
-			File file = (File)model.get(GriddyState.Image);
+			File file = new File((String)model.get(GriddyState.ImageFileName));
 			IOActions.load(this, model, file);
 		}
 		catch (IOException e) {
@@ -189,7 +210,7 @@ public class Griddy extends JFrame implements ModelHandler<GriddyState>, WindowL
 		displayArea.setImage(image);
 		if(scrollPane != null) // init.
 			scrollPane.validate();
-		File file = (File)model.get(GriddyState.Image);
+		File file = new File((String)model.get(GriddyState.ImageFileName));
 		setTitle("Griddy - " + file.getName());
 		repaint();
 	}
@@ -206,8 +227,8 @@ public class Griddy extends JFrame implements ModelHandler<GriddyState>, WindowL
 	
 	@Override
 	public void save(Model<GriddyState> model) {
-		model.set(GriddyState.ScaleToolHorizontal, scaleToolHorizontal);
-		model.set(GriddyState.ScaleToolVertical, scaleToolVertical);
+		//model.set(GriddyState.ScaleToolHorizontal, scaleToolHorizontal);
+		//model.set(GriddyState.ScaleToolVertical, scaleToolVertical);
 		model.set(GriddyState.MainWindowPlacement, getBounds());
 	}
 

@@ -19,7 +19,6 @@ public class Ruler implements DisplayComponent, MouseListener, MouseMotionListen
 	private Color color;
 
 	private List<RulerListener> listeners;
-	private volatile transient boolean isSlowValid;
 	private volatile transient Point tmp;
 	
 	public Ruler(Zoom zoom, BorderRuler brh, BorderRuler brv) {
@@ -44,7 +43,6 @@ public class Ruler implements DisplayComponent, MouseListener, MouseMotionListen
 	}
 
 	public void setLengthType(LengthType lengthType) {
-		isSlowValid = false;
 		this.lengthType = lengthType;
 		fireChanges();
 	}
@@ -54,7 +52,6 @@ public class Ruler implements DisplayComponent, MouseListener, MouseMotionListen
 	}
 	
 	public void setColor(Color color) {
-		isSlowValid = false;
 		this.color = color;
 		fireChanges();
 	}
@@ -120,7 +117,7 @@ public class Ruler implements DisplayComponent, MouseListener, MouseMotionListen
 			}
 			else {
 				Point2D.Double p2 = Ruler.this.p2;
-				if(p2 == null)
+				if(p2 == null && tmp != null)
 					p2 = new Point2D.Double(tmp.x, tmp.y);
 				
 				setText(formatPoint(p1));
@@ -158,8 +155,7 @@ public class Ruler implements DisplayComponent, MouseListener, MouseMotionListen
 	
 	private static final int DOT_RADIUS = 2;
 	@Override
-	public void drawQuick(Graphics2D g2) {
-		isSlowValid = true;
+	public void draw(BufferedImage baseImage, Graphics2D g2) {
 		g2.setColor(color);
 		if(p1 != null) {
 			Ellipse2D.Double oval = new Ellipse2D.Double(p1.x-DOT_RADIUS, p1.y-DOT_RADIUS, DOT_RADIUS*2, DOT_RADIUS*2);
@@ -176,13 +172,7 @@ public class Ruler implements DisplayComponent, MouseListener, MouseMotionListen
 	}
 
 	@Override
-	public void drawSlow(BufferedImage baseImage, Graphics2D g2) {
-		drawQuick(g2);
-	}
-
-	@Override
 	public void mouseClicked(MouseEvent e) {
-		isSlowValid = false;
 		Point p = e.getPoint();
 		if(p1 == null) {
 			p1 = new Point2D.Double(p.x, p.y);			
@@ -214,15 +204,12 @@ public class Ruler implements DisplayComponent, MouseListener, MouseMotionListen
 
 	@Override
 	public void mouseMoved(MouseEvent e) {
-		if(p1 != null && p2 == null)
-			isSlowValid = false;
 		tmp = e.getPoint();
 		fireChanges();
 	}
 
 	@Override
 	public void zoomChanged(double newZoom, double zoomChangeFactor) {
-		isSlowValid = false;
 		if(p1 != null) {
 			p1.x *= zoomChangeFactor;
 			p1.y *= zoomChangeFactor;
@@ -231,10 +218,5 @@ public class Ruler implements DisplayComponent, MouseListener, MouseMotionListen
 			p2.x *= zoomChangeFactor;
 			p2.y *= zoomChangeFactor;
 		}
-	}
-
-	@Override
-	public boolean isSlowValid() {
-		return isSlowValid;
 	}
 }

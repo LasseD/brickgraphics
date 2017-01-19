@@ -18,6 +18,7 @@ public class KVFileHandler<S extends ModelState> {
 		typeSerializers.put(Dimension.class.getName(), new KV_Dimension());
 		typeSerializers.put(Integer.class.getName(), new KV_Integer());
 		typeSerializers.put(Float.class.getName(), new KV_Float());
+		typeSerializers.put(Double.class.getName(), new KV_Double());
 		typeSerializers.put(float[].class.getName(), new KV_FloatArray());
 		typeSerializers.put(int[].class.getName(), new KV_IntArray());
 		typeSerializers.put(Boolean.class.getName(), new KV_Boolean());
@@ -71,7 +72,13 @@ public class KVFileHandler<S extends ModelState> {
 	public void writeFile(PrintWriter pw, Map<S, Object> map) {
 		for(S s : map.keySet()) {
 			String typeName = s.getType().getName();
-			pw.println(s + ":" + typeSerializers.get(typeName).value2kl(map.get(s)));
+			Object value = map.get(s);
+			if(value == null)
+				throw new NoSuchElementException("Value " + s + " not found in map!");
+			KVFileValueHandler vh = typeSerializers.get(typeName);
+			if(vh == null)
+				throw new NoSuchElementException("Type name " + typeName + " not found in serializers!");
+			pw.println(s + ":" + vh.value2kl(value));
 		}
 	}
 	
@@ -98,6 +105,16 @@ public class KVFileHandler<S extends ModelState> {
 		@Override
 		public String value2kl(Integer t) {
 			return Integer.toString(t);
+		}
+	}
+	private static class KV_Double implements KVFileValueHandler<Double> {
+		@Override
+		public Double kl2value(String s) {
+			return Double.parseDouble(s);
+		}
+		@Override
+		public String value2kl(Double t) {
+			return Double.toString(t);
 		}
 	}
 	private static class KV_Float implements KVFileValueHandler<Float> {

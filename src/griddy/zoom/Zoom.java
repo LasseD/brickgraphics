@@ -1,10 +1,12 @@
 package griddy.zoom;
 
+import io.*;
+
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.*;
-import io.*;
+import griddy.io.*;
 
 import javax.swing.*;
 import griddy.*;
@@ -154,7 +156,6 @@ public class Zoom implements ModelHandler<GriddyState>, ModelChangeListener {
 
 	@Override
 	public void handleModelChange(Model<GriddyState> model) {
-		// TODO Auto-generated method stub
-		
+		zoom = (Double)model.get(GriddyState.Zoom);
 	}
 }

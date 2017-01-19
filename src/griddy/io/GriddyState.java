@@ -6,7 +6,8 @@ import java.awt.*;
 public enum GriddyState implements ModelState {
 	MainWindowPlacement(new Rectangle(0, 0, 640, 480)),
 	ImageFileName("griddy_sample_input.jpg"),
-	ImageFile(new DataFile());
+	ImageFile(new DataFile()),
+	Zoom(1.0);
 
 	// Sample values:
 	//SelectedColors(new int[]{0, 1, 2, 14, 15, 19, 70, 71, 72, 320}),

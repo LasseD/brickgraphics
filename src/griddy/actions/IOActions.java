@@ -1,8 +1,11 @@
 package griddy.actions;
 
 import griddy.*;
+import griddy.io.*;
 import java.io.*;
 import java.awt.AWTException;
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.Toolkit;
@@ -36,6 +39,17 @@ public class IOActions {
 	public static void saveImage(BufferedImage bricked, File file) throws IOException {
 		ImageIO.write(bricked, suffix(file), file);		
 	}
+	
+	public static BufferedImage readImageNoAlpha(File file) throws IOException {
+		BufferedImage img = ImageIO.read(file);		
+		BufferedImage copy = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_RGB);
+		Graphics2D g2 = copy.createGraphics();
+		g2.setColor(Color.WHITE);
+		g2.fillRect(0, 0, copy.getWidth(), copy.getHeight());
+		g2.drawImage(img, 0, 0, null);
+		g2.dispose();	
+		return copy;
+	}
 
 	public static void load(Griddy parent, Model<GriddyState> changingModel, File file) throws IOException, ClassCastException {
 		FileType fileType = FileType.get(file);
@@ -44,7 +58,7 @@ public class IOActions {
 			FileInputStream fis = new FileInputStream(file);
 			ObjectInputStream ois = new ObjectInputStream(fis);
 			//changingModel.loadFrom(ois); // TODO: Update!
-			String fileNameType = suffix((File)changingModel.get(GriddyState.Image));			
+			String fileNameType = suffix((File)changingModel.get(GriddyState.ImageFileName));			
 			ImageInputStream iis = ImageIO.createImageInputStream(fis);
 			
 			Iterator<ImageReader> imageReaders = ImageIO.getImageReadersByFormatName(fileNameType);
@@ -65,7 +79,7 @@ public class IOActions {
 			parent.imageFileLoaded(img);
 			break;
 		case img:
-			changingModel.set(GriddyState.Image, file);
+			changingModel.set(GriddyState.ImageFileName, file.getCanonicalPath());
 			BufferedImage read = ImageIO.read(file);
 
 			if(read.getType() == BufferedImage.TYPE_CUSTOM) {
@@ -102,7 +116,7 @@ public class IOActions {
 					parent.setBounds(r); // old size.
 
 					String timeString = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss").format(new Date());
-					model.set(GriddyState.Image, new File("screenshot_" + timeString + ".png"));
+					model.set(GriddyState.ImageFileName, new File("screenshot_" + timeString + ".png"));
 					if(screenImage.getType() == BufferedImage.TYPE_CUSTOM) {
 						int w = screenImage.getWidth();
 						int h = screenImage.getHeight();
@@ -132,7 +146,7 @@ public class IOActions {
 	}
 	
 	public static Action createOpenAction(final Model<GriddyState> currentModel, final Griddy parent) {
-		File currentImage = (File)currentModel.get(GriddyState.Image);
+		File currentImage = new File((String)currentModel.get(GriddyState.ImageFileName));
 		final JFileChooser fileChooser = new JFileChooser(currentImage.getParentFile());
 		List<String> suffixes = new LinkedList<String>();
 		for(String s : IMG_SUFFIXES)
@@ -179,7 +193,7 @@ public class IOActions {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				File file = (File)currentModel.get(GriddyState.Image);
+				File file = new File((String)currentModel.get(GriddyState.ImageFileName));
 				file = ensureSuffix(file, GRIDDY_SUFFIX);
 				try {
 					saveGriddy(currentModel, parent.getImage(), file);
@@ -209,7 +223,7 @@ public class IOActions {
 	}
 
 	public static Action createSaveAsAction(final Model<GriddyState> currentModel, final Griddy parent) {
-		File currentImage = (File)currentModel.get(GriddyState.Image);
+		File currentImage = new File((String)currentModel.get(GriddyState.ImageFileName));
 		final JFileChooser fileChooser = new JFileChooser(currentImage.getParentFile());
 		
 		for(FileFilter filter : fileChooser.getChoosableFileFilters())
@@ -222,14 +236,14 @@ public class IOActions {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				fileChooser.setSelectedFile(ensureSuffix((File)currentModel.get(GriddyState.Image), GRIDDY_SUFFIX));
+				fileChooser.setSelectedFile(ensureSuffix(new File((String)currentModel.get(GriddyState.ImageFileName)), GRIDDY_SUFFIX));
 				int retVal = fileChooser.showSaveDialog(parent);
 				if(retVal == JFileChooser.APPROVE_OPTION) {
 					File file = ensureSuffix(fileChooser.getSelectedFile(), GRIDDY_SUFFIX);
 					
 					try {
 						saveGriddy(currentModel, parent.getImage(), file);
-						currentModel.set(GriddyState.Image, file);
+						currentModel.set(GriddyState.ImageFileName, file);
 					} catch (Exception e1) {
 						String message = "An error ocurred while saving file " + file.getName() + "\n" + e1.getMessage();
 						JOptionPane.showMessageDialog(parent, message, "Error when saving file", JOptionPane.ERROR_MESSAGE);
@@ -250,7 +264,7 @@ public class IOActions {
 	}
 	
 	public static Action createExportAction(final Model<GriddyState> currentModel, final Griddy parent) {
-		File currentImage = (File)currentModel.get(GriddyState.Image);
+		File currentImage = new File((String)currentModel.get(GriddyState.ImageFileName));
 		final JFileChooser fileChooser = new JFileChooser(currentImage.getParentFile());
 		
 		for(FileFilter filter : fileChooser.getChoosableFileFilters())
@@ -266,11 +280,9 @@ public class IOActions {
 		fileChooser.setSelectedFile(currentImage);
 
 		Action export = new AbstractAction() {
-			private static final long serialVersionUID = 66031427278213561L;
-
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				fileChooser.setSelectedFile(((File)currentModel.get(GriddyState.Image)));
+				fileChooser.setSelectedFile((new File((String)currentModel.get(GriddyState.ImageFileName))));
 				int retVal = fileChooser.showDialog(parent, "Save Screenshot");
 				if(retVal == JFileChooser.APPROVE_OPTION) {
 					File file = fileChooser.getSelectedFile();

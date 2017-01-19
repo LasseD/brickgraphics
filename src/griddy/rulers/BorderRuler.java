@@ -19,7 +19,6 @@ public class BorderRuler implements Serializable, BorderRulerListener, ZoomListe
 	private double start, end, dist;
 	private LengthType lengthType;
 	private transient List<BorderRulerListener> scaleListeners, scaleListenersViews;
-	private transient volatile boolean isSlowValid;
 	
 	public BorderRuler(boolean isHorizontal) {
 		this.isHorizontal = isHorizontal;
@@ -32,7 +31,6 @@ public class BorderRuler implements Serializable, BorderRulerListener, ZoomListe
 	
 	public void conformTo(BorderRuler other) {
 		assert(isHorizontal == other.isHorizontal);
-		isSlowValid = false;
 		start = other.start;
 		end = other.end;
 		dist = other.dist;
@@ -81,7 +79,6 @@ public class BorderRuler implements Serializable, BorderRulerListener, ZoomListe
 	public void setStart(double start) {
 		if(end <= start)
 			throw new IllegalArgumentException("end <= start");
-		isSlowValid = false;
 		this.start = start;
 		fireStateChange(this, false);
 	}
@@ -93,7 +90,6 @@ public class BorderRuler implements Serializable, BorderRulerListener, ZoomListe
 	public void setEnd(double end) {
 		if(end <= start)
 			throw new IllegalArgumentException("end <= start");
-		isSlowValid = false;
 		this.end = end;
 		fireStateChange(this, false);
 	}
@@ -105,7 +101,6 @@ public class BorderRuler implements Serializable, BorderRulerListener, ZoomListe
 	public void setDist(double dist) {
 		if(dist <= 0)
 			throw new IllegalArgumentException("dist <= 0");
-		isSlowValid = false;
 		this.dist = dist;
 		fireStateChange(this, false);
 	}
@@ -115,7 +110,6 @@ public class BorderRuler implements Serializable, BorderRulerListener, ZoomListe
 	}
 
 	public void setLengthType(LengthType lengthType) {
-		isSlowValid = false;
 		this.lengthType = lengthType;
 		fireStateChange(this, false);
 	}
@@ -131,20 +125,13 @@ public class BorderRuler implements Serializable, BorderRulerListener, ZoomListe
 
 	public DisplayComponent makeDisplayLineComponent() {
 		return new DisplayComponent() {
-			private static final long serialVersionUID = 1L;
 			private static final int STROKE_PERIOD = 4;
 			private final Stroke stroke1 = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 1, new float[]{STROKE_PERIOD, STROKE_PERIOD}, 0);
 			private final Stroke stroke2 = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 1, new float[]{STROKE_PERIOD, STROKE_PERIOD}, STROKE_PERIOD);
 			
 			@Override
-			public void drawSlow(BufferedImage baseImage, Graphics2D g2) {
-				drawQuick(g2);
-			}
-			
-			@Override
-			public void drawQuick(Graphics2D g2) {
+			public void draw(BufferedImage baseImage, Graphics2D g2) {
 				if(!isRulerActive) {
-					isSlowValid = true;
 					return;					
 				}
 
@@ -171,12 +158,6 @@ public class BorderRuler implements Serializable, BorderRulerListener, ZoomListe
 					g2.drawLine(rect.x, end, rect.x+rect.width, end);
 				}
 				g2.setStroke(tmpStroke);
-				isSlowValid = true;
-			}
-
-			@Override
-			public boolean isSlowValid() {
-				return isSlowValid;
 			}
 		};
 	}
@@ -287,7 +268,6 @@ public class BorderRuler implements Serializable, BorderRulerListener, ZoomListe
 		if(scaleTool == this) {
 			return;
 		}
-		isSlowValid = false;
 		// update dist to match it:
 		double theirSpan = (scaleTool.getEnd() - scaleTool.getStart()) / scaleTool.getLengthType().getUnitLength();
 		double ourSpan = (getEnd() - getStart()) / getLengthType().getUnitLength();
@@ -299,7 +279,6 @@ public class BorderRuler implements Serializable, BorderRulerListener, ZoomListe
 
 	@Override
 	public void zoomChanged(double newZoom, double zoomChangeFactor) {
-		isSlowValid = false;
 		start *= zoomChangeFactor;
 		end *= zoomChangeFactor;
 		fireStateChange(this, true);
@@ -378,7 +357,6 @@ public class BorderRuler implements Serializable, BorderRulerListener, ZoomListe
 				
 				@Override
 				public void mouseDragged(MouseEvent e) {
-					isSlowValid = false;
 					Point p = e.getPoint();
 					if(startPlace == null)
 						return;

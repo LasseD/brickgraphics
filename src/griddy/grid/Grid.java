@@ -1,5 +1,7 @@
 package griddy.grid;
 
+import io.Model;
+
 import java.awt.event.*;
 import java.awt.image.*;
 import java.awt.*;
@@ -7,18 +9,18 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.List;
 import griddy.*;
+import griddy.io.GriddyState;
 import griddy.rulers.*;
 
 public class Grid implements DisplayComponent, BorderRulerListener {
-	private static final long serialVersionUID = -8151492927599986064L;
 	private Point gridStart;
 	private GridCellType sizeType;
 	private List<GridLevel> gridLevels;
 	private double gridScale;
 	private transient Point mousePressed, currentTranslate;
-	private volatile transient boolean isSlowValid;
 	
-	public Grid() {
+	public Grid(Model<GriddyState> model) {
+		// TODO: Load model!
 		gridStart = new Point();
 		sizeType = GridCellType.plate;
 		gridLevels = new LinkedList<GridLevel>();
@@ -30,7 +32,6 @@ public class Grid implements DisplayComponent, BorderRulerListener {
 	}
 	
 	public void conformTo(Grid other) {
-		isSlowValid = false;
 		setGridStart(other.getGridStart());
 		setSizeType(other.getSizeType());
 		setGridScale(other.gridScale);
@@ -46,17 +47,14 @@ public class Grid implements DisplayComponent, BorderRulerListener {
 	}
 
 	public void setGridStart(Point gridStart) {
-		isSlowValid = false;
 		this.gridStart = gridStart;
 	}
 	
 	public void setGridScale(double scale) {
-		isSlowValid = false;
 		gridScale = scale;
 	}
 	
 	public void setSizeType(GridCellType sizeType) {
-		isSlowValid = false;
 		this.sizeType = sizeType;
 	}
 	
@@ -71,33 +69,22 @@ public class Grid implements DisplayComponent, BorderRulerListener {
 	public void addGridLevel() {
 		Color color = Color.getHSBColor((float)Math.random(), 1.0f, 1.0f);
 		gridLevels.add(new GridLevel(color, 5, 5, false));
-		isSlowValid = false;
 	}
 	
 	public void removeGridLevel(GridLevel gridLevel) {
-		isSlowValid = false;
 		gridLevels.remove(gridLevel);
 	}
 	
 	@Override
 	public void borderRulerChanged(BorderRuler scaleTool) {
-		isSlowValid = false;
 		double span = scaleTool.getEnd() - scaleTool.getStart();
 		gridScale = span/scaleTool.getDist() / scaleTool.getLengthType().getUnitLength();
 	}
 	
 	@Override
-	public void drawQuick(Graphics2D g2) {
+	public void draw(BufferedImage baseImage, Graphics2D g2) {
 		for(GridLevel l : gridLevels) {
-			l.drawQuick(g2);
-		}
-	}
-
-	@Override
-	public void drawSlow(BufferedImage baseImage, Graphics2D g2) {
-		isSlowValid = true;
-		for(GridLevel l : gridLevels) {
-			l.drawSlow(baseImage, g2);
+			l.draw(baseImage, g2);
 		}
 	}
 	
@@ -117,7 +104,6 @@ public class Grid implements DisplayComponent, BorderRulerListener {
 			public void mouseDragged(MouseEvent e) {
 				if(mousePressed == null || currentTranslate == null)
 					return;
-				isSlowValid = false;
 				currentTranslate = new Point(e.getPoint().x - mousePressed.x, e.getPoint().y - mousePressed.y);
 				toRepaint.repaint();
 			}
@@ -151,7 +137,6 @@ public class Grid implements DisplayComponent, BorderRulerListener {
 			public void mouseReleased(MouseEvent e) {
 				if(mousePressed == null || currentTranslate == null)
 					return;
-				isSlowValid = false;
 				
 				int distX = e.getPoint().x - mousePressed.x;
 				int distY = e.getPoint().y - mousePressed.y;
@@ -210,19 +195,16 @@ public class Grid implements DisplayComponent, BorderRulerListener {
 		public void setXSize(int size) {
 			if(size <= 0)
 				throw new IllegalArgumentException("size <= 0");
-			isSlowValid = false;
 			this.xSize = size;
 		}
 		
 		public void setYSize(int size) {
 			if(size <= 0)
 				throw new IllegalArgumentException("size <= 0");
-			isSlowValid = false;
 			this.ySize = size;
 		}
 		
 		public void setColor(Color color) {
-			isSlowValid = false;
 			this.color = color;
 		}		
 		
@@ -251,16 +233,6 @@ public class Grid implements DisplayComponent, BorderRulerListener {
 			}	
 		}
 		
-		public void drawQuick(Graphics2D g2) {
-			g2.setColor(color);
-			draw(g2, new LineDrawer(){
-				@Override
-				public void drawLine(Graphics2D g2, int x1, int y1, int x2, int y2) {					
-					g2.drawLine(x1, y1, x2, y2);
-				}				
-			});		
-		}
-		
 		private boolean nearer(int color, Color nearer, Color other) {
 			Color c = new Color(color);
 			int r = c.getRed();
@@ -275,8 +247,14 @@ public class Grid implements DisplayComponent, BorderRulerListener {
 			return distNearer < distOther;
 		}
 		
-		public void drawSlow(final BufferedImage baseImage, Graphics2D g2) {
-			drawQuick(g2);
+		public void draw(final BufferedImage baseImage, Graphics2D g2) {
+			g2.setColor(color);
+			draw(g2, new LineDrawer(){
+				@Override
+				public void drawLine(Graphics2D g2, int x1, int y1, int x2, int y2) {					
+					g2.drawLine(x1, y1, x2, y2);
+				}				
+			});		
 			if(!drawContrasting) {
 				return;
 			}
@@ -336,10 +314,4 @@ public class Grid implements DisplayComponent, BorderRulerListener {
 			});
 		}
 	}
-
-	@Override
-	public boolean isSlowValid() {
-		return isSlowValid;
-	}
-
 }

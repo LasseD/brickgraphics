@@ -31,7 +31,7 @@ public enum GridCellType {
 	}, stud(5, 5) {
 		@Override
 		public Icon icon(int iconSize) {
-			return Icons.studFromTop(1).get(ToBricksIconType.Enabled, iconSize);
+			return Icons.studsFromTop(1,1).get(ToBricksIconType.Enabled, iconSize);
 		}
 	};
 	
