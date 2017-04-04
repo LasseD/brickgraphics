@@ -212,6 +212,9 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		int columns = (bom.length+rows-1)/rows;
 		int columnWidth = (xMax-xMin)/columns;
 		int i = 0;
+		int maxWidth = columnWidth - rowHeight;
+		int textHeight = reduceFontSize(bom, g2, maxWidth);
+
 		for(LEGOColor.CountingLEGOColor c : bom) {
 			int x = i%columns;
 			int y = i/columns;
@@ -224,29 +227,49 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 			g2.fillRect(xIndent, yIndent, fontSizeIn1_72inches, fontSizeIn1_72inches);
 			g2.setColor(Color.BLACK);
 			g2.drawRect(xIndent, yIndent, fontSizeIn1_72inches, fontSizeIn1_72inches);
-			int maxWidth = columnWidth - rowHeight;
 			
-			g2.drawString(cut(c.cnt + "x " + colorController.getNormalIdentifier(c.c), g2, maxWidth), xMin + x*columnWidth + rowHeight, yMin + y*rowHeight + fontSizeIn1_72inches*9/10);
+			g2.drawString(c.cnt + "x " + colorController.getNormalIdentifier(c.c), 
+					xMin + x*columnWidth + rowHeight, 
+					yMin + y*rowHeight + fontSizeIn1_72inches*9/10 - (fontSizeIn1_72inches - textHeight)/2);
 
 			++i;
 		}
 		return yMax;
 	}
-	
-	private static int lastLength = Short.MAX_VALUE;
-	private static String cut(String s, Graphics2D g2, int maxWidth) {
-		Font font = g2.getFont();
-		FontRenderContext context = g2.getFontRenderContext();
-		if(lastLength+1 < s.length()) {
-			s = s.substring(0, lastLength+1);
+
+	// Return final height.
+	private int reduceFontSize(LEGOColor.CountingLEGOColor[] colors, Graphics2D g2, int maxWidth) {
+		String widestText = "";
+		for(LEGOColor.CountingLEGOColor color : colors) {
+			String s = color.cnt + "x " + colorController.getNormalIdentifier(color.c);
+			if(s.length() > widestText.length())
+				widestText = s;
 		}
-		while(font.getStringBounds(s, context).getWidth() > maxWidth) {
-			s = s.substring(0,  s.length()-1);
-		}
-		lastLength = s.length(); 
-		return s;
+		return reduceFontSize(widestText, g2, maxWidth);
 	}
-	
+	private int reduceFontSize(Set<LEGOColor> colors, Graphics2D g2, int maxWidth) {
+		String widestText = "";
+		for(LEGOColor color : colors) {
+			String s = colorController.getNormalIdentifier(color);
+			if(s.length() > widestText.length())
+				widestText = s;
+		}
+		return reduceFontSize(widestText, g2, maxWidth);
+	}	
+	private static int reduceFontSize(String widestText, Graphics2D g2, int maxWidth) {
+		Font originalFont = g2.getFont();
+		float size = originalFont.getSize2D();
+		Font font = originalFont;
+		FontRenderContext context = g2.getFontRenderContext();
+		while(font.getStringBounds(widestText, context).getWidth() > maxWidth && size >= 2) {
+			--size;
+			font = originalFont.deriveFont(size);
+			g2.setFont(font);
+			context = g2.getFontRenderContext();
+		}
+		return (int)size;
+	}
+		
 	private static void drawImage(Graphics2D g2, int xMin, int xMax, int yMin, int yMax, BufferedImage image) {
 		double scale = (xMax-xMin)/(double)image.getWidth();
 		if(scale*image.getHeight() > (yMax-yMin)) {
@@ -372,13 +395,13 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		int fromLeft = (page % numPagesWidth)+1;
 		int fromTop = (page / numPagesWidth)+1;
 		if(showPosition == ShowPosition.Written) {
-			//String pageNumberString = "" + fromLeft + " mod højre, " + fromTop + " ned.";
-			String pageNumberString = fromLeft + ". from left, " + fromTop + ". from top.";
+			String pageNumberString = "" + fromLeft + " mod højre, " + fromTop + " ned.";
+			//String pageNumberString = fromLeft + ". from left, " + fromTop + ". from top.";
 			Rectangle2D pageNumberStringBounds = fm.getStringBounds(pageNumberString, g2);
 			float x = xMin + (float)((xMax-xMin)-pageNumberStringBounds.getWidth())/2;
 			float y = yMin + unit;
 			g2.drawString(pageNumberString, x, y);
-			return unit*1.1; // 2.2 to make a little bit of space above the letters
+			return unit*1.2; // 1.2 to make a little bit of space above the letters
 		}
 		
 		// Boxes:
@@ -528,6 +551,10 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		int columns = (used.size()+rows-1)/rows;
 		int columnWidth = (xMax-xMin)/columns;
 		int i = 0;
+		
+		int maxWidth = columnWidth-rowHeight;
+		int textHeight = reduceFontSize(used, g2, maxWidth);
+
 		for(LEGOColor c : used) {
 			int x = i%columns;
 			int y = i/columns;
@@ -540,8 +567,9 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 			g2.fillRect(xIndent, yIndent, fontSizeIn1_72inches, fontSizeIn1_72inches);
 			g2.setColor(Color.BLACK);
 			g2.drawRect(xIndent, yIndent, fontSizeIn1_72inches, fontSizeIn1_72inches);
-			int maxWidth = columnWidth-rowHeight;
-			g2.drawString(colorController.getNormalIdentifier(c), xMin + x*columnWidth + rowHeight, yMin + y*rowHeight + fontSizeIn1_72inches*9/10);
+			g2.drawString(colorController.getNormalIdentifier(c), 
+					xMin + x*columnWidth + rowHeight, 
+					yMin + y*rowHeight + fontSizeIn1_72inches*9/10 - (fontSizeIn1_72inches - textHeight)/2);
 			++i;
 		}
 	}

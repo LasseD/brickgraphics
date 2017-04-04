@@ -52,6 +52,8 @@ public class FloydSteinbergTransform extends BufferedLEGOColorTransform {
 		
 		out[x][y] = nearest;
 		diff(pixel, nearest.getRGB().getRGB(), diff);
+		//if(nearest.getName().equals("Orange") && Math.random() < 0.25)
+		//	out[x][y] = LEGOColor.parse("28|Dark Tan|#958a73|19864|1109|2002|2015|Sand yellow|28|69|DkTan|138");
 	}	
 	private void sub(int[] pixels, int pixelIndex, int weight, int[] diff) {
 		int[] components = new int[3];

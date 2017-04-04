@@ -11,7 +11,7 @@ public class LEGOColorLookUp {
 	private static final byte[] map = new byte[MAP_SIZE]; // from color to byte indexing color in legoColors
 	
 	private static LEGOColor[] legoColors = null;
-
+	
 	private static void clearMap() {
 		for(int i = 0; i < MAP_SIZE; ++i) {
 			map[i] = -1;

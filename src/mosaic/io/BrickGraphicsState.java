@@ -4,6 +4,8 @@ import io.DataFile;
 import io.ModelState;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
+
+import bricks.ToBricksType;
 import mosaic.controllers.*;
 
 public enum BrickGraphicsState implements ModelState {
@@ -70,6 +72,7 @@ public enum BrickGraphicsState implements ModelState {
 	ToBricksHeight(160),
 	ToBricksPropagationPercentage(50),
 	SelectedColors(new int[]{0, 1, 2, 14, 15, 19, 70, 71, 72, 320}),
+	ToBricksFiltered(ToBricksType.getDefaultTypes()),
 	ToBricksTypeIndex(0);
 		
 	private Object defaultValue;

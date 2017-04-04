@@ -34,8 +34,8 @@ public class ExportLDR extends AbstractAction {
 		putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_DOWN_MASK));
 	}
 
-	private static void saveLDR(BrickedView brickedView, File file) throws IOException {
-		new LDRPrinter(brickedView).printTo(file);		
+	private static void saveLDR(MainController mc, BrickedView brickedView, File file) throws IOException {
+		new LDRPrinter(mc, brickedView).printTo(file);		
 	}
 
 	@Override
@@ -45,7 +45,7 @@ public class ExportLDR extends AbstractAction {
 		
 		if(file != null) {			
 			try {
-				saveLDR(mw.getBrickedView(), file);
+				saveLDR(mc, mw.getBrickedView(), file);
 				JOptionPane.showMessageDialog(mw, "LDraw file exported sucessfully!", "File exported", JOptionPane.INFORMATION_MESSAGE);
 			} catch (Exception e1) {
 				String message = "An error ocurred while saving file " + file.getName() + "\n" + e1.getMessage();

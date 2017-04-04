@@ -32,7 +32,6 @@ public class MainMenu extends JMenuBar {
 		viewMenu.setDisplayedMnemonicIndex(0);
 		viewMenu.setMnemonic('V');
 		ImagePreparingView ipv = mw.getImagePreparingView();
-		BrickedView bv = mw.getBrickedView();
 		viewMenu.add(new ToggleCrop(ipv));
 		viewMenu.add(new ToggleFilters(ipv));
 		viewMenu.addSeparator();
@@ -53,7 +52,7 @@ public class MainMenu extends JMenuBar {
 		add(fileMenu);
 		add(viewMenu);
 		add(new ColorMenu(csd, mc.getColorController()));
-		add(new MagnifierMenu(bv.getMagnifierController(), mc.getUIController()));
+		add(new MagnifierMenu(mc.getMagnifierController(), mc.getUIController()));
 		add(helpMenu);
 	}
 }

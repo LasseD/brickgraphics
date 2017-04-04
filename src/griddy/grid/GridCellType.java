@@ -11,7 +11,7 @@ public enum GridCellType {
 	plate(5, 2) {
 		@Override
 		public Icon icon(int iconSize) {
-			return Icons.plateFromSide().get(ToBricksIconType.Enabled, iconSize);
+			return Icons.plateFromSide(1).get(ToBricksIconType.Enabled, iconSize);
 		}
 	}, brick(5, 6) {
 		@Override
@@ -21,7 +21,7 @@ public enum GridCellType {
 	}, sidewaysPlate(5, 2) {
 		@Override
 		public Icon icon(int iconSize) {
-			return new RotateIcon(Icons.plateFromSide().get(ToBricksIconType.Enabled, iconSize));
+			return new RotateIcon(Icons.plateFromSide(1).get(ToBricksIconType.Enabled, iconSize));
 		}
 	}, sidewaysBrick(5, 6) {
 		@Override

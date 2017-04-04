@@ -39,7 +39,7 @@ public class ExportLXF extends AbstractAction {
 		
 		if(file != null) {			
 			try {
-				LXFPrinter.printTo(mw, file);
+				LXFPrinter.printTo(mc, mw, file);
 				JOptionPane.showMessageDialog(mw, "LLDD file exported sucessfully!", "File exported", JOptionPane.INFORMATION_MESSAGE);
 			} catch (Exception e1) {
 				String message = "An error ocurred while saving file " + file.getName() + "\n" + e1.getMessage();

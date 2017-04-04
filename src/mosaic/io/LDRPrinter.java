@@ -4,9 +4,8 @@ import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.io.*;
 import bricks.*;
-import mosaic.controllers.MagnifierController;
+import mosaic.controllers.*;
 import mosaic.ui.BrickedView;
-import mosaic.ui.menu.ToBricksTools;
 import colors.*;
 import transforms.*;
 
@@ -20,11 +19,10 @@ public class LDRPrinter {
 	private ToBricksType type;
 	private Dimension blockSize, size;
 	
-	public LDRPrinter(BrickedView brickedView) {
+	public LDRPrinter(MainController mc, BrickedView brickedView) {
 		tbt = brickedView.getToBricksTransform();
-		ToBricksTools toolBar = brickedView.getToolBar();
-		type = toolBar.getToBricksType();
-		MagnifierController magnifier = brickedView.getMagnifierController();
+		type = mc.getToBricksController().getToBricksType();
+		MagnifierController magnifier = mc.getMagnifierController();
 		blockSize = magnifier.getSizeInMosaicBlocks();
 		size = brickedView.getBrickedSize();
 	}
@@ -46,13 +44,31 @@ public class LDRPrinter {
 		
 		switch(type) {
 		case STUD_FROM_TOP:
-			buildWithStuds(out);
+			buildWithStuds(out, 1, LXFPrinter.PLATE_1_X_1);
+			break;
+		case ONE_BY_TWO_STUDS_FROM_TOP:
+			buildWithStuds(out, 2, LXFPrinter.PLATE_1_X_2);
+			break;
+		case ONE_BY_THREE_STUDS_FROM_TOP:
+			buildWithStuds(out, 3, LXFPrinter.PLATE_1_X_3);
+			break;
+		case ONE_BY_FOUR_STUDS_FROM_TOP:
+			buildWithStuds(out, 4, LXFPrinter.PLATE_1_X_4);
 			break;
 		case TILE_FROM_TOP:
 			buildWithTiles(out);			
 			break;
 		case PLATE_FROM_SIDE:
-			buildWithPlates(out);
+			buildWithPlates(out, 1, LXFPrinter.PLATE_1_X_1);
+			break;
+		case PLATE_2_1_FROM_SIDE:
+			buildWithPlates(out, 2, LXFPrinter.PLATE_1_X_2);
+			break;
+		case PLATE_3_1_FROM_SIDE:
+			buildWithPlates(out, 3, LXFPrinter.PLATE_1_X_3);
+			break;
+		case PLATE_4_1_FROM_SIDE:
+			buildWithPlates(out, 4, LXFPrinter.PLATE_1_X_4);
 			break;
 		case BRICK_FROM_SIDE:
 			buildWidthBricks(out);
@@ -100,8 +116,8 @@ public class LDRPrinter {
 		}
 	}
 	
-	private void buildWithStuds(PrintWriter out) {
-		build(out, 20, 20, "0 -1 0 0 0 -1 1 0 0 3024.DAT"); 
+	private void buildWithStuds(PrintWriter out, int width, String partNumber) {
+		build(out, width*20, 20, "0 -1 0 0 0 -1 1 0 0 " + partNumber + ".DAT"); 
 	}
 
 	private void buildWithTwoByTwoPlates(PrintWriter out) {
@@ -112,8 +128,8 @@ public class LDRPrinter {
 		build(out, 20, 20, "0 -1 0 0 0 -1 1 0 0 3070B.DAT"); 
 	}
 
-	private void buildWithPlates(PrintWriter out) {
-		build(out, 20, 8, "0 0 -1 0 1 0 1 0 0 3024.DAT");
+	private void buildWithPlates(PrintWriter out, int width, String partNumber) {
+		build(out, width*20, 8, "0 0 -1 0 1 0 1 0 0 " + partNumber + ".DAT");
 	}
 	
 	private void buildWidthBricks(PrintWriter out) {

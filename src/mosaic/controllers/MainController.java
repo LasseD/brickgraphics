@@ -33,9 +33,11 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 	private UIController uiController;
 	private ColorController colorController;
 	private PrintController printController;
+	private ToBricksController toBricksController;
 	
 	private MainWindow mw;
 	private SaveDialog saveDialog;
+	private ToBricksTypeFilterDialog toBricksTypeFilterDialog;
 	
 	// Image (for model state):
 	private BufferedImage image;
@@ -62,6 +64,7 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 		colorController = ColorController.instance(model);
 		uiController = new UIController(model);
 		magnifierController = new MagnifierController(model, uiController);
+		toBricksController = new ToBricksController(this, model);
 		Log.log("Created controllers after " + (System.currentTimeMillis()-startTime) + "ms.");
 
 		// Set up UI:
@@ -89,6 +92,7 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 		printController = new PrintController(model, this, mw);
 		new MagnifierWindow(MainController.this, mw); // Do your own thing little window.
 		saveDialog = new SaveDialog(mw);
+		toBricksTypeFilterDialog = new ToBricksTypeFilterDialog(toBricksController, mw);
 	}
 	
 	public static void main(String[] args) {
@@ -143,6 +147,10 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 		return saveDialog;
 	}
 	
+	public ToBricksTypeFilterDialog getToBricksTypeFilterDialog() {
+		return toBricksTypeFilterDialog;
+	}
+	
 	public String getFileName() {
 		return imageFileName;
 	}
@@ -173,6 +181,11 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 
 	public UIController getUIController() {
 		return uiController;
+	}
+
+
+	public ToBricksController getToBricksController() {
+		return toBricksController;
 	}
 	
 	@Override

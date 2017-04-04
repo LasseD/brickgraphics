@@ -19,10 +19,4 @@ public class Ribbon extends JToolBar {
 		add(new ToggleColorChooser(mw.getColorChooser()));
 		add(new ToggleMagnifier(mc.getUIController()));
 	}
-	
-	/*private static JButton makeButton(Action a) {
-		JButton res = new JButton(a);
-		res.setAction(a);
-		return res;
-	}*/
 }

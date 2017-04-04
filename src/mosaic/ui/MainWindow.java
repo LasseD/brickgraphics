@@ -88,7 +88,7 @@ public class MainWindow extends JFrame implements ChangeListener, ModelHandler<B
 				int dividerLocation = splitPane.getDividerLocation();
 				imagePreparingView.setVisible(dividerLocation >= getMinDividerLocation());
 				brickedView.setVisible(splitPane.getWidth() == 0 || dividerLocation <= getMaxDividerLocation());
-				brickedView.getToolBar().update();
+				mc.getToBricksController().update();
 			}
 		});
 		
@@ -108,7 +108,7 @@ public class MainWindow extends JFrame implements ChangeListener, ModelHandler<B
 			public void run() {
 				colorChooser = new ColorChooserDialog(mc, MainWindow.this); // Must be made before ribbon!
 				Ribbon ribbon = new Ribbon(mc, MainWindow.this);
-				brickedView.getToolBar().addComponents(ribbon, true);		
+				mc.getToBricksController().addComponents(ribbon, true, mc);
 				add(ribbon, BorderLayout.NORTH);
 				ColorSettingsDialog csd = new ColorSettingsDialog(MainWindow.this, mc.getColorController());
 				setJMenuBar(new MainMenu(mc, MainWindow.this, model, csd));
@@ -153,7 +153,7 @@ public class MainWindow extends JFrame implements ChangeListener, ModelHandler<B
 	}
 	
 	public BufferedImage getFinalImage() {
-		return brickedView.getMagnifierController().getCoreImageInCoreUnits();
+		return mc.getMagnifierController().getCoreImageInCoreUnits();
 	}
 	
 	@Override

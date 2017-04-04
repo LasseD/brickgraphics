@@ -5,7 +5,7 @@ import icon.*;
 import icon.ToBricksIcon.ToBricksIconType;
 
 public enum LengthType {
-	plateHeight(2, Icons.plateFromSide().get(ToBricksIconType.MeasureHeight, 24)), 
+	plateHeight(2, Icons.plateFromSide(1).get(ToBricksIconType.MeasureHeight, 24)), 
 	brickHeight(6, Icons.brickFromSide().get(ToBricksIconType.MeasureHeight, 24)), 
 	brickWidth(5, Icons.brickFromSide().get(ToBricksIconType.MeasureWidth, 24)), 
 	cm(6, "cm."), 

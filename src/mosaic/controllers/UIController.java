@@ -1,7 +1,6 @@
 package mosaic.controllers;
 
 import io.*;
-
 import java.util.*;
 import javax.swing.event.*;
 

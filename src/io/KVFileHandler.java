@@ -21,6 +21,7 @@ public class KVFileHandler<S extends ModelState> {
 		typeSerializers.put(Double.class.getName(), new KV_Double());
 		typeSerializers.put(float[].class.getName(), new KV_FloatArray());
 		typeSerializers.put(int[].class.getName(), new KV_IntArray());
+		typeSerializers.put(boolean[].class.getName(), new KV_BoolArray());
 		typeSerializers.put(Boolean.class.getName(), new KV_Boolean());
 		typeSerializers.put(Rectangle2D.Double.class.getName(), new KV_Rectangle2DDouble());
 		typeSerializers.put(DataFile.class.getName(), new KV_DataFile());
@@ -180,6 +181,34 @@ public class KVFileHandler<S extends ModelState> {
 					sb.append(' ');
 				sb.append(f);
 				first = false;				
+			}
+			return sb.toString();
+		}
+	}
+	private static class KV_BoolArray implements KVFileValueHandler<boolean[]> {
+		@Override
+		public boolean[] kl2value(String s) {
+			List<Boolean> list = new LinkedList<Boolean>();			
+			Scanner scanner = new Scanner(s);
+			while(scanner.hasNextInt()) {
+				list.add(scanner.nextInt() == 1);
+			}
+			boolean[] out = new boolean[list.size()];
+			int i = 0;
+			for(boolean f : list) {
+				out[i++] = f;
+			}
+			return out;
+		}
+		@Override
+		public String value2kl(boolean[] t) {
+			StringBuffer sb = new StringBuffer();
+			boolean first = true;
+			for(boolean f : t) {
+				if(!first)
+					sb.append(' ');
+				sb.append(f ? 1 : 0);
+				first = false;	
 			}
 			return sb.toString();
 		}

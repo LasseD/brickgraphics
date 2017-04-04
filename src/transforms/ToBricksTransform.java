@@ -17,12 +17,10 @@ public class ToBricksTransform implements InstructionsTransform {
 	private int width, height;
 	private ToBricksType toBricksType;
 	private HalfToneType halfToneType;
-	private ScaleTransform studTileTransform, 
-	   					   twoByOneTransform,
-              	           twoByTwoTransform,
-						   brickTransform, 
-						   plateTransform, 
-						   sidePlateTransform, 
+	private ScaleTransform brickFromTopTransform, 
+						   brickFromSideTransform, 
+						   plateFromSideTransform, 
+						   verticalPlateFromSideTransform, 
 						   basicTransform,
 						   rTransform;
 	private FloydSteinbergTransform ditheringTransform;
@@ -33,12 +31,10 @@ public class ToBricksTransform implements InstructionsTransform {
 	
 	public ToBricksTransform(LEGOColor[] colors, ToBricksType toBricksType, HalfToneType halfToneType, int propagationPercentage, ColorController cc) {
 		this.cc = cc;
-		studTileTransform = new ScaleTransform(ScaleTransform.Type.dims, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-		twoByOneTransform = new ScaleTransform(ScaleTransform.Type.dims, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-		twoByTwoTransform = new ScaleTransform(ScaleTransform.Type.dims, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-		brickTransform = new ScaleTransform(ScaleTransform.Type.dims, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-		plateTransform = new ScaleTransform(ScaleTransform.Type.dims, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-		sidePlateTransform = new ScaleTransform(ScaleTransform.Type.dims, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+		brickFromTopTransform = new ScaleTransform(ScaleTransform.Type.dims, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+		brickFromSideTransform = new ScaleTransform(ScaleTransform.Type.dims, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+		plateFromSideTransform = new ScaleTransform(ScaleTransform.Type.dims, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+		verticalPlateFromSideTransform = new ScaleTransform(ScaleTransform.Type.dims, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 
 		basicTransform = new ScaleTransform(ScaleTransform.Type.dims, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 		rTransform = new ScaleTransform(ScaleTransform.Type.dims, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
@@ -50,15 +46,18 @@ public class ToBricksTransform implements InstructionsTransform {
 		
 		this.toBricksType = toBricksType;
 		this.halfToneType = halfToneType;
-		updateScaleTransforms();
+		updateBasicTransform();
 	}
 	
 	public Transform getBasicTransform() {
 		return basicTransform;
 	}
 
-	public Transform getBrickTransform() {
-		return brickTransform;
+	public Transform getBrickFromSideTransform(int studsLength) {
+		brickFromSideTransform.setWidth(width/(SizeInfo.BRICK_WIDTH*studsLength));
+		brickFromSideTransform.setHeight(height/SizeInfo.BRICK_HEIGHT);
+
+		return brickFromSideTransform;
 	}
 
 	public BufferedLEGOColorTransform getMainTransform() {
@@ -67,28 +66,32 @@ public class ToBricksTransform implements InstructionsTransform {
 		return thresholdTransform;
 	}
 
-	public Transform getPlateTransform() {
-		return plateTransform;
+	public Transform getPlateFromSideTransform(int studsLength) {
+		plateFromSideTransform.setWidth(width/(SizeInfo.BRICK_WIDTH*studsLength));
+		plateFromSideTransform.setHeight(height/SizeInfo.PLATE_HEIGHT);
+
+		return plateFromSideTransform;
 	}
 
 	public Transform getRTransform() {
+		rTransform.setWidth(width);
+		rTransform.setHeight(height);
+
 		return rTransform;
 	}
 
-	public Transform getSidePlateTransform() {
-		return sidePlateTransform;
+	public Transform getVerticalPlateFromSideTransform() {
+		verticalPlateFromSideTransform.setWidth(width/SizeInfo.PLATE_HEIGHT);
+		verticalPlateFromSideTransform.setHeight(height/SizeInfo.BRICK_WIDTH);
+
+		return verticalPlateFromSideTransform;
 	}
 
-	public Transform getStudTileTransform() {
-		return studTileTransform;
-	}
+	public Transform getBrickFromTopTransform(int studsWidth, int studsHeight) {
+		brickFromTopTransform.setWidth(width/(SizeInfo.BRICK_WIDTH*studsWidth));
+		brickFromTopTransform.setHeight(height/(SizeInfo.BRICK_WIDTH*studsHeight));
 
-	public Transform getTwoByOneTransform() {
-		return twoByOneTransform;
-	}
-
-	public Transform getTwoByTwoTransform() {
-		return twoByTwoTransform;
+		return brickFromTopTransform;
 	}
 
 	public void setToBricksType(ToBricksType toBricksType) {
@@ -107,7 +110,7 @@ public class ToBricksTransform implements InstructionsTransform {
 	public void setBasicUnitSize(int width, int height) {
 		this.width = width;
 		this.height = height;
-		updateScaleTransforms();
+		updateBasicTransform();
 	}
 	
 	public void setHalfToneType(HalfToneType halfToneType) {
@@ -127,30 +130,9 @@ public class ToBricksTransform implements InstructionsTransform {
 		return false;		
 	}
 	
-	private void updateScaleTransforms() {
-		studTileTransform.setWidth(width/SizeInfo.BRICK_WIDTH);
-		studTileTransform.setHeight(height/SizeInfo.BRICK_WIDTH);
-
-		twoByTwoTransform.setWidth(width/SizeInfo.SNOT_BLOCK_WIDTH);
-		twoByTwoTransform.setHeight(height/SizeInfo.SNOT_BLOCK_WIDTH);
-
-		twoByOneTransform.setWidth(width/SizeInfo.SNOT_BLOCK_WIDTH);
-		twoByOneTransform.setHeight(height/SizeInfo.BRICK_WIDTH);
-
-		brickTransform.setWidth(width/SizeInfo.BRICK_WIDTH);
-		brickTransform.setHeight(height/SizeInfo.BRICK_HEIGHT);
-
-		plateTransform.setWidth(width/SizeInfo.BRICK_WIDTH);
-		plateTransform.setHeight(height/SizeInfo.PLATE_HEIGHT);
-
-		sidePlateTransform.setWidth(width/SizeInfo.PLATE_HEIGHT);
-		sidePlateTransform.setHeight(height/SizeInfo.BRICK_WIDTH);
-
+	private void updateBasicTransform() {
 		basicTransform.setWidth(width);
-		basicTransform.setHeight(height);
-		
-		rTransform.setWidth(width);
-		rTransform.setHeight(height);
+		basicTransform.setHeight(height);		
 	}
 
 	/**

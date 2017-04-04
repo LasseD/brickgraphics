@@ -7,6 +7,7 @@ public class Model<S extends ModelState> {
 	private String modelFile;
 	private Map<S, Object> stateValueMap;
 	private List<ModelHandler<S>> modelHandlers;
+	private Set<String> addedModelHandlers;
 	private Class<S> modelStateClass;
 	private KVFileHandler<S> serializer;
 	private Set<S> savedValues;
@@ -20,6 +21,7 @@ public class Model<S extends ModelState> {
 		this.modelFile = modelFile;
 		serializer = new KVFileHandler<S>();
 		modelHandlers = new LinkedList<ModelHandler<S>>();
+		addedModelHandlers = new TreeSet<String>();
 
 		// Populate state value map with default values - then load from state file
 		stateValueMap = new HashMap<S, Object>();	
@@ -80,7 +82,10 @@ public class Model<S extends ModelState> {
 	}
 	
 	public void addModelHandler(ModelHandler<S> modelHandler) {
+		if(addedModelHandlers.contains(modelHandler.getClass().getName()))
+			throw new IllegalStateException("Model handler of type " + addedModelHandlers  + " already added!");
 		modelHandlers.add(modelHandler);
+		addedModelHandlers.add(modelHandler.getClass().getName());
 	}
 	
 	/**

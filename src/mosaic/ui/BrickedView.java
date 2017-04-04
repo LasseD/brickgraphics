@@ -9,24 +9,23 @@ import javax.swing.event.*;
 import colors.*;
 import mosaic.controllers.*;
 import mosaic.io.*;
-import mosaic.ui.menu.*;
 import bricks.ToBricksType;
 import java.awt.event.*;
 
 public class BrickedView extends JComponent implements ChangeListener {
 	private BufferedImage inImage, bricked;
 	private ToBricksTransform toBricksTransform;
-	private ToBricksTools toolBar;
+	private ToBricksController toBricksController;
 	private MagnifierController magnifierController;
 	private ColorController colorController;
 	private JComponent mainComponent;
 	
-	public BrickedView(MainController mw, Model<BrickGraphicsState> model) {
-		magnifierController = mw.getMagnifierController();
-		colorController = mw.getColorController();
-		// UI:		
-		toolBar = new ToBricksTools(mw, model);
-		toolBar.addChangeListener(magnifierController);
+	public BrickedView(MainController mc, Model<BrickGraphicsState> model) {
+		magnifierController = mc.getMagnifierController();
+		colorController = mc.getColorController();
+		// UI:
+		toBricksController = mc.getToBricksController();
+		toBricksController.addChangeListener(magnifierController);
 		magnifierController.addChangeListener(this);
 
 		SwingUtilities.invokeLater(new Runnable() {			
@@ -37,7 +36,7 @@ public class BrickedView extends JComponent implements ChangeListener {
 		});
 		
 		toBricksTransform = new ToBricksTransform(colorController.getColorChooserSelectedColors(), 
-				toolBar.getToBricksType(), toolBar.getHalfToneType(), toolBar.getPropagationPercentage(), colorController);			
+				toBricksController.getToBricksType(), toBricksController.getHalfToneType(), toBricksController.getPropagationPercentage(), colorController);
 		magnifierController.setTBTransform(toBricksTransform);
 	}
 	
@@ -102,22 +101,22 @@ public class BrickedView extends JComponent implements ChangeListener {
 		bricked = toBricksTransform.transform(image);
 		magnifierController.setCoreImage(bricked);
 		
-		toolBar.imageUpdated(image.getWidth(), image.getHeight());
-		updateTransform(toolBar);
+		toBricksController.imageUpdated(image.getWidth(), image.getHeight());
+		updateTransform(toBricksController);
 	}
 	
-	private void updateTransform(ToBricksTools toolBar) {
-		toBricksTransform.setPropagationPercentage(toolBar.getPropagationPercentage());
-		toBricksTransform.setToBricksType(toolBar.getToBricksType());
-		toBricksTransform.setHalfToneType(toolBar.getHalfToneType());
+	private void updateTransform(ToBricksController t) {
+		toBricksTransform.setPropagationPercentage(t.getPropagationPercentage());
+		toBricksTransform.setToBricksType(t.getToBricksType());
+		toBricksTransform.setHalfToneType(t.getHalfToneType());
 		toBricksTransform.setColors(colorController.getColorChooserSelectedColors());
-		toBricksTransform.setBasicUnitSize(toolBar.getBasicWidth(), toolBar.getBasicHeight());		
+		toBricksTransform.setBasicUnitSize(t.getBasicWidth(), t.getBasicHeight());		
 	}
 
 	@Override
 	public void stateChanged(ChangeEvent e) {
-		if(e != null && inImage != null && e.getSource() instanceof ToBricksTools) {
-			ToBricksTools toolBar = (ToBricksTools)e.getSource();
+		if(e != null && inImage != null && e.getSource() instanceof ToBricksController) {
+			ToBricksController toolBar = (ToBricksController)e.getSource();
 			updateTransform(toolBar);
 			bricked = toBricksTransform.transform(inImage);
 			magnifierController.setTBTransform(toBricksTransform);
@@ -137,18 +136,8 @@ public class BrickedView extends JComponent implements ChangeListener {
 	public ToBricksTransform getToBricksTransform() {
 		return toBricksTransform;
 	}
-
-	public MagnifierController getMagnifierController() {
-		if(magnifierController == null)
-			throw new IllegalStateException();
-		return magnifierController;
-	}
 	
 	public Dimension getBrickedSize() {
 		return new Dimension(bricked.getWidth(), bricked.getHeight());
-	}
-
-	public ToBricksTools getToolBar() {
-		return toolBar;
 	}
 }

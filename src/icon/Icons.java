@@ -1,5 +1,7 @@
 package icon;
 
+import icon.ToBricksIcon.ToBricksIconType;
+
 import java.awt.*;
 import java.awt.geom.*;
 import javax.swing.*;
@@ -236,10 +238,11 @@ public class Icons {
 		};
 	}
 
-	public static ToBricksIcon plateFromSide() {
+	public static ToBricksIcon plateFromSide(final int STUDS) {
 		return new ToBricksIcon() {
 			@Override
 			public void paint(Graphics2D g2, ToBricksIconType type, int size) {
+				int studs = STUDS; // Local copy.
 				g2.setColor(Color.RED);
 				BrickIconMeasure m = new BrickIconMeasure(size);
 				int baseX, baseY;
@@ -247,36 +250,44 @@ public class Icons {
 				switch(type) {
 				case MeasureHeight:
 					// size*M=brickWidth, x*M=size-4 => brickWidth/size = (size-4)/x => x = ...
-					m = new BrickIconMeasure((size-5)*size/m.brickWidth);
+					m = new BrickIconMeasure((size-5));
+					studs = 1;
 					baseX = 4;
 					baseY = size/2 - (m.studHeight+m.plateHeight)/2 + m.studHeight;
-					drawVerticalMeasure(g2, 1, baseY, baseY + m.plateHeight);
+					drawVerticalMeasure(g2, 1, baseY, baseY + 2*m.plateHeight);
 					break;
 				case MeasureWidth:
-					m = new BrickIconMeasure(size*size/m.brickWidth);
+					//m = new BrickIconMeasure(size*size/m.brickWidth);
 					baseX = 0;
-					baseY = size-5 - m.plateHeight;
+					baseY = size-5 - 2*m.plateHeight;
 					drawHorizontalMeasure(g2, 0, size-1, size-2);
 					break;
 				case Disabled:
 					g2.setColor(DISABLED_COLOR);
 					// Fall through intended:
 				case Enabled:
-					baseX = m.mid-m.brickWidth/2;
+					baseX = 0;//m.mid-m.brickWidth/2;
 					baseY = m.mid-(m.plateHeight+m.studHeight)/2+m.studHeight;
 					break;
 				default:
 					throw new IllegalStateException("Enum broken: " + type);
 				}				
 				
-				// brick base and stud:
-				g2.fillRect(baseX, baseY, m.brickWidth, m.plateHeight);
-				g2.fillRect(baseX + (m.brickWidth-m.studWidth)/2, baseY-m.studHeight, m.studWidth, m.studHeight);
+				// brick base and studs:
+				int plateHeight = 2*m.plateHeight/studs;
+				int studHeight = 2*m.studHeight/studs;
+				int brickWidth = 2*m.brickWidth/studs;
+				int studWidth = 2*m.studWidth/studs;
+				
+				g2.fillRect(baseX, baseY, 2*m.brickWidth, plateHeight);
+				for(int i = 0; i < studs; ++i)
+					g2.fillRect(baseX + brickWidth*i + (brickWidth-studWidth)/2, baseY-studHeight, studWidth, studHeight);
 
 				g2.setColor(Color.BLACK);
 				// brick base and stud:
-				g2.drawRect(baseX, baseY, m.brickWidth, m.plateHeight);
-				g2.drawRect(baseX + (m.brickWidth-m.studWidth)/2, baseY-m.studHeight, m.studWidth, m.studHeight);
+				g2.drawRect(baseX, baseY, 2*m.brickWidth, plateHeight);
+				for(int i = 0; i < studs; ++i)
+					g2.drawRect(baseX + brickWidth*i + (brickWidth-studWidth)/2, baseY-studHeight, studWidth, studHeight);
 			}
 		};
 	}
@@ -321,46 +332,56 @@ public class Icons {
 		};
 	}
 
-	public static ToBricksIcon studsFromTop(final int bricksWide, final int bricksTall) {
+	public static ToBricksIcon studsFromTop(final int BRICKS_WIDE, final int BRICKS_TALL) {
 		return new ToBricksIcon() {
 			@Override
 			public void paint(Graphics2D g2, ToBricksIconType type, int size) {
+				int bricksWide = BRICKS_WIDE;
+				int bricksTall = BRICKS_TALL;
 				g2.setColor(Color.RED);
 				
-				BrickIconMeasure m = type.isMeasure() ?  new BrickIconMeasure(2*(size-5)/bricksWide) : new BrickIconMeasure(size);	
+				BrickIconMeasure m = new BrickIconMeasure(size);
+				
 				int baseX, baseY;
 				
 				switch(type) {
 				case MeasureHeight:
+					if(bricksTall != 2)
+						bricksWide = 1;
+					m = new BrickIconMeasure(size-5);
 					baseX = 4;
 					baseY = 0;
-					drawVerticalMeasure(g2, 1, 0, m.brickWidth*bricksTall);
+					drawVerticalMeasure(g2, 1, 0, 2*m.brickWidth);
 					break;
 				case MeasureWidth:
+					m = new BrickIconMeasure(size-5);
 					baseX = 4;
 					baseY = 0;
-					drawHorizontalMeasure(g2, 4, 4+m.brickWidth*bricksWide, size-3);
+					drawHorizontalMeasure(g2, 4, 4+2*m.brickWidth, size-3);
 					break;
 				case Disabled:
 					g2.setColor(DISABLED_COLOR);
 					// Fall through intended:
 				case Enabled:
-					baseX = m.mid-m.brickWidth/2*bricksWide;
-					baseY = m.mid-m.brickWidth/2*bricksTall;
+					baseX = 0;//m.mid-m.brickWidth/2*bricksWide;
+					baseY = m.mid-m.brickWidth*bricksTall/bricksWide;
 					break;
 				default:
 					throw new IllegalStateException("Enum broken: " + type);
-				}				
-				
-				g2.fillRect(baseX, baseY, m.brickWidth*bricksWide, m.brickWidth*bricksTall);
+				}
+								
+				g2.fillRect(baseX, baseY, m.brickWidth*2, m.brickWidth*2*bricksTall/bricksWide);
 				g2.setColor(Color.BLACK);
-				g2.drawRect(baseX, baseY, m.brickWidth*bricksWide, m.brickWidth*bricksTall);
+				g2.drawRect(baseX, baseY, m.brickWidth*2, m.brickWidth*2*bricksTall/bricksWide);
+				//g2.drawRect(baseX, baseY, m.brickWidth*bricksWide, m.brickWidth*bricksTall);
 				// studs:
+				int drawnStudWidth = m.studWidth*2/bricksWide;
+				int drawnBrickWidth = m.brickWidth*2/bricksWide;
 				for(int x = 0; x < bricksWide; ++x) {
-					int indentX = baseX + x*m.brickWidth + (m.brickWidth-m.studWidth)/2;
+					int indentX = baseX + x*drawnBrickWidth + (drawnBrickWidth-drawnStudWidth)/2;
 					for(int y = 0; y < bricksTall; ++y) {
-						int indentY = baseY + y*m.brickWidth + (m.brickWidth-m.studWidth)/2;
-						g2.drawOval(indentX, indentY, m.studWidth, m.studWidth);
+						int indentY = baseY + y*drawnBrickWidth + (drawnBrickWidth-drawnStudWidth)/2;
+						g2.drawOval(indentX, indentY, drawnStudWidth, drawnStudWidth);
 					}
 				}
 			}
@@ -416,6 +437,34 @@ public class Icons {
 		};
 	}
 
+	public static Icon filterToBrickTypes(final int size) {
+		return new BrickGraphicsIcon(size) {
+			@Override
+			public void paint(Graphics2D g2) {
+				ToBricksIcon i1 = studsFromTop(1, 1);
+				ToBricksIcon i2 = plateFromSide(1);
+				i1.paint(g2, ToBricksIconType.Enabled, size/2);
+				g2.translate(0, size/2);
+				i2.paint(g2, ToBricksIconType.Enabled, size/2);
+				
+				g2.translate(size/2, 0);
+				drawChecked(g2);
+				g2.translate(0, -size/2);
+				drawChecked(g2);
+			}
+			
+			private void drawChecked(Graphics2D g2) {
+				g2.setColor(Color.WHITE);
+				g2.fillRect(1, 1, size/2-2, size/2-2);
+				g2.setColor(Color.BLACK);
+				g2.drawRect(1, 1, size/2-2, size/2-2);
+				// Check mark:
+				g2.drawLine(4, size/4, size/4, size/2-4);
+				g2.drawLine(size/4, size/2-4, size/2-4, 4);				
+			}
+		};
+	}
+	
 	public static Icon crop(final int size) {
 		return new BrickGraphicsIcon(size) {
 			@Override

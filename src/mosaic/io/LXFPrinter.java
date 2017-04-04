@@ -11,7 +11,6 @@ import javax.imageio.ImageIO;
 import bricks.*;
 import mosaic.controllers.*;
 import mosaic.ui.*;
-import mosaic.ui.menu.ToBricksTools;
 import colors.*;
 import transforms.*;
 
@@ -22,6 +21,9 @@ import transforms.*;
  */
 public class LXFPrinter {
 	public static final String PLATE_1_X_1 = "3024";
+	public static final String PLATE_1_X_2 = "3023";
+	public static final String PLATE_1_X_3 = "3623";
+	public static final String PLATE_1_X_4 = "3710";
 	public static final String BRICK_1_X_1 = "3005";
 	public static final String TILE_1_X_1 = "3070";
 	public static final String PLATE_2_X_2 = "3022";
@@ -34,16 +36,15 @@ public class LXFPrinter {
 	private ToBricksType type;
 	private Dimension size;
 	
-	private LXFPrinter(BrickedView brickedView) {
+	private LXFPrinter(MainController mc, BrickedView brickedView) {
 		tbt = brickedView.getToBricksTransform();
-		ToBricksTools toolBar = brickedView.getToolBar();
-		type = toolBar.getToBricksType();
+		type = mc.getToBricksController().getToBricksType();
 		size = brickedView.getBrickedSize();
 	}
 	
-	public static void printTo(MainWindow mw, File file) throws IOException {
+	public static void printTo(MainController mc, MainWindow mw, File file) throws IOException {
 		BrickedView brickedView = mw.getBrickedView();
-		LXFPrinter printer = new LXFPrinter(brickedView);
+		LXFPrinter printer = new LXFPrinter(mc, brickedView);
 		
 		// File handling:
 		String fileName = file.getName();
@@ -90,13 +91,31 @@ public class LXFPrinter {
 	private void writeDynanmicSection(PrintWriter out, boolean brickSection) {
 		switch(type) {
 		case STUD_FROM_TOP:
-			buildWith1x1PlatesFromTop(out, brickSection);
+			buildWith1xXPlatesFromTop(out, brickSection, 1, PLATE_1_X_1);
+			break;
+		case ONE_BY_TWO_STUDS_FROM_TOP:
+			buildWith1xXPlatesFromTop(out, brickSection, 2, PLATE_1_X_2);
+			break;
+		case ONE_BY_THREE_STUDS_FROM_TOP:
+			buildWith1xXPlatesFromTop(out, brickSection, 3, PLATE_1_X_3);
+			break;
+		case ONE_BY_FOUR_STUDS_FROM_TOP:
+			buildWith1xXPlatesFromTop(out, brickSection, 4, PLATE_1_X_4);
 			break;
 		case TILE_FROM_TOP:
 			buildWith1x1TilesFromTop(out, brickSection);
 			break;
 		case PLATE_FROM_SIDE:
-			buildWith1x1PlatesFromSide(out, brickSection);
+			buildWith1xXPlatesFromSide(out, brickSection, 1, PLATE_1_X_1);
+			break;
+		case PLATE_2_1_FROM_SIDE:
+			buildWith1xXPlatesFromSide(out, brickSection, 2, PLATE_1_X_2);
+			break;
+		case PLATE_3_1_FROM_SIDE:
+			buildWith1xXPlatesFromSide(out, brickSection, 3, PLATE_1_X_3);
+			break;
+		case PLATE_4_1_FROM_SIDE:
+			buildWith1xXPlatesFromSide(out, brickSection, 4, PLATE_1_X_4);
 			break;
 		case BRICK_FROM_SIDE:
 			buildWith1x1BricksFromSide(out, brickSection);
@@ -132,12 +151,12 @@ public class LXFPrinter {
 		tbt.buildLastInstructions(builder, new Rectangle(0, 0, size.width, size.height));
 	}
 	
-	private void buildWith1x1PlatesFromTop(PrintWriter out, boolean isElementSection) {
-		buildFromTop(out, PLATE_HALF_WIDTH, 2*PLATE_HALF_WIDTH, PLATE_HALF_WIDTH, 2*PLATE_HALF_WIDTH, UP_ORIENTATION, PLATE_1_X_1, isElementSection, false); 
+	private void buildWith1xXPlatesFromTop(PrintWriter out, boolean isElementSection, int width, String partNumber) {
+		buildFromTop(out, width*PLATE_HALF_WIDTH, width*2*PLATE_HALF_WIDTH, PLATE_HALF_WIDTH, 2*PLATE_HALF_WIDTH, UP_ORIENTATION, partNumber, isElementSection, false); 
 	}
 
-	private void buildWith1x1PlatesFromSide(PrintWriter out, boolean isElementSection) {
-		buildFromSide(out, PLATE_HALF_WIDTH, 2*PLATE_HALF_WIDTH, PLATE_HALF_WIDTH, PLATE_HEIGHT, UP_ORIENTATION, PLATE_1_X_1, isElementSection); 
+	private void buildWith1xXPlatesFromSide(PrintWriter out, boolean isElementSection, int width, String partNumber) {
+		buildFromSide(out, width*PLATE_HALF_WIDTH, width*2*PLATE_HALF_WIDTH, PLATE_HALF_WIDTH, PLATE_HEIGHT, UP_ORIENTATION, partNumber, isElementSection); 
 	}
 
 	private void buildWith1x1BricksFromSide(PrintWriter out, boolean isElementSection) {
@@ -172,8 +191,8 @@ public class LXFPrinter {
 		}
 	}	
 	
-	private void buildFromSide(PrintWriter out, double startX, double multX, double startY, double multZ, String orient, String element, 
-			boolean isElementSection) {
+	private void buildFromSide(PrintWriter out, double startX, double multX, double startY, double multZ, 
+			String orient, String element, boolean isElementSection) {
 		LEGOColor[][] instructions = tbt.getMainTransform().lastInstructions();
 		int w = instructions.length;
 		int h = instructions[0].length;
