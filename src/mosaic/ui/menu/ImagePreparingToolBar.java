@@ -30,15 +30,14 @@ public class ImagePreparingToolBar extends JToolBar {
 				view.setSharpness(value);
 			}
 		}));
-		sliderList.add(new ColorSlider(Icons.gamma(Icons.SIZE_SMALL), "Gamma", model, BrickGraphicsState.PrepareGamma, 0.05f, 6f, new ViewSlideUpdater() {			
+		sliderList.add(new ColorSlider(Icons.gamma(Icons.SIZE_SMALL), "Gamma", model, BrickGraphicsState.PrepareGamma, 0.05f, 6f, new ViewSlideUpdater() {
 			@Override
 			public void set(int index, float value) {
 				view.setGamma(index, value);
 			}
 			@Override
 			public void set(float value) {
-				for(int i = 0; i < 3; i++)
-					view.setGamma(i, value);
+				view.setGamma(value);
 			}
 		}));
 		sliderList.add(new ColorSlider(Icons.brightness(Icons.SIZE_SMALL), "Brightness", model, BrickGraphicsState.PrepareBrightness, 0f, 4f, new ViewSlideUpdater() {			
@@ -48,8 +47,7 @@ public class ImagePreparingToolBar extends JToolBar {
 			}
 			@Override
 			public void set(float value) {
-				for(int i = 0; i < 3; i++)
-					view.setBrightness(i, value);
+				view.setBrightness(value);
 			}
 		}));
 		sliderList.add(new ColorSlider(Icons.contrast(Icons.SIZE_SMALL), "Contrast", model, BrickGraphicsState.PrepareContrast, -1f, 4f, new ViewSlideUpdater() {			
@@ -59,8 +57,7 @@ public class ImagePreparingToolBar extends JToolBar {
 			}
 			@Override
 			public void set(float value) {
-				for(int i = 0; i < 3; i++)
-					view.setContrast(i, value);
+				view.setContrast(value);
 			}
 		}));
 		sliderList.add(new ColorSlider(Icons.saturation(Icons.SIZE_SMALL), "Saturation", model, BrickGraphicsState.PrepareSaturation, 0f, 4f, new ViewSlideUpdater() {			

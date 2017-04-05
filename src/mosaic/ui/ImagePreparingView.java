@@ -154,6 +154,13 @@ public class ImagePreparingView extends JComponent implements ChangeListener, Mo
 		this.contrast.set(get);
 		rePrepairImage(this.contrastR, null);	
 	}
+	public void setContrast(float contrast) {
+		float[] get = new float[3];
+		for(int i = 0; i < 3; ++i)
+			get[i] = contrast;
+		this.contrast.set(get);
+		rePrepairImage(this.contrastR, null);	
+	}
 
 	public void setSaturation(float saturation) {
 		this.saturation.set(saturation);
@@ -180,10 +187,24 @@ public class ImagePreparingView extends JComponent implements ChangeListener, Mo
 		this.gamma.set(get);
 		rePrepairImage(this.gammaR, null);
 	}
+	public void setGamma(float gamma) {
+		float[] get = new float[3];
+		for(int i = 0; i < 3; ++i)
+			get[i] = gamma;
+		this.gamma.set(get);
+		rePrepairImage(this.gammaR, null);
+	}
 
 	public void setBrightness(int index, float brightness) {
 		float[] get = this.brightness.get();
 		get[index] = brightness;
+		this.brightness.set(get);
+		rePrepairImage(this.brightnessR, null);
+	}
+	public void setBrightness(float brightness) {
+		float[] get = new float[3];
+		for(int i = 0; i < 3; ++i)
+			get[i] = brightness;
 		this.brightness.set(get);
 		rePrepairImage(this.brightnessR, null);
 	}
