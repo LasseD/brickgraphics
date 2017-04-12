@@ -1,5 +1,7 @@
 package transforms;
 
+import io.Log;
+
 import java.awt.image.*;
 
 public abstract class BufferedTransform implements Transform {
@@ -21,17 +23,23 @@ public abstract class BufferedTransform implements Transform {
 	@Override
 	public BufferedImage transform(BufferedImage in) {
 		for(BufferedImage[] pair : imagePairs) {
-			if(pair[0] == in)
+			if(pair[0] == in) {
+				//Log.log(getClass().getName() + " transformation buffer skip.");
 				return pair[1];
+			}
 		}
 		
+		long startTime = System.currentTimeMillis();
 		BufferedImage newOut = transformUnbuffered(in);
 		if(imagePairs.length == 0)
 			return newOut;
 		imagePairs[pairIndex] = new BufferedImage[]{in, newOut};
 		
 		pairIndex++;
-		pairIndex %= imagePairs.length;
+		if(pairIndex == imagePairs.length)
+			pairIndex = 0;
+		long endTime = System.currentTimeMillis();
+		Log.log(getClass().getName() + " transformation performed in " + (endTime-startTime) + "ms.");
 		return newOut;
 	}
 	

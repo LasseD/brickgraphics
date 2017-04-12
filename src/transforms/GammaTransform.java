@@ -1,5 +1,6 @@
 package transforms;
 
+import java.awt.Dimension;
 import java.awt.image.*;
 
 public class GammaTransform extends RGBTransform {
@@ -27,5 +28,10 @@ public class GammaTransform extends RGBTransform {
 		LookupOp op = new LookupOp(table, null);
 		BufferedImage tmp = new BufferedImage(w, h, in.getType());
 		return op.filter(in, tmp);
+	}
+
+	@Override
+	public Dimension getTransformedSize(BufferedImage in) {
+		return new Dimension(in.getWidth(), in.getHeight());
 	}
 }

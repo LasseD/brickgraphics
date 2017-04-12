@@ -27,6 +27,12 @@ public class MainMenu extends JMenuBar {
 		fileMenu.addSeparator();
 		fileMenu.add(new ExitAction(model));
 
+		// Edit menu:
+		JMenu editMenu = new JMenu("Edit");
+		editMenu.setDisplayedMnemonicIndex(0);
+		editMenu.setMnemonic('E');
+		editMenu.add(new ShowOptionsAction(mc.getOptionsController().getOptionsDialog()));
+		
 		// View menu:
 		JMenu viewMenu = new JMenu("View");
 		viewMenu.setDisplayedMnemonicIndex(0);
@@ -50,6 +56,7 @@ public class MainMenu extends JMenuBar {
 		
 		// this menu bar:
 		add(fileMenu);
+		add(editMenu);
 		add(viewMenu);
 		add(new ColorMenu(csd, mc.getColorController()));
 		add(new MagnifierMenu(mc.getMagnifierController(), mc.getUIController()));

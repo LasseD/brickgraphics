@@ -1,6 +1,7 @@
 package transforms;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.image.*;
 
 public class SaturationTransform extends StateTransform<Float> {
@@ -34,5 +35,10 @@ public class SaturationTransform extends StateTransform<Float> {
 		BufferedImage tmp = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
 		tmp.setRGB(0, 0, w, h, rgbs, 0, w);
 		return tmp;
+	}
+
+	@Override
+	public Dimension getTransformedSize(BufferedImage in) {
+		return new Dimension(in.getWidth(), in.getHeight());
 	}
 }

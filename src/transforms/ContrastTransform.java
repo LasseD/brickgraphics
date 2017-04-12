@@ -1,6 +1,7 @@
 package transforms;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.image.*;
 
 public class ContrastTransform extends RGBTransform {
@@ -51,5 +52,10 @@ public class ContrastTransform extends RGBTransform {
 		if(s > 255)
 			return 255;
 		return s;
+	}
+
+	@Override
+	public Dimension getTransformedSize(BufferedImage in) {
+		return new Dimension(in.getWidth(), in.getHeight());
 	}
 }

@@ -2,7 +2,6 @@ package mosaic.io;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
-import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.zip.ZipEntry;
@@ -13,6 +12,7 @@ import mosaic.controllers.*;
 import mosaic.ui.*;
 import colors.*;
 import transforms.*;
+import transforms.ScaleTransform.ScaleQuality;
 
 /**
  * Class responsible for outputting to LXF file. 
@@ -76,7 +76,7 @@ public class LXFPrinter {
 			ZipEntry ze = new ZipEntry("IMAGE100.PNG");
 			zos.putNextEntry(ze);
 			BufferedImage image = mw.getFinalImage();
-			ScaleTransform t = new ScaleTransform(ScaleTransform.Type.bounded, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR, 0);
+			ScaleTransform t = new ScaleTransform(true, ScaleQuality.BiLinear, 0);
 			t.setHeight(128);
 			t.setWidth(128);
 			ImageIO.write(t.transformUnbuffered(image), "png", zos);

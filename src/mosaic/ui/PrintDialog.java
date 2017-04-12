@@ -29,7 +29,6 @@ import mosaic.controllers.PrintController.ShowPosition;
  * @author ld
  */
 public class PrintDialog extends JDialog implements ChangeListener {
-	private static final long serialVersionUID = -1834122366997009709L;
 	private PrintController pc;
 	// Input boxes:
 	private LividTextField tfMagnifiersPerPageWidth, tfMagnifiersPerPageHeight, tfFontSize;
@@ -257,25 +256,14 @@ public class PrintDialog extends JDialog implements ChangeListener {
 			tfMagnifiersPerPageHeight.setText(h);
 		cbShowLegend.setSelected(pc.getShowLegend());
 		cbShowPageNumber.setSelected(pc.getShowPageNumber());
-		int i = 0;
-		for(ShowPosition p : ShowPosition.values()) {
-			if(p == pc.getShowPosition())
-				rbShowPosition[i].setSelected(true);
-			++i;
-		}
+		rbShowPosition[pc.getShowPosition().ordinal()].setSelected(true);
 
 		boolean cps = pc.getCoverPageShow();
 		cbCoverPageShow.setSelected(cps);
 
 		cbCoverPageShowFileName.setSelected(pc.getCoverPageShowFileName());
 		cbCoverPageShowLegend.setSelected(pc.getCoverPageShowLegend());
-		i = 0;
-		for(CoverPagePictureType t : CoverPagePictureType.values()) {
-			if(t == pc.getCoverPagePictureType()) {
-				rbCoverPagePictureType[i].setSelected(true);				
-			}
-			++i;
-		}
+		rbCoverPagePictureType[pc.getCoverPagePictureType().ordinal()].setSelected(true);				
 		updateEnabledFields();
 	}
 	

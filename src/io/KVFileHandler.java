@@ -41,24 +41,30 @@ public class KVFileHandler<S extends ModelState> {
 			if(indexOfColon == -1)
 				continue; // not a valid line.
 			String k = line.substring(0, indexOfColon);
-			String v = line.substring(indexOfColon+1);
+			String vRaw = line.substring(indexOfColon+1);
 			
-			// Build longer v if necessary:
-			if(v.length() > 0 && v.charAt(0) == '"') {
-				while(v.charAt(v.length()-1) != '"') {
-					v+=br.readLine();
+			// Build longer vRaw if necessary:
+			if(vRaw.length() > 0 && vRaw.charAt(0) == '"') {
+				StringBuilder v = new StringBuilder();
+				v.append(vRaw);
+				while(vRaw.charAt(vRaw.length()-1) != '"') {
+					vRaw = br.readLine();
+					if(vRaw == null)
+						throw new IOException("KVFile corrupt: Mismatched text blob. No matching \"-character ending text blob.");
+					v.append(vRaw);
 				}
-				v = v.substring(1, v.length()-1);
+				vRaw = v.toString();
+				vRaw = vRaw.substring(1, vRaw.length()-1);
 			}
 			
 			if(!keyToSMap.containsKey(k)) {
-				Log.log("Unknown key value pair. Key: " + k + ", value: " + v);
+				Log.log("Unknown key value pair. Key: " + k + ", value: " + vRaw);
 				continue;
 			}
 			S type = keyToSMap.get(k);
 			keyToSMap.remove(k);
 			try {
-				mapWithDefaults.put(type, typeSerializers.get(type.getType().getName()).kl2value(v));
+				mapWithDefaults.put(type, typeSerializers.get(type.getType().getName()).kl2value(vRaw));
 			}
 			catch(Exception e) {
 				Log.log(e);

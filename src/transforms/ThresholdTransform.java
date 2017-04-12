@@ -1,5 +1,6 @@
 package transforms;
 
+import java.awt.Dimension;
 import java.awt.image.*;
 
 import mosaic.controllers.ColorController;
@@ -30,5 +31,12 @@ public class ThresholdTransform extends BufferedLEGOColorTransform {
 			}
 		}
 	    return pixels;
+	}
+
+	@Override
+	public Dimension getTransformedSize(BufferedImage in) {
+		int w = in.getWidth();
+		int h = in.getHeight();
+		return new Dimension(w, h);
 	}
 }

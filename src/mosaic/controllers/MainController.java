@@ -34,6 +34,7 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 	private ColorController colorController;
 	private PrintController printController;
 	private ToBricksController toBricksController;
+	private OptionsController optionsController;	
 	
 	private MainWindow mw;
 	private SaveDialog saveDialog;
@@ -57,10 +58,12 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 		long startTime = System.currentTimeMillis();
 		Log.log("Initiating components");
 		model = new Model<BrickGraphicsState>(STATE_FILE_NAME, BrickGraphicsState.class);
+		Log.log("Model file loaded");
 		handleModelChange(model);
 		model.addModelHandler(this);
 		
 		// Set up controllers:
+		optionsController = new OptionsController(model, mw);
 		colorController = ColorController.instance(model);
 		uiController = new UIController(model);
 		magnifierController = new MagnifierController(model, uiController);
@@ -182,7 +185,10 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 	public UIController getUIController() {
 		return uiController;
 	}
-
+	
+	public OptionsController getOptionsController() {
+		return optionsController;
+	}
 
 	public ToBricksController getToBricksController() {
 		return toBricksController;

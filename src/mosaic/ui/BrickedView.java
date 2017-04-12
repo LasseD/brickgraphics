@@ -1,6 +1,7 @@
 package mosaic.ui;
 
 import transforms.*;
+import transforms.ScaleTransform.ScaleQuality;
 import io.*;
 import java.awt.*;
 import java.awt.image.*;
@@ -36,7 +37,8 @@ public class BrickedView extends JComponent implements ChangeListener {
 		});
 		
 		toBricksTransform = new ToBricksTransform(colorController.getColorChooserSelectedColors(), 
-				toBricksController.getToBricksType(), toBricksController.getHalfToneType(), toBricksController.getPropagationPercentage(), colorController);
+				toBricksController.getToBricksType(), 
+				toBricksController.getPropagationPercentage(), colorController);
 		magnifierController.setTBTransform(toBricksTransform);
 	}
 	
@@ -44,9 +46,7 @@ public class BrickedView extends JComponent implements ChangeListener {
 		setLayout(new BorderLayout());
 		mainComponent = new JComponent() {
 			private static final long serialVersionUID = 5749886635907597779L;
-			private ScaleTransform scaler = new ScaleTransform(
-					ScaleTransform.Type.bounded, 
-					RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+			private ScaleTransform scaler = new ScaleTransform(true, ScaleQuality.RetainColors);
 
 			@Override 
 			public void paintComponent(Graphics g) {				
@@ -76,7 +76,6 @@ public class BrickedView extends JComponent implements ChangeListener {
 				}
 				else
 					magnifierController.setMouseOffset(1, 1);
-				//g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 				g2.drawImage(shownImage, null, null);
 				magnifierController.drawHighlightRect(g2);
 			}
@@ -108,7 +107,6 @@ public class BrickedView extends JComponent implements ChangeListener {
 	private void updateTransform(ToBricksController t) {
 		toBricksTransform.setPropagationPercentage(t.getPropagationPercentage());
 		toBricksTransform.setToBricksType(t.getToBricksType());
-		toBricksTransform.setHalfToneType(t.getHalfToneType());
 		toBricksTransform.setColors(colorController.getColorChooserSelectedColors());
 		toBricksTransform.setBasicUnitSize(t.getBasicWidth(), t.getBasicHeight());		
 	}

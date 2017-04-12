@@ -15,7 +15,6 @@ import mosaic.ui.ColorSettingsDialog;
 import mosaic.ui.actions.ShowColorOptionsAction;
 
 public class ColorMenu extends JMenu implements ChangeListener {
-	private static final long serialVersionUID = -6315804592857888262L;
 	private JMenu colorTextMenu;
 	private ColorController cc;
 	

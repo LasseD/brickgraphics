@@ -11,7 +11,6 @@ import javax.swing.event.*;
 
 import mosaic.io.*;
 import mosaic.ui.actions.ShowToBricksTypeFilterDialog;
-import transforms.*;
 import ui.IconizedTextfield;
 import ui.LividTextField;
 
@@ -29,7 +28,7 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 	private float originalScale;
 	private ToBricksType toBricksType;
 	private boolean[] availableToBricksTypes;
-	private HalfToneType halfToneType;
+	//private HalfToneType halfToneType;
 	private boolean sizeChoiceFromWidth;
 	private int propagationPercentage;
 	private volatile boolean uiReady;
@@ -178,9 +177,6 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 	public ToBricksType getToBricksType() {
 		return toBricksType;
 	}
-	public HalfToneType getHalfToneType() {
-		return halfToneType;
-	}
 	public int getPropagationPercentage() {
 		return propagationPercentage;
 	}
@@ -228,8 +224,6 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 			propagationPercentage = 100;
 		if(!propagationPercentageField.getText().trim().equals(propagationPercentage+""))
 			propagationPercentageField.setText(propagationPercentage+"");
-		halfToneType = propagationPercentage == 0 ? HalfToneType.Threshold : HalfToneType.FloydSteinberg;
-
 		
 		if(sizeChoiceFromWidth) {
 			width = toBricksType.closestCompatibleWidth(width, toBricksType.getUnitWidth());

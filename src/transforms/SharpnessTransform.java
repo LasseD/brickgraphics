@@ -1,5 +1,6 @@
 package transforms;
 
+import java.awt.Dimension;
 import java.awt.image.*;
 
 public class SharpnessTransform extends StateTransform<Float> {
@@ -24,5 +25,10 @@ public class SharpnessTransform extends StateTransform<Float> {
 		ConvolveOp op = new ConvolveOp(kernel, ConvolveOp.EDGE_NO_OP, null);
 		op.filter(in, tmp);
 		return tmp;
+	}
+
+	@Override
+	public Dimension getTransformedSize(BufferedImage in) {
+		return new Dimension(in.getWidth(), in.getHeight());
 	}
 }

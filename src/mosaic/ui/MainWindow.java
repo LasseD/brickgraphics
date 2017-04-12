@@ -29,7 +29,7 @@ public class MainWindow extends JFrame implements ChangeListener, ModelHandler<B
 		
 		setVisible(true);
 		
-		imagePreparingView = new ImagePreparingView(model);
+		imagePreparingView = new ImagePreparingView(model, mc.getOptionsController());
 		imagePreparingView.addChangeListener(this);
 		Log.log("Created left view after " + (System.currentTimeMillis()-startTime) + "ms.");
 		

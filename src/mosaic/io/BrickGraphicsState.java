@@ -5,6 +5,8 @@ import io.ModelState;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 
+import transforms.ScaleTransform;
+
 import bricks.ToBricksType;
 import mosaic.controllers.*;
 
@@ -46,27 +48,26 @@ public enum BrickGraphicsState implements ModelState {
 	MagnifierShowColors(true),
 	MagnifierShowTotals(true),
 	MagnifierShow(false),
-	
+	MagnifierSize(new Dimension(4, 4)),
+		
 	// Color Chooser:
 	ColorDistributionChartShow(true),
 	
-	MagnifierSize(new Dimension(4, 4)),
-	
 	// Prepare:
 	PrepareSharpness(1.0f),
-	PrepareSharpnessRank(0),
 	PrepareGamma(new float[]{1.0f, 1.0f, 1.0f}),
-	PrepareGammaRank(1),
 	PrepareBrightness(new float[]{1.0f, 1.0f, 1.0f}),
-	PrepareBrightnessRank(2),
 	PrepareContrast(new float[]{1.0f, 1.0f, 1.0f}),
-	PrepareContrastRank(3),
 	PrepareSaturation(1.0f),
-	PrepareSaturationRank(4),
 	PrepareCropEnabled(false),
 	PrepareCrop(new Rectangle2D.Double(0.25, 0.25, 0.5, 0.5)),
 	PrepareFiltersEnabled(false),
 
+	// Options dialog:
+	PrepareAllowFilterReordering(true),
+	PrepareScaleQuality(ScaleTransform.ScaleQuality.NearestNeighbor.ordinal()),
+	PrepareScaleBeforePreparing(true),
+	
 	// ToBrick:
 	ToBricksWidth(480),
 	ToBricksHeight(160),

@@ -29,19 +29,28 @@ public class Model<S extends ModelState> {
 			stateValueMap.put(state, state.getDefaultValue());
 		}
 
+		FileInputStream fis = null;
+		BufferedReader br = null;
 		try {
-			FileInputStream fis = new FileInputStream(modelFile);
-	        BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+			fis = new FileInputStream(modelFile);
+	        br = new BufferedReader(new InputStreamReader(fis));
 	        
 	        loadFrom(br);
-
-	        br.close();
-	        fis.close();	        
-	        return;
 		}
 		catch (IOException e) {
 			Log.log(e);
 		} 
+		finally {
+			try {
+				if(br != null)
+					br.close();
+				if(fis != null)
+					fis.close();							
+			}
+			catch(IOException e2) {
+				Log.log(e2);				
+			}
+		}
 	}
 	
 	public void loadFrom(BufferedReader br) throws IOException {

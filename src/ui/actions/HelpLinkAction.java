@@ -27,7 +27,7 @@ public class HelpLinkAction extends AbstractAction {
 		putValue(NAME, NAME_STR);
 		putValue(Action.MNEMONIC_KEY, KeyEvent.VK_O);
 		putValue(Action.DISPLAYED_MNEMONIC_INDEX_KEY, NAME_STR.indexOf('O'));
-		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0));	
+		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0));
 	}
 
 	@Override

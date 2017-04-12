@@ -1,6 +1,8 @@
 package transforms;
 
+import java.awt.Dimension;
 import java.awt.image.*;
+
 import mosaic.controllers.ColorController;
 import colors.*;
 
@@ -23,6 +25,9 @@ public class FloydSteinbergTransform extends BufferedLEGOColorTransform {
 		propagationPercentage = pp;
 		clearBuffer();
 		return true;
+	}
+	public int getPropagationPercentage() {
+		return propagationPercentage;
 	}
 	
 	private static int boundFF(int a) {
@@ -110,5 +115,12 @@ public class FloydSteinbergTransform extends BufferedLEGOColorTransform {
 		processPixel(pixels[w*(h-1)+w-1-start], out, w-1-start, h-1, diff);
 
 	    return out;
+	}
+
+	@Override
+	public Dimension getTransformedSize(BufferedImage in) {
+		int w = in.getWidth();
+		int h = in.getHeight();
+		return new Dimension(w, h);
 	}
 }

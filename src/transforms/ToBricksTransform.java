@@ -4,6 +4,8 @@ import java.awt.*;
 import java.awt.image.*;
 import java.util.*;
 import java.util.List;
+
+import transforms.ScaleTransform.ScaleQuality;
 import mosaic.controllers.ColorController;
 import mosaic.io.InstructionsBuilderI;
 import colors.*;
@@ -16,7 +18,6 @@ import bricks.*;
 public class ToBricksTransform implements InstructionsTransform {	
 	private int width, height;
 	private ToBricksType toBricksType;
-	private HalfToneType halfToneType;
 	private ScaleTransform brickFromTopTransform, 
 						   brickFromSideTransform, 
 						   plateFromSideTransform, 
@@ -29,15 +30,15 @@ public class ToBricksTransform implements InstructionsTransform {
 	private boolean[][] normalColorsChoosen;
 	private ColorController cc;
 	
-	public ToBricksTransform(LEGOColor[] colors, ToBricksType toBricksType, HalfToneType halfToneType, int propagationPercentage, ColorController cc) {
+	public ToBricksTransform(LEGOColor[] colors, ToBricksType toBricksType, int propagationPercentage, ColorController cc) {
 		this.cc = cc;
-		brickFromTopTransform = new ScaleTransform(ScaleTransform.Type.dims, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-		brickFromSideTransform = new ScaleTransform(ScaleTransform.Type.dims, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-		plateFromSideTransform = new ScaleTransform(ScaleTransform.Type.dims, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-		verticalPlateFromSideTransform = new ScaleTransform(ScaleTransform.Type.dims, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+		brickFromTopTransform = new ScaleTransform(false, ScaleQuality.RetainColors);
+		brickFromSideTransform = new ScaleTransform(false, ScaleQuality.RetainColors);
+		plateFromSideTransform = new ScaleTransform(false, ScaleQuality.RetainColors);
+		verticalPlateFromSideTransform = new ScaleTransform(false, ScaleQuality.RetainColors);
 
-		basicTransform = new ScaleTransform(ScaleTransform.Type.dims, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-		rTransform = new ScaleTransform(ScaleTransform.Type.dims, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+		basicTransform = new ScaleTransform(false, ScaleQuality.RetainColors);
+		rTransform = new ScaleTransform(false, ScaleQuality.RetainColors);
 		
 		LEGOColorLookUp.setColors(colors);
 
@@ -45,7 +46,6 @@ public class ToBricksTransform implements InstructionsTransform {
 		thresholdTransform = new ThresholdTransform(2, cc);
 		
 		this.toBricksType = toBricksType;
-		this.halfToneType = halfToneType;
 		updateBasicTransform();
 	}
 	
@@ -61,9 +61,7 @@ public class ToBricksTransform implements InstructionsTransform {
 	}
 
 	public BufferedLEGOColorTransform getMainTransform() {
-		if(halfToneType == HalfToneType.FloydSteinberg)
-			return ditheringTransform;
-		return thresholdTransform;
+		return ditheringTransform.getPropagationPercentage() == 0 ? thresholdTransform : ditheringTransform;
 	}
 
 	public Transform getPlateFromSideTransform(int studsLength) {
@@ -113,13 +111,6 @@ public class ToBricksTransform implements InstructionsTransform {
 		updateBasicTransform();
 	}
 	
-	public void setHalfToneType(HalfToneType halfToneType) {
-		if(this.halfToneType != halfToneType) {
-			this.halfToneType = halfToneType;
-			basicTransform.clearBuffer();
-		}
-	}
-
 	public boolean setColors(LEGOColor[] colors) {
 		if(LEGOColorLookUp.setColors(colors)) {
 			basicTransform.clearBuffer();
@@ -240,6 +231,11 @@ public class ToBricksTransform implements InstructionsTransform {
 	@Override
 	public BufferedImage transform(BufferedImage in) {
 		return toBricksType.transform(in, this);
+	}
+
+	@Override
+	public Dimension getTransformedSize(BufferedImage in) {
+		return toBricksType.getTransformedSize(in, this);
 	}
 
 	/*

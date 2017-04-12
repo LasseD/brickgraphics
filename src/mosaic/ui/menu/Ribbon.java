@@ -15,8 +15,8 @@ public class Ribbon extends JToolBar {
 		
 		add(new ToggleCrop(imagePreparingView));
 		add(new ToggleFilters(imagePreparingView));
-		add(new ToggleDivider(mw));
 		add(new ToggleColorChooser(mw.getColorChooser()));
 		add(new ToggleMagnifier(mc.getUIController()));
+		add(new ToggleDivider(mw));
 	}
 }

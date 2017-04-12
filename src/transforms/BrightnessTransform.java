@@ -1,5 +1,6 @@
 package transforms;
 
+import java.awt.Dimension;
 import java.awt.image.*;
 
 public class BrightnessTransform extends RGBTransform {
@@ -16,5 +17,10 @@ public class BrightnessTransform extends RGBTransform {
 		BufferedImage out = new BufferedImage(in.getWidth(), in.getHeight(), in.getType());
 		op.filter(in, out);
 		return out;
+	}
+
+	@Override
+	public Dimension getTransformedSize(BufferedImage in) {
+		return new Dimension(in.getWidth(), in.getHeight());
 	}
 }

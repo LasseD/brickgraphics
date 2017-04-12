@@ -12,7 +12,7 @@ public abstract class StateTransform<StateType> extends BufferedTransform {
 	private Comparator<StateType> cmp;
 	
 	public StateTransform(StateType initialState) {
-		this(initialState, 0, null);
+		this(initialState, null);
 	}
 
 	/**
@@ -21,17 +21,14 @@ public abstract class StateTransform<StateType> extends BufferedTransform {
 	 * @param cmp comparator for comparing the state to a new one set.
 	 */
 	public StateTransform(StateType initialState, Comparator<StateType> cmp) {
-		this(initialState, 0, cmp);
-	}
-	
-	public StateTransform(StateType initialState, int bufferSize, Comparator<StateType> cmp) {
-		super(bufferSize);
+		super(1);
 		this.state = initialState;
 		this.cmp = cmp;
 	}
 	
 	public void set(StateType state) {
-		if(cmp == null && state.equals(this.state) || cmp != null && cmp.compare(state, this.state) == 0)
+		if(cmp == null && state.equals(this.state) || 
+		   cmp != null && cmp.compare(state, this.state) == 0)
 			return;
 		this.state = state;
 		clearBuffer();

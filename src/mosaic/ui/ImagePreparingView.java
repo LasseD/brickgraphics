@@ -1,6 +1,7 @@
 package mosaic.ui;
 
 import io.*;
+import mosaic.controllers.OptionsController;
 import mosaic.io.BrickGraphicsState;
 import mosaic.ui.menu.ImagePreparingToolBar;
 import java.awt.image.*;
@@ -10,6 +11,7 @@ import java.util.List;
 import javax.swing.*;
 import javax.swing.event.*;
 import transforms.*;
+import transforms.ScaleTransform.ScaleQuality;
 
 /**
  * crop, sharpness, gamma, brightness, contrast, saturation
@@ -22,47 +24,42 @@ public class ImagePreparingView extends JComponent implements ChangeListener, Mo
 	private RGBTransform brightness, gamma, contrast;
 	private StateTransform<Float> saturation, sharpness;
 
-	private List<StateTransformRanker> transforms;
-	private StateTransformRanker brightnessR, gammaR, contrastR, saturationR, sharpnessR;
-	private int maxRank;
+	private Transform[] transforms;
 	private ImagePreparingToolBar toolBar;
+	private OptionsController optionsController;
+	
+	// For scaling the image before it is transformed before bricked - 
+	private boolean scaleBeforePreparing, allowFilterReordering;
 
 	// For showing image:
-	private ScaleTransform fullScaler, cropScaler;
+	private ScaleTransform fullScaler, cropScaler, toBrickedPixelsSizeScaler;
+	private Transform lastTransformUsedAsSource = null;
 	
-	public ImagePreparingView(final Model<BrickGraphicsState> model) {
+	public ImagePreparingView(final Model<BrickGraphicsState> model, OptionsController optionsController) {
+		this.optionsController = optionsController;
+		optionsController.addChangeListener(this);
 		model.addModelHandler(this);
 		setLayout(new BorderLayout());
 		listeners = new LinkedList<ChangeListener>();
 
-		fullScaler = new ScaleTransform(ScaleTransform.Type.bounded, RenderingHints.VALUE_INTERPOLATION_BILINEAR, 2);
-		cropScaler = new ScaleTransform(ScaleTransform.Type.bounded, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+		ScaleQuality quality = optionsController.getScaleQuality();		
+		allowFilterReordering = optionsController.getAllowFilterReordering();
+		scaleBeforePreparing = optionsController.getScaleBeforePreparing();
+		fullScaler = new ScaleTransform(true, quality, 2);
+		cropScaler = new ScaleTransform(true, quality);
+		toBrickedPixelsSizeScaler = new ScaleTransform(true, quality);
 		
 		cropper = new Cropper(model);		
 		cropper.addChangeListener(this);
 		addMouseMotionListener(cropper);
 		addMouseListener(cropper);
 		{
-			transforms = new ArrayList<StateTransformRanker>(5);
-
 			sharpness = new SharpnessTransform((Float)model.get(BrickGraphicsState.PrepareSharpness));
-			sharpnessR = new StateTransformRanker(sharpness, model, BrickGraphicsState.PrepareSharpnessRank);
-			transforms.add(sharpnessR);
 			brightness = new BrightnessTransform((float[])model.get(BrickGraphicsState.PrepareBrightness));
-			brightnessR = new StateTransformRanker(brightness, model, BrickGraphicsState.PrepareBrightnessRank);
-			transforms.add(brightnessR);
 			gamma = new GammaTransform((float[])model.get(BrickGraphicsState.PrepareGamma));
-			gammaR = new StateTransformRanker(gamma, model, BrickGraphicsState.PrepareGammaRank);
-			transforms.add(gammaR);
 			contrast = new ContrastTransform((float[])model.get(BrickGraphicsState.PrepareContrast));
-			contrastR = new StateTransformRanker(contrast, model, BrickGraphicsState.PrepareContrastRank);
-			transforms.add(contrastR);
 			saturation = new SaturationTransform((Float)model.get(BrickGraphicsState.PrepareSaturation));
-			saturationR = new StateTransformRanker(saturation, model, BrickGraphicsState.PrepareSaturationRank);
-			transforms.add(saturationR);
-
-			updateMaxRank();
-			Collections.sort(transforms);		
+			transforms = new Transform[]{sharpness, brightness, gamma, contrast, saturation};
 		}
 		toolBar = new ImagePreparingToolBar(ImagePreparingView.this, model);
 		toolBar.setVisible((Boolean)model.get(BrickGraphicsState.PrepareFiltersEnabled));
@@ -70,13 +67,6 @@ public class ImagePreparingView extends JComponent implements ChangeListener, Mo
 	
 	public ImagePreparingToolBar getToolBar() {
 		return toolBar;
-	}
-	
-	private void updateMaxRank() {
-		maxRank = 0;
-		for(StateTransformRanker s : transforms) {
-			maxRank = Math.max(maxRank, s.getRank());
-		}
 	}
 
 	public void updateBaseImages() {
@@ -116,14 +106,9 @@ public class ImagePreparingView extends JComponent implements ChangeListener, Mo
 		}
 	}
 
-	private void rePrepairImage(StateTransformRanker source, Object sourceToListeners) {
+	private void rePrepairImage(Transform source, Object sourceToListeners) {
 		if(inImage == null || inImage.getWidth() == 0 || inImage.getHeight() == 0)
 			return;
-		if(source != null) {
-			maxRank++;
-			source.setRank(maxRank);
-			Collections.sort(transforms);
-		}
 
 		if(cropper.isEnabled()) {
 			prepared = baseCrop;
@@ -131,9 +116,41 @@ public class ImagePreparingView extends JComponent implements ChangeListener, Mo
 		else {
 			prepared = inImage;
 		}
-		for(StateTransformRanker t : transforms) {
-			prepared = t.getTransform().transform(prepared);		
+		
+		// Scale "prepared" to not use more pixels than bricked.
+		if(scaleBeforePreparing) {
+			prepared = toBrickedPixelsSizeScaler.transform(prepared);
 		}
+		
+		long startTime = System.currentTimeMillis();
+		
+		if(allowFilterReordering) {
+			// Find last to transform:
+			if(source != null) {
+				for(Transform t : transforms) {
+					if(t == source) {
+						lastTransformUsedAsSource = source;
+						break;
+					}
+				}				
+			}
+			for(Transform t : transforms) {
+				if(t != lastTransformUsedAsSource)
+					prepared = t.transform(prepared);		
+			}
+			if(lastTransformUsedAsSource != null) {
+				prepared = lastTransformUsedAsSource.transform(prepared);
+			}
+		}		
+		else {
+			// No reordering allowed:
+			for(Transform t : transforms) {
+				prepared = t.transform(prepared);		
+			}
+		}
+		
+		long endTime = System.currentTimeMillis();
+		Log.log("Performed transformations in " + (endTime-startTime) + "ms. Allow reordering: " + allowFilterReordering);
 
 		notifyListeners(sourceToListeners);
 	}
@@ -152,24 +169,24 @@ public class ImagePreparingView extends JComponent implements ChangeListener, Mo
 		float[] get = this.contrast.get();
 		get[index] = contrast;
 		this.contrast.set(get);
-		rePrepairImage(this.contrastR, null);	
+		rePrepairImage(this.contrast, null);	
 	}
 	public void setContrast(float contrast) {
 		float[] get = new float[3];
 		for(int i = 0; i < 3; ++i)
 			get[i] = contrast;
 		this.contrast.set(get);
-		rePrepairImage(this.contrastR, null);	
+		rePrepairImage(this.contrast, null);	
 	}
 
 	public void setSaturation(float saturation) {
 		this.saturation.set(saturation);
-		rePrepairImage(this.saturationR, null);
+		rePrepairImage(this.saturation, null);
 	}
 
 	public void setSharpness(float sharpness) {
 		this.sharpness.set(sharpness);
-		rePrepairImage(this.sharpnessR, null);
+		rePrepairImage(this.sharpness, null);
 	}
 	
 	public void switchCropState() {
@@ -185,28 +202,28 @@ public class ImagePreparingView extends JComponent implements ChangeListener, Mo
 		float[] get = this.gamma.get();
 		get[index] = gamma;
 		this.gamma.set(get);
-		rePrepairImage(this.gammaR, null);
+		rePrepairImage(this.gamma, null);
 	}
 	public void setGamma(float gamma) {
 		float[] get = new float[3];
 		for(int i = 0; i < 3; ++i)
 			get[i] = gamma;
 		this.gamma.set(get);
-		rePrepairImage(this.gammaR, null);
+		rePrepairImage(this.gamma, null);
 	}
 
 	public void setBrightness(int index, float brightness) {
 		float[] get = this.brightness.get();
 		get[index] = brightness;
 		this.brightness.set(get);
-		rePrepairImage(this.brightnessR, null);
+		rePrepairImage(this.brightness, null);
 	}
 	public void setBrightness(float brightness) {
 		float[] get = new float[3];
 		for(int i = 0; i < 3; ++i)
 			get[i] = brightness;
 		this.brightness.set(get);
-		rePrepairImage(this.brightnessR, null);
+		rePrepairImage(this.brightness, null);
 	}
 	
 	private Cursor cursor;
@@ -222,46 +239,17 @@ public class ImagePreparingView extends JComponent implements ChangeListener, Mo
 
 	@Override
 	public void stateChanged(ChangeEvent e) {
+		ScaleQuality quality = optionsController.getScaleQuality();
+		fullScaler.setQuality(quality);
+		cropScaler.setQuality(quality);
+		toBrickedPixelsSizeScaler.setQuality(quality);
+		
+		allowFilterReordering = optionsController.getAllowFilterReordering();
+		scaleBeforePreparing = optionsController.getScaleBeforePreparing();
+
 		updateCursor();
 		updateBaseCrop();
 		rePrepairImage(null, null);
-	}
-
-	private static class StateTransformRanker implements Comparable<StateTransformRanker> {
-		private StateTransform<?> transform;
-		private int rank;
-		private BrickGraphicsState toSave;
-
-		public StateTransformRanker(StateTransform<?> transform, Model<BrickGraphicsState> model, BrickGraphicsState toSave) {
-			this.transform = transform;
-			this.toSave = toSave;
-			load(model);
-		}
-
-		public void load(Model<BrickGraphicsState> model) {
-			rank = (Integer) model.get(toSave);
-		}
-
-		@Override
-		public int compareTo(StateTransformRanker other) {
-			return rank - other.rank;
-		}
-
-		public void save(Model<BrickGraphicsState> model) {
-			model.set(toSave, rank);
-		}
-		
-		public void setRank(int rank) {
-			this.rank = rank;
-		}
-		
-		public int getRank() {
-			return rank;
-		}
-
-		public StateTransform<?> getTransform() {
-			return transform;
-		}
 	}
 
 	@Override 
@@ -317,12 +305,6 @@ public class ImagePreparingView extends JComponent implements ChangeListener, Mo
 		contrast.set((float[])model.get(BrickGraphicsState.PrepareContrast));
 		saturation.set((Float)model.get(BrickGraphicsState.PrepareSaturation));
 
-		for(StateTransformRanker s : transforms) {
-			s.load(model);
-		}
-		Collections.sort(transforms);
-		updateMaxRank();
-
 		toolBar.setVisible((Boolean)model.get(BrickGraphicsState.PrepareFiltersEnabled));
 		toolBar.reloadModel(model);
 		updateBaseImages();
@@ -335,13 +317,5 @@ public class ImagePreparingView extends JComponent implements ChangeListener, Mo
 		model.set(BrickGraphicsState.PrepareContrast, contrast.get());
 		model.set(BrickGraphicsState.PrepareSaturation, saturation.get());
 		model.set(BrickGraphicsState.PrepareFiltersEnabled, toolBar.isVisible());
-		
-		Collections.sort(transforms);
-		int i = 0;
-		for(StateTransformRanker s : transforms) {
-			s.setRank(i);
-			s.save(model);
-			i++;
-		}
 	}
 }
