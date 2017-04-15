@@ -4,6 +4,7 @@ import icon.*;
 import icon.ToBricksIcon.ToBricksIconType;
 import javax.swing.*;
 
+import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.event.*;
 import io.*;
@@ -24,11 +25,10 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 	private JButton buttonLessPP, buttonMorePP;
 	private List<ChangeListener> listeners;
 	
-	private int width, height; // in basicUnits
+	private int constructionWidthInBasicUnits, constructionHeightInBasicUnits; // in basicUnits
 	private float originalScale;
 	private ToBricksType toBricksType;
 	private boolean[] availableToBricksTypes;
-	//private HalfToneType halfToneType;
 	private boolean sizeChoiceFromWidth;
 	private int propagationPercentage;
 	private volatile boolean uiReady;
@@ -129,9 +129,9 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 				sizeChoiceFromWidth = true;
 				try {
 					int w = toBricksType.getUnitWidth()*Integer.parseInt(sizeFieldWidth.getText().trim());
-					if(w == ToBricksController.this.width)
+					if(w == ToBricksController.this.constructionWidthInBasicUnits)
 						return;
-					ToBricksController.this.width = w;
+					ToBricksController.this.constructionWidthInBasicUnits = w;
 					update();
 				}
 				catch(NumberFormatException ex) {
@@ -147,9 +147,9 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 				sizeChoiceFromWidth = false;
 				try {
 					int h = toBricksType.getUnitHeight()*Integer.parseInt(sizeFieldHeight.getText().trim());
-					if(ToBricksController.this.height == h)
+					if(ToBricksController.this.constructionHeightInBasicUnits == h)
 						return;
-					ToBricksController.this.height = h;
+					ToBricksController.this.constructionHeightInBasicUnits = h;
 					update();
 				}
 				catch(NumberFormatException ex) {
@@ -168,15 +168,27 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 		update();
 	}
 
-	public int getBasicHeight() {
-		return height;
+	public int getConstructionHeightInBasicUnits() {
+		return constructionHeightInBasicUnits;
 	}
-	public int getBasicWidth() {
-		return width;
-	}
+	public int getConstructionWidthInBasicUnits() {
+		return constructionWidthInBasicUnits;
+	}	
 	public ToBricksType getToBricksType() {
 		return toBricksType;
 	}
+	public Dimension getMinimalInputImageSize() {
+		int w = constructionWidthInBasicUnits/toBricksType.getUnitWidth();
+		int h = constructionHeightInBasicUnits/toBricksType.getUnitHeight();
+		System.out.println("w=" + constructionWidthInBasicUnits + ", h=" + constructionHeightInBasicUnits + ", tbtWidth=" + toBricksType.getUnitWidth() + ", tbtUnitHeight=" + toBricksType.getUnitHeight());
+		if(toBricksType == ToBricksType.SNOT_IN_2_BY_2) {
+			w *= 10;
+			h *= 10;
+		}
+		
+		return new Dimension(w, h);
+	}
+	
 	public int getPropagationPercentage() {
 		return propagationPercentage;
 	}
@@ -226,17 +238,17 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 			propagationPercentageField.setText(propagationPercentage+"");
 		
 		if(sizeChoiceFromWidth) {
-			width = toBricksType.closestCompatibleWidth(width, toBricksType.getUnitWidth());
-			height = toBricksType.closestCompatibleHeight(Math.round(width/originalScale), toBricksType.getUnitHeight());	
+			constructionWidthInBasicUnits = toBricksType.closestCompatibleWidth(constructionWidthInBasicUnits, toBricksType.getUnitWidth());
+			constructionHeightInBasicUnits = toBricksType.closestCompatibleHeight(Math.round(constructionWidthInBasicUnits/originalScale), toBricksType.getUnitHeight());	
 		}
 		else {
-			height = toBricksType.closestCompatibleHeight(height, toBricksType.getUnitHeight());		
-			width = toBricksType.closestCompatibleWidth(Math.round(originalScale*height), toBricksType.getUnitWidth());
+			constructionHeightInBasicUnits = toBricksType.closestCompatibleHeight(constructionHeightInBasicUnits, toBricksType.getUnitHeight());		
+			constructionWidthInBasicUnits = toBricksType.closestCompatibleWidth(Math.round(originalScale*constructionHeightInBasicUnits), toBricksType.getUnitWidth());
 		}
-		String w = "" + (width/toBricksType.getUnitWidth());
+		String w = "" + (constructionWidthInBasicUnits/toBricksType.getUnitWidth());
 		if(!sizeFieldWidth.getText().trim().equals(w))
 			sizeFieldWidth.setText(w);
-		String h = "" + (height/toBricksType.getUnitHeight());
+		String h = "" + (constructionHeightInBasicUnits/toBricksType.getUnitHeight());
 		if(!sizeFieldHeight.getText().trim().equals(h))
 			sizeFieldHeight.setText(h);
 		ChangeEvent e = new ChangeEvent(this);
@@ -256,18 +268,18 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 	}
 	@Override
 	public void save(Model<BrickGraphicsState> model) {
-		model.set(BrickGraphicsState.ToBricksWidth, width);
-		model.set(BrickGraphicsState.ToBricksHeight, height);
+		model.set(BrickGraphicsState.ToBricksWidth, constructionWidthInBasicUnits);
+		model.set(BrickGraphicsState.ToBricksHeight, constructionHeightInBasicUnits);
 		model.set(BrickGraphicsState.ToBricksTypeIndex, toBricksType.ordinal());
 		model.set(BrickGraphicsState.ToBricksPropagationPercentage, propagationPercentage);
 		model.set(BrickGraphicsState.ToBricksFiltered, availableToBricksTypes);
 	}
 	@Override
 	public void handleModelChange(Model<BrickGraphicsState> model) {
-		this.width = (Integer)model.get(BrickGraphicsState.ToBricksWidth);
-		this.height = (Integer)model.get(BrickGraphicsState.ToBricksHeight);
+		this.constructionWidthInBasicUnits = (Integer)model.get(BrickGraphicsState.ToBricksWidth);
+		this.constructionHeightInBasicUnits = (Integer)model.get(BrickGraphicsState.ToBricksHeight);
 		propagationPercentage = (Integer)model.get(BrickGraphicsState.ToBricksPropagationPercentage);
-		originalScale = width/(float)height;
+		originalScale = constructionWidthInBasicUnits/(float)constructionHeightInBasicUnits;
 		int tbtl = ToBricksType.values().length;
 		toBricksType = ToBricksType.values()[((Integer)model.get(BrickGraphicsState.ToBricksTypeIndex))%tbtl];
 		availableToBricksTypes = (boolean[])model.get(BrickGraphicsState.ToBricksFiltered);

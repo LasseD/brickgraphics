@@ -14,7 +14,8 @@ import bricks.ToBricksType;
 import java.awt.event.*;
 
 public class BrickedView extends JComponent implements ChangeListener {
-	private BufferedImage inImage, bricked;
+	private BufferedImage bricked;
+	private ImagePreparingView.PreparedImage inImage;
 	private ToBricksTransform toBricksTransform;
 	private ToBricksController toBricksController;
 	private MagnifierController magnifierController;
@@ -46,7 +47,7 @@ public class BrickedView extends JComponent implements ChangeListener {
 		setLayout(new BorderLayout());
 		mainComponent = new JComponent() {
 			private static final long serialVersionUID = 5749886635907597779L;
-			private ScaleTransform scaler = new ScaleTransform(true, ScaleQuality.RetainColors);
+			private ScaleTransform scaler = new ScaleTransform("Constructed view", true, ScaleQuality.RetainColors);
 
 			@Override 
 			public void paintComponent(Graphics g) {				
@@ -93,14 +94,14 @@ public class BrickedView extends JComponent implements ChangeListener {
 		add(mainComponent, BorderLayout.CENTER);		
 	}
 	
-	public void setImage(BufferedImage image) {
+	public void setImage(ImagePreparingView.PreparedImage image) {
 		if(image == null)
 			throw new NullPointerException();
 		inImage = image;
-		bricked = toBricksTransform.transform(image);
+		bricked = toBricksTransform.transform(image.getImage());
 		magnifierController.setCoreImage(bricked);
 		
-		toBricksController.imageUpdated(image.getWidth(), image.getHeight());
+		toBricksController.imageUpdated(image.getOriginalWidth(), image.getOriginalHeight());
 		updateTransform(toBricksController);
 	}
 	
@@ -108,7 +109,7 @@ public class BrickedView extends JComponent implements ChangeListener {
 		toBricksTransform.setPropagationPercentage(t.getPropagationPercentage());
 		toBricksTransform.setToBricksType(t.getToBricksType());
 		toBricksTransform.setColors(colorController.getColorChooserSelectedColors());
-		toBricksTransform.setBasicUnitSize(t.getBasicWidth(), t.getBasicHeight());		
+		toBricksTransform.setBasicUnitSize(t.getConstructionWidthInBasicUnits(), t.getConstructionHeightInBasicUnits());		
 	}
 
 	@Override
@@ -116,7 +117,7 @@ public class BrickedView extends JComponent implements ChangeListener {
 		if(e != null && inImage != null && e.getSource() instanceof ToBricksController) {
 			ToBricksController toolBar = (ToBricksController)e.getSource();
 			updateTransform(toolBar);
-			bricked = toBricksTransform.transform(inImage);
+			bricked = toBricksTransform.transform(inImage.getImage());
 			magnifierController.setTBTransform(toBricksTransform);
 			magnifierController.setCoreImage(bricked);
 		}

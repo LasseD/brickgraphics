@@ -14,7 +14,7 @@ public class BrightnessTransform extends RGBTransform {
 			return in;
 
 		RescaleOp op = new RescaleOp(get(), new float[3], null);
-		BufferedImage out = new BufferedImage(in.getWidth(), in.getHeight(), in.getType());
+		BufferedImage out = new BufferedImage(in.getWidth(), in.getHeight(), BufferedImage.TYPE_INT_RGB);
 		op.filter(in, out);
 		return out;
 	}

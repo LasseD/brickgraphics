@@ -53,7 +53,7 @@ public enum ToBricksType {
 			LEGOColor[][] normalColors = mainTransform.lcTransform(normal);
 			LEGOColor[][] sidewaysColors = mainTransform.lcTransform(sideways);			
 
-			in = tbt.getBasicTransform().transform(in);
+			in = tbt.getSnotOutputTransform().transform(in);
 			//System.out.println("SNOT transform prepared in: " + (System.currentTimeMillis()-start) + "ms.");
 			BufferedImage res = tbt.bestMatch(normalColors, sidewaysColors, in);
 			//System.out.println("SNOT written in: " + (System.currentTimeMillis()-start) + "ms. total.");			

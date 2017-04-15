@@ -61,6 +61,8 @@ public class FloydSteinbergTransform extends BufferedLEGOColorTransform {
 		//	out[x][y] = LEGOColor.parse("28|Dark Tan|#958a73|19864|1109|2002|2015|Sand yellow|28|69|DkTan|138");
 	}	
 	private void sub(int[] pixels, int pixelIndex, int weight, int[] diff) {
+		if(pixelIndex < 0 || pixelIndex >= pixels.length)
+			return; // Error silently.
 		int[] components = new int[3];
 		splitColor(pixels[pixelIndex], components);
 		for(int i = 0; i < 3; ++i) {
@@ -74,6 +76,8 @@ public class FloydSteinbergTransform extends BufferedLEGOColorTransform {
 	public LEGOColor[][] lcTransformUnbuffered(BufferedImage in) {		
 		int w = in.getWidth();
 		int h = in.getHeight();
+		if(w == 0 || h == 0)
+			throw new IllegalArgumentException("In-image has null dimension!");
 		io.Log.log("Floyd-Steinberg " + w + "x" + h + " with " + LEGOColorLookUp.size() + " colors.");		
 		
 		int[] pixels = new int[w*h];

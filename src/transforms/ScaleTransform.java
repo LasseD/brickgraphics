@@ -12,47 +12,60 @@ public class ScaleTransform extends BufferedTransform {
 	private double scaleX, scaleY;
 	private boolean bounded;
 	private ScaleQuality quality;
+	private String usage;
 
-	public ScaleTransform(boolean bounded, ScaleQuality quality, int bufferSize) {
+	public ScaleTransform(String usage, boolean bounded, ScaleQuality quality, int bufferSize) {
 		super(bufferSize);
 		this.bounded = bounded;
 		this.quality = quality;
+		this.usage = usage;
 	}
 
-	public ScaleTransform(boolean bounded, ScaleQuality quality) {
-		this(bounded, quality, 1);
+	public ScaleTransform(String usage, boolean bounded, ScaleQuality quality) {
+		this(usage, bounded, quality, 1);
 	}
 	
-	public void setQuality(ScaleQuality quality) {
+	public boolean setQuality(ScaleQuality quality) {
 		if(this.quality == quality)
-			return;
+			return false;
 		this.quality = quality;		
 		clearBuffer();
+		return true;
 	}
 	
-	public void setWidth(int width) {
+	public boolean setWidth(int width) {
 		if(this.width == width)
-			return;
+			return false;
 		this.width = width;
 		clearBuffer();
+		return true;
 	}
-	public void setHeight(int height) {
+	public int getWidth() {
+		return width;
+	}
+	public boolean setHeight(int height) {
 		if(this.height == height)
-			return;
+			return false;
 		this.height = height;	
 		clearBuffer();
+		return true;
 	}
-	public void setScaleX(double x) {
+	public int getHeight() {
+		return height;
+	}
+	public boolean setScaleX(double x) {
 		if(scaleX == x)
-			return;
+			return false;
 		scaleX = x;
 		clearBuffer();
+		return true;
 	}
-	public void setScaleY(double y) {
+	public boolean setScaleY(double y) {
 		if(scaleY == y)
-			return;
+			return false;
 		scaleY = y;
 		clearBuffer();
+		return true;
 	}
 	
 	public Scale getScale(double inX, double inY) {
@@ -83,7 +96,7 @@ public class ScaleTransform extends BufferedTransform {
 		w = (int)Math.round(scale.w*w);
 		h = (int)Math.round(scale.h*h);
 
-        BufferedImage resized = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage resized = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
         Object renderingHint = quality.renderingHint;
         if(renderingHint == null) {
         	// Fill arrays:
@@ -112,6 +125,7 @@ public class ScaleTransform extends BufferedTransform {
             g2.dispose();
         }
 		
+        System.out.print(usage + ": " + in.getWidth() + "x" + in.getHeight() + "->" + resized.getWidth() + "x" + resized.getHeight() + ". ");
 		return resized;
 	}
 	

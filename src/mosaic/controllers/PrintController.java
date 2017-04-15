@@ -286,7 +286,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		if(coverPagePictureType == CoverPagePictureType.None)
 			return;
 		if(coverPagePictureType == CoverPagePictureType.Both) {
-			BufferedImage left = mw.getImagePreparingView().getFullyPreparredImage();
+			BufferedImage left = mw.getImagePreparingView().getPreparredImage().getImage();
 			drawImage(g2, xMin, xMin + (xMax-xMin)*9/20, yMin, yMax, left);
 			
 			BufferedImage right = mw.getFinalImage();
@@ -296,7 +296,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		
 		BufferedImage image;
 		if(coverPagePictureType == CoverPagePictureType.Original) {
-			image = mw.getImagePreparingView().getFullyPreparredImage();
+			image = mw.getImagePreparingView().getPreparredImage().getImage();
 		}
 		else {
 			image = mw.getFinalImage();

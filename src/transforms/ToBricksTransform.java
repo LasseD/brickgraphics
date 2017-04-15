@@ -22,7 +22,7 @@ public class ToBricksTransform implements InstructionsTransform {
 						   brickFromSideTransform, 
 						   plateFromSideTransform, 
 						   verticalPlateFromSideTransform, 
-						   basicTransform,
+						   snotOutputTransform,
 						   rTransform;
 	private FloydSteinbergTransform ditheringTransform;
 	private ThresholdTransform thresholdTransform;
@@ -32,13 +32,13 @@ public class ToBricksTransform implements InstructionsTransform {
 	
 	public ToBricksTransform(LEGOColor[] colors, ToBricksType toBricksType, int propagationPercentage, ColorController cc) {
 		this.cc = cc;
-		brickFromTopTransform = new ScaleTransform(false, ScaleQuality.RetainColors);
-		brickFromSideTransform = new ScaleTransform(false, ScaleQuality.RetainColors);
-		plateFromSideTransform = new ScaleTransform(false, ScaleQuality.RetainColors);
-		verticalPlateFromSideTransform = new ScaleTransform(false, ScaleQuality.RetainColors);
+		brickFromTopTransform = new ScaleTransform("Construct from top",  false, ScaleQuality.RetainColors);
+		brickFromSideTransform = new ScaleTransform("Construct bricks from side", false, ScaleQuality.RetainColors);
+		plateFromSideTransform = new ScaleTransform("Construct plates from side", false, ScaleQuality.RetainColors);
+		verticalPlateFromSideTransform = new ScaleTransform("Construct vertical plates from side", false, ScaleQuality.RetainColors);
 
-		basicTransform = new ScaleTransform(false, ScaleQuality.RetainColors);
-		rTransform = new ScaleTransform(false, ScaleQuality.RetainColors);
+		snotOutputTransform = new ScaleTransform("SNOT output", false, ScaleQuality.RetainColors);
+		rTransform = new ScaleTransform("To correct construction scale", false, ScaleQuality.RetainColors);
 		
 		LEGOColorLookUp.setColors(colors);
 
@@ -49,8 +49,8 @@ public class ToBricksTransform implements InstructionsTransform {
 		updateBasicTransform();
 	}
 	
-	public Transform getBasicTransform() {
-		return basicTransform;
+	public Transform getSnotOutputTransform() {
+		return snotOutputTransform;
 	}
 
 	public Transform getBrickFromSideTransform(int studsLength) {
@@ -98,7 +98,7 @@ public class ToBricksTransform implements InstructionsTransform {
 	
 	public void setPropagationPercentage(int pp) {
 		if(ditheringTransform.setPropagationPercentage(pp))
-			basicTransform.clearBuffer(); // pipe line breakage => clear the basic transform buffer to enforce update in view.
+			snotOutputTransform.clearBuffer(); // pipe line breakage => clear the basic transform buffer to enforce update in view.
 	}
 
 	public ToBricksType getToBricksType() {
@@ -113,7 +113,7 @@ public class ToBricksTransform implements InstructionsTransform {
 	
 	public boolean setColors(LEGOColor[] colors) {
 		if(LEGOColorLookUp.setColors(colors)) {
-			basicTransform.clearBuffer();
+			snotOutputTransform.clearBuffer();
 			ditheringTransform.clearBuffer();
 			thresholdTransform.clearBuffer();
 			return true;
@@ -122,8 +122,8 @@ public class ToBricksTransform implements InstructionsTransform {
 	}
 	
 	private void updateBasicTransform() {
-		basicTransform.setWidth(width);
-		basicTransform.setHeight(height);		
+		snotOutputTransform.setWidth(width);
+		snotOutputTransform.setHeight(height);		
 	}
 
 	/**
@@ -151,16 +151,16 @@ public class ToBricksTransform implements InstructionsTransform {
 		int ch = height/SizeInfo.SNOT_BLOCK_WIDTH;
 		normalColorsChoosen = new boolean[cw][ch];
 		
-		int[] o = new int[width*height];
-		o = original.getRGB(0,  0, width, height, o, 0, width);
+		int[] outputPixels = new int[width*height];
+		outputPixels = original.getRGB(0,  0, width, height, outputPixels, 0, width);
 		
 		for(int x = 0; x < cw; x++) {
 			for(int y = 0; y < ch; y++) {				
-				normalColorsChoosen[x][y] = arrayBestMatch(x, y, o);
+				normalColorsChoosen[x][y] = arrayBestMatch(x, y, outputPixels);
 			}
 		}
 		
-		original.setRGB(0, 0, width, height, o, 0, width);
+		original.setRGB(0, 0, width, height, outputPixels, 0, width);
 		return original;
 	}
 	

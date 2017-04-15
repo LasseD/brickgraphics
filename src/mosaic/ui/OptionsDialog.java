@@ -34,8 +34,8 @@ public class OptionsDialog extends JDialog implements ChangeListener {
 		{
 			// Scale before prepare:
 			JPanel titlePanel = new JPanel(new FlowLayout());
-			titlePanel.setBorder(BorderFactory.createTitledBorder("Scale image before the filters"));
-			cbScaleBeforePreparing = new JCheckBox("Scale the loaded image before filtering.");
+			titlePanel.setBorder(BorderFactory.createTitledBorder("Scale the loaded image before filtering"));
+			cbScaleBeforePreparing = new JCheckBox("Attempt to improve performance by scaling the image down before applying the filters.");
 			ActionListener a = new ActionListener() {				
 				@Override
 				public void actionPerformed(ActionEvent e) {
@@ -43,7 +43,6 @@ public class OptionsDialog extends JDialog implements ChangeListener {
 				}
 			};
 			cbScaleBeforePreparing.addActionListener(a);
-			titlePanel.add(new JLabel("When checking the box below, the program will attempt to improve performance by scaling the image down before applying the filters."));
 			titlePanel.add(cbScaleBeforePreparing);
 			performancePanel.add(titlePanel);
 		}
@@ -51,7 +50,7 @@ public class OptionsDialog extends JDialog implements ChangeListener {
 			// Reorder filters:
 			JPanel titlePanel = new JPanel(new FlowLayout());
 			titlePanel.setBorder(BorderFactory.createTitledBorder("Reorder filters"));
-			cbAllowFilterReordering = new JCheckBox("Improve performance by reordering filters.");
+			cbAllowFilterReordering = new JCheckBox("Improve rendering speed by reordering filters. Warning: The colors used when constructing the mosaic will not be consistent.");
 			ActionListener a = new ActionListener() {				
 				@Override
 				public void actionPerformed(ActionEvent e) {
@@ -59,7 +58,6 @@ public class OptionsDialog extends JDialog implements ChangeListener {
 				}
 			};
 			cbAllowFilterReordering.addActionListener(a);
-			titlePanel.add(new JLabel("When checking the box below, the program will attempt to improve performance by scaling the image down before applying the filters."));
 			titlePanel.add(cbAllowFilterReordering);
 			performancePanel.add(titlePanel);
 		}

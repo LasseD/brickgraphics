@@ -76,7 +76,7 @@ public class LXFPrinter {
 			ZipEntry ze = new ZipEntry("IMAGE100.PNG");
 			zos.putNextEntry(ze);
 			BufferedImage image = mw.getFinalImage();
-			ScaleTransform t = new ScaleTransform(true, ScaleQuality.BiLinear, 0);
+			ScaleTransform t = new ScaleTransform("Thumbnail for LXF file", true, ScaleQuality.BiLinear, 0);
 			t.setHeight(128);
 			t.setWidth(128);
 			ImageIO.write(t.transformUnbuffered(image), "png", zos);

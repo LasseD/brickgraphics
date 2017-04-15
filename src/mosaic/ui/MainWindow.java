@@ -29,7 +29,7 @@ public class MainWindow extends JFrame implements ChangeListener, ModelHandler<B
 		
 		setVisible(true);
 		
-		imagePreparingView = new ImagePreparingView(model, mc.getOptionsController());
+		imagePreparingView = new ImagePreparingView(model, mc.getOptionsController(), mc.getToBricksController());
 		imagePreparingView.addChangeListener(this);
 		Log.log("Created left view after " + (System.currentTimeMillis()-startTime) + "ms.");
 		
@@ -169,8 +169,7 @@ public class MainWindow extends JFrame implements ChangeListener, ModelHandler<B
 			setTitle(MainController.APP_NAME + " - " + mc.getFile().getName());
 
 		imagePreparingView.setImage(mc.getInImage(), this);						
-		BufferedImage toBrick = imagePreparingView.getFullyPreparredImage();
-		brickedView.setImage(toBrick);
+		brickedView.setImage(imagePreparingView.getPreparredImage());
 
 		if(splitPane == null)
 			return;

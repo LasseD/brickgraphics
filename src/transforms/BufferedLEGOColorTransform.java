@@ -77,7 +77,7 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform, 
 	private static BufferedImage toBufferedImage(LEGOColor[][] lcs) {
 		int w = lcs.length;
 		int h = lcs[0].length;
-		BufferedImage out = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+		BufferedImage out = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
 		int[] pixels = new int[w*h];
 		for(int y = 0, i = 0; y < h; y++) {
 			for(int x = 0; x < w; x++, i++) {

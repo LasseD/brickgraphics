@@ -60,7 +60,7 @@ public class MosaicIO {
 		case img:
 			BufferedImage read = removeAlpha(ImageIO.read(file));
 			//System.out.println(read);
-			if(read.getType() == BufferedImage.TYPE_CUSTOM) {
+			if(read.getType() != BufferedImage.TYPE_INT_RGB) {
 				int w = read.getWidth();
 				int h = read.getHeight();
 				BufferedImage copy = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);

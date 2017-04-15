@@ -2,6 +2,7 @@ package mosaic.ui;
 
 import io.*;
 import mosaic.controllers.OptionsController;
+import mosaic.controllers.ToBricksController;
 import mosaic.io.BrickGraphicsState;
 import mosaic.ui.menu.ImagePreparingToolBar;
 import java.awt.image.*;
@@ -17,7 +18,8 @@ import transforms.ScaleTransform.ScaleQuality;
  * crop, sharpness, gamma, brightness, contrast, saturation
  */
 public class ImagePreparingView extends JComponent implements ChangeListener, ModelHandler<BrickGraphicsState> {
-	private BufferedImage inImage, prepared, baseImage, baseCrop;
+	private BufferedImage inImage, baseImage, baseCrop;
+	private PreparedImage prepared;
 	private Cropper cropper;
 	private List<ChangeListener> listeners;
 
@@ -27,17 +29,20 @@ public class ImagePreparingView extends JComponent implements ChangeListener, Mo
 	private Transform[] transforms;
 	private ImagePreparingToolBar toolBar;
 	private OptionsController optionsController;
+	private ToBricksController toBricksController;
 	
 	// For scaling the image before it is transformed before bricked - 
 	private boolean scaleBeforePreparing, allowFilterReordering;
 
 	// For showing image:
-	private ScaleTransform fullScaler, cropScaler, toBrickedPixelsSizeScaler;
+	private ScaleTransform fullScaler, cropScaler, noCropScaler, toBrickedPixelsSizeScaler;
 	private Transform lastTransformUsedAsSource = null;
 	
-	public ImagePreparingView(final Model<BrickGraphicsState> model, OptionsController optionsController) {
+	public ImagePreparingView(final Model<BrickGraphicsState> model, OptionsController optionsController, ToBricksController toBricksController) {
 		this.optionsController = optionsController;
+		this.toBricksController = toBricksController;
 		optionsController.addChangeListener(this);
+		toBricksController.addChangeListener(this);
 		model.addModelHandler(this);
 		setLayout(new BorderLayout());
 		listeners = new LinkedList<ChangeListener>();
@@ -45,9 +50,10 @@ public class ImagePreparingView extends JComponent implements ChangeListener, Mo
 		ScaleQuality quality = optionsController.getScaleQuality();		
 		allowFilterReordering = optionsController.getAllowFilterReordering();
 		scaleBeforePreparing = optionsController.getScaleBeforePreparing();
-		fullScaler = new ScaleTransform(true, quality, 2);
-		cropScaler = new ScaleTransform(true, quality);
-		toBrickedPixelsSizeScaler = new ScaleTransform(true, quality);
+		fullScaler = new ScaleTransform("Filtered left image", true, quality, 2);
+		cropScaler = new ScaleTransform("Crop", false, quality);
+		noCropScaler = new ScaleTransform("No crop", false, ScaleQuality.RetainColors);
+		toBrickedPixelsSizeScaler = new ScaleTransform("Construction minimal size", false, quality);
 		
 		cropper = new Cropper(model);		
 		cropper.addChangeListener(this);
@@ -81,16 +87,18 @@ public class ImagePreparingView extends JComponent implements ChangeListener, Mo
 	}
 	
 	private Rectangle baseCropRect;
-	public void updateBaseCrop() {
+	public boolean updateBaseCrop() {
 		if(baseImage == null)
-			return;
+			return false;
 		int w = baseImage.getWidth();
 		int h = baseImage.getHeight();
 		Rectangle r = cropper.getCrop(0, 0, w, h);
 		if(baseCropRect == null || !baseCropRect.equals(r)) {
 			baseCropRect = r;
 			baseCrop = baseImage.getSubimage(r.x, r.y, r.width, r.height);		
+			return true;
 		}
+		return false;
 	}
 
 	public void addChangeListener(ChangeListener listener) {
@@ -111,18 +119,20 @@ public class ImagePreparingView extends JComponent implements ChangeListener, Mo
 			return;
 
 		if(cropper.isEnabled()) {
-			prepared = baseCrop;
+			prepared = new PreparedImage(baseCrop);
 		}
 		else {
-			prepared = inImage;
+			prepared = new PreparedImage(inImage);
 		}
 		
 		// Scale "prepared" to not use more pixels than bricked.
-		if(scaleBeforePreparing) {
-			prepared = toBrickedPixelsSizeScaler.transform(prepared);
+		if(scaleBeforePreparing && 
+		   prepared.originalWidth > toBrickedPixelsSizeScaler.getWidth() &&
+		   prepared.originalHeight > toBrickedPixelsSizeScaler.getHeight()) {
+			prepared.apply(toBrickedPixelsSizeScaler);
 		}
 		
-		long startTime = System.currentTimeMillis();
+		//long startTime = System.currentTimeMillis();
 		
 		if(allowFilterReordering) {
 			// Find last to transform:
@@ -136,31 +146,30 @@ public class ImagePreparingView extends JComponent implements ChangeListener, Mo
 			}
 			for(Transform t : transforms) {
 				if(t != lastTransformUsedAsSource)
-					prepared = t.transform(prepared);		
+					prepared.apply(t);		
 			}
 			if(lastTransformUsedAsSource != null) {
-				prepared = lastTransformUsedAsSource.transform(prepared);
+				prepared.apply(lastTransformUsedAsSource);
 			}
 		}		
 		else {
 			// No reordering allowed:
-			for(Transform t : transforms) {
-				prepared = t.transform(prepared);		
-			}
+			for(Transform t : transforms)
+				prepared.apply(t);		
 		}
 		
-		long endTime = System.currentTimeMillis();
-		Log.log("Performed transformations in " + (endTime-startTime) + "ms. Allow reordering: " + allowFilterReordering);
+		//long endTime = System.currentTimeMillis();
+		//Log.log("Performed transformations in " + (endTime-startTime) + "ms. Allow reordering: " + allowFilterReordering);
 
 		notifyListeners(sourceToListeners);
 	}
 
-	public BufferedImage getFullyPreparredImage() {
+	public PreparedImage getPreparredImage() {
 		return prepared;
 	}
 	
 	public void setImage(BufferedImage image, Object source) {
-		this.inImage = image;
+		this.inImage = image;		
 		updateBaseImages();
 		rePrepairImage(null, source);
 	}
@@ -225,31 +234,50 @@ public class ImagePreparingView extends JComponent implements ChangeListener, Mo
 		this.brightness.set(get);
 		rePrepairImage(this.brightness, null);
 	}
+
+	private boolean updateToBrickedPixelsSizeScaler() {
+		Dimension dim = toBricksController.getMinimalInputImageSize();
+		
+		boolean changedHeight = toBrickedPixelsSizeScaler.setHeight(dim.height);
+		boolean changedWidth = toBrickedPixelsSizeScaler.setWidth(dim.width);
+		return changedHeight || changedWidth;
+	}	
 	
 	private Cursor cursor;
-	public void updateCursor() {
+	public boolean updateCursor() {
 		Cursor c;
 		if(cropper.isEnabled())
 			c = cropper.getCursor();
 		else
 			c = Cursor.getPredefinedCursor(java.awt.Cursor.DEFAULT_CURSOR);
-		if(cursor != c)
-			setCursor(cursor = c);
+		if(cursor == c)
+			return false;
+		setCursor(cursor = c);
+		return true;
 	}
 
 	@Override
 	public void stateChanged(ChangeEvent e) {
+		boolean changed = false;
 		ScaleQuality quality = optionsController.getScaleQuality();
-		fullScaler.setQuality(quality);
-		cropScaler.setQuality(quality);
-		toBrickedPixelsSizeScaler.setQuality(quality);
+		changed |= fullScaler.setQuality(quality);
+		changed |= cropScaler.setQuality(quality);
+		changed |= toBrickedPixelsSizeScaler.setQuality(quality);
 		
-		allowFilterReordering = optionsController.getAllowFilterReordering();
-		scaleBeforePreparing = optionsController.getScaleBeforePreparing();
+		if(allowFilterReordering != optionsController.getAllowFilterReordering()) {
+			allowFilterReordering = optionsController.getAllowFilterReordering();
+			changed = true;
+		}		
+		if(scaleBeforePreparing != optionsController.getScaleBeforePreparing()) {
+			scaleBeforePreparing = optionsController.getScaleBeforePreparing();
+			changed = true;			
+		}
 
-		updateCursor();
-		updateBaseCrop();
-		rePrepairImage(null, null);
+		changed |= updateCursor();
+		changed |= updateBaseCrop();
+		changed |= updateToBrickedPixelsSizeScaler();
+		if(changed)
+			rePrepairImage(null, null);
 	}
 
 	@Override 
@@ -284,10 +312,17 @@ public class ImagePreparingView extends JComponent implements ChangeListener, Mo
 			cropScaler.setWidth(r.width);
 			cropScaler.setHeight(r.height);
 
-			g2.drawImage(cropScaler.transform(ImagePreparingView.this.prepared), null, x+r.x+2, r.y+2);
+			g2.drawImage(cropScaler.transform(ImagePreparingView.this.prepared.getImage()), null, x+r.x+2, r.y+2);
 		}
 		else {
-			BufferedImage fullScaled = fullScaler.transform(ImagePreparingView.this.prepared);
+			BufferedImage fullScaled = ImagePreparingView.this.prepared.getImage();
+			if(scaleBeforePreparing) {
+				noCropScaler.setWidth(inImage.getWidth());
+				noCropScaler.setHeight(inImage.getHeight());
+				fullScaled = noCropScaler.transform(fullScaled);				
+			}
+
+			fullScaled = fullScaler.transform(fullScaled);
 			int w = fullScaled.getWidth();
 			if(w < size.width) {
 				g2.translate((size.width-w)/2, 0);
@@ -317,5 +352,32 @@ public class ImagePreparingView extends JComponent implements ChangeListener, Mo
 		model.set(BrickGraphicsState.PrepareContrast, contrast.get());
 		model.set(BrickGraphicsState.PrepareSaturation, saturation.get());
 		model.set(BrickGraphicsState.PrepareFiltersEnabled, toolBar.isVisible());
+	}
+	
+	public static class PreparedImage {
+		private int originalWidth, originalHeight;
+		private BufferedImage image;
+
+		public PreparedImage(BufferedImage image) {
+			if(image == null)
+				throw new IllegalArgumentException("Image is null");
+			this.image = image;
+			this.originalHeight = image.getHeight();
+			this.originalWidth = image.getWidth();
+		}
+		protected void apply(Transform t) {
+			image = t.transform(image);
+		}
+		
+		public BufferedImage getImage() {
+			return image;
+		}
+		
+		public int getOriginalHeight() {
+			return originalHeight;
+		}
+		public int getOriginalWidth() {
+			return originalWidth;
+		}
 	}
 }
