@@ -6,7 +6,6 @@ import java.util.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import transforms.ScaleTransform.ScaleQuality;
-import mosaic.controllers.ColorController.ShownName;
 import mosaic.io.BrickGraphicsState;
 import mosaic.ui.MainWindow;
 import mosaic.ui.OptionsDialog;

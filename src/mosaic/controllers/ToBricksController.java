@@ -11,7 +11,6 @@ import io.*;
 import javax.swing.event.*;
 
 import mosaic.io.*;
-import mosaic.ui.actions.ShowToBricksTypeFilterDialog;
 import ui.IconizedTextfield;
 import ui.LividTextField;
 
@@ -180,7 +179,6 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 	public Dimension getMinimalInputImageSize() {
 		int w = constructionWidthInBasicUnits/toBricksType.getUnitWidth();
 		int h = constructionHeightInBasicUnits/toBricksType.getUnitHeight();
-		System.out.println("w=" + constructionWidthInBasicUnits + ", h=" + constructionHeightInBasicUnits + ", tbtWidth=" + toBricksType.getUnitWidth() + ", tbtUnitHeight=" + toBricksType.getUnitHeight());
 		if(toBricksType == ToBricksType.SNOT_IN_2_BY_2) {
 			w *= 10;
 			h *= 10;

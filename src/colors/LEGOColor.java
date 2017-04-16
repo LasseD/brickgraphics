@@ -5,7 +5,6 @@ import java.io.*;
 import mosaic.controllers.ColorController;
 
 public class LEGOColor implements Comparable<LEGOColor>, Serializable {
-	private static final long serialVersionUID = 6713668277298989578L;
 	private int idRebrickable, idLEGO;
 	private String name;
 	private Color rgb;

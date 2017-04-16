@@ -25,47 +25,77 @@ public class OptionsDialog extends JDialog implements ChangeListener {
 		Container cp = getContentPane();
 		cp.setLayout(new BorderLayout());
 		
-		JTabbedPane tabs = new JTabbedPane();
+		JPanel performancePanel = createPerformancePanel();
 		
+		JTabbedPane tabs = new JTabbedPane();
+		tabs.addTab("Performance options", performancePanel);
+
+		cp.add(tabs, BorderLayout.CENTER);
+
+		{
+			// Close
+			JPanel panel = new JPanel(new FlowLayout());
+			JButton closeButton = new JButton("Close");
+			closeButton.addActionListener(new ActionListener() {				
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					setVisible(false);
+				}
+			});
+			panel.add(closeButton);
+			cp.add(panel, BorderLayout.SOUTH);
+		}
+
+		stateChanged(null);
+	}
+	
+	private JPanel createPerformancePanel() {
 		JPanel performancePanel = new JPanel();
 		performancePanel.setLayout(new BoxLayout(performancePanel, BoxLayout.Y_AXIS));
 		
-		// Performance options:
+		// Filter options:
 		{
-			// Scale before prepare:
-			JPanel titlePanel = new JPanel(new FlowLayout());
-			titlePanel.setBorder(BorderFactory.createTitledBorder("Scale the loaded image before filtering"));
-			cbScaleBeforePreparing = new JCheckBox("Attempt to improve performance by scaling the image down before applying the filters.");
-			ActionListener a = new ActionListener() {				
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					oc.setScaleBeforePreparing(cbScaleBeforePreparing.isSelected(), OptionsDialog.this);
-				}
-			};
-			cbScaleBeforePreparing.addActionListener(a);
-			titlePanel.add(cbScaleBeforePreparing);
-			performancePanel.add(titlePanel);
-		}
-		{
-			// Reorder filters:
-			JPanel titlePanel = new JPanel(new FlowLayout());
-			titlePanel.setBorder(BorderFactory.createTitledBorder("Reorder filters"));
-			cbAllowFilterReordering = new JCheckBox("Improve rendering speed by reordering filters. Warning: The colors used when constructing the mosaic will not be consistent.");
-			ActionListener a = new ActionListener() {				
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					oc.setAllowFilterReordering(cbAllowFilterReordering.isSelected(), OptionsDialog.this);
-				}
-			};
-			cbAllowFilterReordering.addActionListener(a);
-			titlePanel.add(cbAllowFilterReordering);
-			performancePanel.add(titlePanel);
+			JPanel filterOptionsPanel = new JPanel();
+			filterOptionsPanel.setLayout(new BoxLayout(filterOptionsPanel, BoxLayout.Y_AXIS));
+			filterOptionsPanel.setBorder(BorderFactory.createTitledBorder("Filter options"));
+			
+			{
+				// Scale before prepare:
+				JPanel flowPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+				cbScaleBeforePreparing = new JCheckBox("Attempt to improve performance by scaling the image down before applying the filters.");
+				ActionListener a = new ActionListener() {				
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						oc.setScaleBeforePreparing(cbScaleBeforePreparing.isSelected(), OptionsDialog.this);
+					}
+				};
+				cbScaleBeforePreparing.addActionListener(a);
+				flowPanel.add(cbScaleBeforePreparing);
+				filterOptionsPanel.add(flowPanel);
+			}
+			{
+				// Reorder filters:
+				JPanel flowPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+				cbAllowFilterReordering = new JCheckBox("Improve rendering speed by reordering filters. Warning: The colors used when constructing the mosaic will not be consistent.");
+				ActionListener a = new ActionListener() {				
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						oc.setAllowFilterReordering(cbAllowFilterReordering.isSelected(), OptionsDialog.this);
+					}
+				};
+				cbAllowFilterReordering.addActionListener(a);
+				flowPanel.add(cbAllowFilterReordering);
+				filterOptionsPanel.add(flowPanel);
+			}
+			performancePanel.add(filterOptionsPanel);
 		}
 		{
 			// Scale Quality:
+			JPanel flowPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+			flowPanel.setBorder(BorderFactory.createTitledBorder("Quality when scaling"));
+			
 			JPanel bottomButtonGroupPanel = new JPanel();
 			bottomButtonGroupPanel.setLayout(new BoxLayout(bottomButtonGroupPanel, BoxLayout.Y_AXIS));
-			bottomButtonGroupPanel.setBorder(BorderFactory.createTitledBorder("Quality when scaling"));
 			ButtonGroup bgScaleQuality = new ButtonGroup();
 			rbScaleQuality = new JRadioButton[ScaleQuality.values().length];
 			int i = 0;
@@ -81,27 +111,11 @@ public class OptionsDialog extends JDialog implements ChangeListener {
 				bottomButtonGroupPanel.add(rbScaleQuality[i]);
 				++i;
 			}
-			performancePanel.add(bottomButtonGroupPanel);
+			flowPanel.add(bottomButtonGroupPanel);
+			performancePanel.add(flowPanel);
 		}
 		
-		{
-			// Close
-			JPanel panel = new JPanel(new FlowLayout());
-			JButton closeButton = new JButton("Close");
-			closeButton.addActionListener(new ActionListener() {				
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					setVisible(false);
-				}
-			});
-			panel.add(closeButton);
-			cp.add(panel, BorderLayout.SOUTH);
-		}
-		
-		tabs.addTab("Performance options", performancePanel);
-		cp.add(tabs, BorderLayout.CENTER);
-		
-		stateChanged(null);
+		return performancePanel;
 	}
 	
 	@Override
