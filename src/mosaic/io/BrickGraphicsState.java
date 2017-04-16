@@ -64,9 +64,9 @@ public enum BrickGraphicsState implements ModelState {
 	PrepareFiltersEnabled(false),
 
 	// Options dialog:
-	PrepareAllowFilterReordering(true),
+	PrepareAllowFilterReordering(false),
 	PrepareScaleQuality(ScaleTransform.ScaleQuality.NearestNeighbor.ordinal()),
-	PrepareScaleBeforePreparing(true),
+	PrepareScaleBeforePreparing(false),
 	
 	// ToBrick:
 	ToBricksWidth(480),

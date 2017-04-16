@@ -31,6 +31,7 @@ public class MainMenu extends JMenuBar {
 		JMenu editMenu = new JMenu("Edit");
 		editMenu.setDisplayedMnemonicIndex(0);
 		editMenu.setMnemonic('E');
+		editMenu.add(new ShowToBricksTypeFilterDialog(mc));
 		editMenu.add(new ShowOptionsAction(mc.getOptionsController().getOptionsDialog()));
 		
 		// View menu:

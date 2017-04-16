@@ -59,7 +59,7 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 			toolBar.add(Box.createHorizontalStrut(10));
 		for(JButton b : toBricksTypeButtons)
 			toolBar.add(b);
-		toolBar.add(new ShowToBricksTypeFilterDialog(mc));
+		//toolBar.add(new ShowToBricksTypeFilterDialog(mc));
 		toolBar.add(Box.createHorizontalStrut(10));
 		toolBar.add(buttonLessPP);
 		toolBar.add(propagationPercentageField);
