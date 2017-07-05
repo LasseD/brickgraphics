@@ -10,6 +10,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 import colors.parsers.*;
 import mosaic.io.*;
+import mosaic.rendering.Pipeline;
 import mosaic.ui.*;
 
 /**
@@ -27,6 +28,7 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 	public static final String HELP_URL = "http://c-mt.dk/software/lddmc/help";
 	
 	private Model<BrickGraphicsState> model;
+	private Pipeline pipeline;
 	private List<ChangeListener> listeners;
 
 	private MagnifierController magnifierController;
@@ -41,7 +43,7 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 	private ToBricksTypeFilterDialog toBricksTypeFilterDialog;
 	
 	// Image (for model state):
-	private BufferedImage image;
+	private BufferedImage inImage;
 	private String imageFileName;
 	private DataFile imageDataFile;
 	private File mosaicFile;
@@ -58,6 +60,7 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 		long startTime = System.currentTimeMillis();
 		Log.log("Initiating components");
 		model = new Model<BrickGraphicsState>(STATE_FILE_NAME, BrickGraphicsState.class);
+		pipeline = new Pipeline();
 		Log.log("Model file loaded");
 		handleModelChange(model);
 		model.addModelHandler(this);
@@ -71,7 +74,7 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 		Log.log("Created controllers after " + (System.currentTimeMillis()-startTime) + "ms.");
 
 		// Set up UI:
-		mw = new MainWindow(this, model);
+		mw = new MainWindow(this, model, pipeline);
 		listeners.add(mw);
 		Log.log("LDDMC main window operational after " + (System.currentTimeMillis()-startTime) + "ms.");
 
@@ -87,15 +90,18 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 				Log.log(e);
 				Action openAction = MosaicIO.createOpenAction(model, MainController.this, mw);
 				openAction.actionPerformed(null);
-			} 						
+			}				
 		}
 		else
 			notifyListeners(model);
 		
 		printController = new PrintController(model, this, mw);
+		pipeline.addFinalImageListener(printController);
 		new MagnifierWindow(MainController.this, mw); // Do your own thing little window.
 		saveDialog = new SaveDialog(mw);
 		toBricksTypeFilterDialog = new ToBricksTypeFilterDialog(toBricksController, mw);
+		
+		pipeline.start();
 	}
 	
 	public static void main(String[] args) {
@@ -120,10 +126,11 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 	}
 	
 	public void setImage(BufferedImage image, File imageFile) throws IOException {
-		this.image = image;
+		inImage = image;
 		imageDataFile = new DataFile(imageFile);
 		imageFileName = imageFile.getCanonicalPath();
 		mosaicFile = null;
+		pipeline.setStartImage(image);
 		notifyListeners(this);
 	}
 	
@@ -167,7 +174,7 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 	}
 
 	public BufferedImage getInImage() {
-		return image;
+		return inImage;
 	}
 	
 	public ColorController getColorController() {
@@ -200,7 +207,8 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 		imageDataFile = (DataFile)model.get(BrickGraphicsState.ImageFile);
 		if(imageDataFile.isValid()) {
 			try {
-				image = MosaicIO.removeAlpha(ImageIO.read(imageDataFile.fakeStream()));
+				BufferedImage image = MosaicIO.removeAlpha(ImageIO.read(imageDataFile.fakeStream()));
+				pipeline.setStartImage(image);
 			} catch (IOException e) {
 				Log.log(e);
 			}			

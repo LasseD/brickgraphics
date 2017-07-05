@@ -7,10 +7,14 @@ import javax.swing.*;
 import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
+
 import io.*;
 import javax.swing.event.*;
 
 import mosaic.io.*;
+import mosaic.rendering.Pipeline;
+import mosaic.rendering.PipelineListener;
 import ui.IconizedTextfield;
 import ui.LividTextField;
 
@@ -25,7 +29,7 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 	private List<ChangeListener> listeners;
 	
 	private int constructionWidthInBasicUnits, constructionHeightInBasicUnits; // in basicUnits
-	private float originalScale;
+	private float originalWidthToHeight;
 	private ToBricksType toBricksType;
 	private boolean[] availableToBricksTypes;
 	private boolean sizeChoiceFromWidth;
@@ -49,6 +53,11 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 				setUI();
 			}
 		});
+	}
+	
+	public void setOriginalWidthToHeight(float originalWidthToHeight) {
+		this.originalWidthToHeight = originalWidthToHeight;
+		update();		
 	}
 	
 	public void addComponents(JToolBar toolBar, boolean append, MainController mc) {
@@ -205,12 +214,7 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 		notifyListeners(e);
 	}
 
-	public void imageUpdated(int newWidth, int newHeight) {
-		originalScale = newWidth/(float)newHeight;
-		update();
-	}
-
-	public void update() {		
+	private void update() {		
 		if(!uiReady)
 			return;
 		
@@ -237,11 +241,11 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 		
 		if(sizeChoiceFromWidth) {
 			constructionWidthInBasicUnits = toBricksType.closestCompatibleWidth(constructionWidthInBasicUnits, toBricksType.getUnitWidth());
-			constructionHeightInBasicUnits = toBricksType.closestCompatibleHeight(Math.round(constructionWidthInBasicUnits/originalScale), toBricksType.getUnitHeight());	
+			constructionHeightInBasicUnits = toBricksType.closestCompatibleHeight(Math.round(constructionWidthInBasicUnits/originalWidthToHeight), toBricksType.getUnitHeight());	
 		}
 		else {
 			constructionHeightInBasicUnits = toBricksType.closestCompatibleHeight(constructionHeightInBasicUnits, toBricksType.getUnitHeight());		
-			constructionWidthInBasicUnits = toBricksType.closestCompatibleWidth(Math.round(originalScale*constructionHeightInBasicUnits), toBricksType.getUnitWidth());
+			constructionWidthInBasicUnits = toBricksType.closestCompatibleWidth(Math.round(originalWidthToHeight*constructionHeightInBasicUnits), toBricksType.getUnitWidth());
 		}
 		String w = "" + (constructionWidthInBasicUnits/toBricksType.getUnitWidth());
 		if(!sizeFieldWidth.getText().trim().equals(w))
@@ -277,7 +281,7 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 		this.constructionWidthInBasicUnits = (Integer)model.get(BrickGraphicsState.ToBricksWidth);
 		this.constructionHeightInBasicUnits = (Integer)model.get(BrickGraphicsState.ToBricksHeight);
 		propagationPercentage = (Integer)model.get(BrickGraphicsState.ToBricksPropagationPercentage);
-		originalScale = constructionWidthInBasicUnits/(float)constructionHeightInBasicUnits;
+		originalWidthToHeight = constructionWidthInBasicUnits/(float)constructionHeightInBasicUnits;
 		int tbtl = ToBricksType.values().length;
 		toBricksType = ToBricksType.values()[((Integer)model.get(BrickGraphicsState.ToBricksTypeIndex))%tbtl];
 		availableToBricksTypes = (boolean[])model.get(BrickGraphicsState.ToBricksFiltered);

@@ -26,11 +26,11 @@ public class ToBricksTransform implements InstructionsTransform {
 						   rTransform;
 	private FloydSteinbergTransform ditheringTransform;
 	private ThresholdTransform thresholdTransform;
-	private LEGOColor[][] normalColors, sidewaysColors;
+	private LEGOColorGrid normalColors, sidewaysColors;
 	private boolean[][] normalColorsChoosen;
 	private ColorController cc;
 	
-	public ToBricksTransform(LEGOColor[] colors, ToBricksType toBricksType, int propagationPercentage, ColorController cc) {
+	public ToBricksTransform(LEGOColor[] colors, ToBricksType toBricksType, int propagationPercentage, int width, int height, ColorController cc) {
 		this.cc = cc;
 		brickFromTopTransform = new ScaleTransform("Construct from top",  false, ScaleQuality.RetainColors);
 		brickFromSideTransform = new ScaleTransform("Construct bricks from side", false, ScaleQuality.RetainColors);
@@ -46,7 +46,7 @@ public class ToBricksTransform implements InstructionsTransform {
 		thresholdTransform = new ThresholdTransform(2, cc);
 		
 		this.toBricksType = toBricksType;
-		updateBasicTransform();
+		setBasicUnitSize(width, height);
 	}
 	
 	public Transform getSnotOutputTransform() {
@@ -129,8 +129,8 @@ public class ToBricksTransform implements InstructionsTransform {
 	/**
 	 * Writes to original.
 	 */
-	public BufferedImage bestMatch(LEGOColor[][] normalColors, 
-			                       LEGOColor[][] sidewaysColors, BufferedImage original) {
+	public BufferedImage bestMatch(LEGOColorGrid normalColors, 
+			                       LEGOColorGrid sidewaysColors, BufferedImage original) {
 		if(this.normalColors == normalColors && this.sidewaysColors == sidewaysColors) {
 			return original; // buffered!
 		}
@@ -174,14 +174,15 @@ public class ToBricksTransform implements InstructionsTransform {
 		int n5 = 5;
 
 		int distNormal = 0;
-		for(int x = 0; x < n2; x++) {
-			int originalIX = originalIBlock + n5*x;
-			for(int y = 0; y < n5; ++y) {
-				int originalIXY = originalIX + n2*w*y;
-				Color normalColor = normalColors[blockX*n2+x][blockY*n5+y].getRGB();
+		for(int y = 0; y < n5; ++y) {
+			int originalIY = originalIBlock + n2*w*y;
+			LEGOColor[] row = normalColors.getRow(blockY*n5+y);
+			for(int x = 0; x < n2; x++) {
+				int originalIXY = originalIY + n5*x;
+				Color normalColor = row[blockX*n2+x].getRGB();
 				for(int x2 = 0; x2 < n5; x2++) {
 					for(int y2 = 0; y2 < n2; ++y2) {
-						int originalColor =  original[originalIXY + x2 + w*y2];
+						int originalColor = original[originalIXY + x2 + w*y2];
 						distNormal += ColorDifference.diffCIE94(normalColor, originalColor);
 					}
 				}
@@ -191,11 +192,12 @@ public class ToBricksTransform implements InstructionsTransform {
 		n2 = 5;
 		n5 = 2;
 		int distSideways = 0;
-		for(int x = 0; x < n2; x++) {
-			int originalIX = originalIBlock + n5*x;
-			for(int y = 0; y < n5; ++y) {
-				int originalIXY = originalIX + n2*w*y;
-				Color sidewaysColor = sidewaysColors[blockX*n2+x][blockY*n5+y].getRGB();
+		for(int y = 0; y < n5; ++y) {
+			int originalIY = originalIBlock + n2*w*y;
+			LEGOColor[] row = sidewaysColors.getRow(blockY*n5+y);
+			for(int x = 0; x < n2; x++) {
+				int originalIXY = originalIY + n5*x;
+				Color sidewaysColor = row[blockX*n2+x].getRGB();
 				for(int x2 = 0; x2 < n5; x2++) {
 					for(int y2 = 0; y2 < n2; ++y2) {
 						int originalColor = original[originalIXY + x2 + w*y2];
@@ -212,14 +214,14 @@ public class ToBricksTransform implements InstructionsTransform {
 			n5 = 5;
 		}
 		
-		for(int x = 0; x < n2; x++) {
-			int originalIX = originalIBlock + n5*x;
-			for(int y = 0; y < n5; ++y) {
-				int originalIXY = originalIX + n2*w*y;
-				int c = (res ? normalColors[blockX*n2+x][blockY*n5+y] : sidewaysColors[blockX*n2+x][blockY*n5+y]).getRGB().getRGB();				
+		for(int y = 0; y < n5; ++y) {
+			int originalIY = originalIBlock + n2*w*y;
+			LEGOColor[] row = (res ? normalColors : sidewaysColors).getRow(blockY*n5+y);
+			for(int x = 0; x < n2; x++) {
+				int originalIXY = originalIY + n5*x;
+				int c = row[blockX*n2+x].getRGB().getRGB();				
 				for(int x2 = 0; x2 < n5; x2++) {
 					for(int y2 = 0; y2 < n2; ++y2) {
-						//original[originalIXY + x2 + w*y2] = (distNormal == distSideways ? Color.WHITE : (res ? Color.red : Color.BLUE)).getRGB();
 						original[originalIXY + x2 + w*y2] = c;
 					}
 				}
@@ -312,15 +314,11 @@ public class ToBricksTransform implements InstructionsTransform {
 		}
 		
 		List<LEGOColor> used = new LinkedList<LEGOColor>();
-		for(int i = 0; i < n2; i++) { // |
-			for(int j = 0; j < n5; j++) { // =
-				LEGOColor color;
+		for(int j = 0; j < n5; j++) { // =
+			int iy = basicUnitRect.y/n2+y*n5+j;
+			for(int i = 0; i < n2; i++) { // |
 				int ix = basicUnitRect.x/n5+x*n2+i;
-				int iy = basicUnitRect.y/n2+y*n5+j;
-				if(normal)
-					color = normalColors[ix][iy];
-				else
-					color = sidewaysColors[ix][iy];
+				LEGOColor color = (normal ? normalColors : sidewaysColors).getRow(iy)[ix];
 				used.add(color);
 				
 				int xIndent = (int)Math.round(scaleW*x+scaleW/n2*i);
@@ -368,14 +366,10 @@ public class ToBricksTransform implements InstructionsTransform {
 					n5 = 2;
 				}				
 				
-				for(int w = 0; w < n2; ++w) {
-					for(int h = 0; h < n5; ++h) {
-						if(normalColorChosen) {
-							addOne(m, normalColors[x*n2+w][y*n5+h]);
-						}
-						else {
-							addOne(m, sidewaysColors[x*n2+w][y*n5+h]);							
-						}						
+				for(int h = 0; h < n5; ++h) {
+					LEGOColor[] row = (normalColorChosen ? normalColors : sidewaysColors).getRow(y*n5+h);
+					for(int w = 0; w < n2; ++w) {
+						addOne(m, row[x*n2+w]);
 					}
 				}				
 			}
@@ -420,17 +414,16 @@ public class ToBricksTransform implements InstructionsTransform {
 					n5 = 2;
 				}
 				
-				for(int i = 0; i < n2; i++) { // |
-					for(int j = 0; j < n5; j++) { // =
-						LEGOColor color;
+				for(int j = 0; j < n5; j++) { // =
+					int iy = y*n5+j;
+					LEGOColor[] row = (normal ? normalColors : sidewaysColors).getRow(iy);
+					for(int i = 0; i < n2; i++) { // |
 						int ix = x*n2+i;
-						int iy = y*n5+j;
+						LEGOColor color = row[ix];
 						if(normal) {
-							color = normalColors[ix][iy];
 							printer.add(id++, 2*x+i, 5*y+j, color);
 						}
 						else {
-							color = sidewaysColors[ix][iy];
 							printer.addSideways(id++, 5*x+i, 2*y+j, color);
 						}
 					}			

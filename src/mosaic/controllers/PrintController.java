@@ -16,6 +16,7 @@ import bricks.ToBricksType;
 import colors.LEGOColor;
 import mosaic.controllers.MagnifierController;
 import mosaic.io.BrickGraphicsState;
+import mosaic.rendering.PipelineListener;
 import mosaic.ui.*;
 import transforms.ToBricksTransform;
 import icon.*;
@@ -24,7 +25,7 @@ import icon.*;
  * This class takes care of the printing mechanism
  * @author ld
  */
-public class PrintController implements Printable, ModelHandler<BrickGraphicsState> {
+public class PrintController implements Printable, ModelHandler<BrickGraphicsState>, PipelineListener {
 	private MainController mc;
 	private List<ChangeListener> listeners;
 	private PrintDialog printDialog;
@@ -32,6 +33,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 	private MagnifierController magnifierController;
 	private UIController uiController;
 	private ColorController colorController;
+	private BufferedImage lastPreparedImage;
 	// Model state:
 	private boolean coverPageShow, coverPageShowFileName, coverPageShowLegend, showLegend, showPageNumber;
 	private float fontSizeMM;
@@ -286,7 +288,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		if(coverPagePictureType == CoverPagePictureType.None)
 			return;
 		if(coverPagePictureType == CoverPagePictureType.Both) {
-			BufferedImage left = mw.getImagePreparingView().getPreparredImage().getImage();
+			BufferedImage left = lastPreparedImage;
 			drawImage(g2, xMin, xMin + (xMax-xMin)*9/20, yMin, yMax, left);
 			
 			BufferedImage right = mw.getFinalImage();
@@ -296,7 +298,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		
 		BufferedImage image;
 		if(coverPagePictureType == CoverPagePictureType.Original) {
-			image = mw.getImagePreparingView().getPreparredImage().getImage();
+			image = lastPreparedImage;
 		}
 		else {
 			image = mw.getFinalImage();
@@ -395,7 +397,8 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		int fromLeft = (page % numPagesWidth)+1;
 		int fromTop = (page / numPagesWidth)+1;
 		if(showPosition == ShowPosition.Written) {
-			String pageNumberString = "" + fromLeft + " mod højre, " + fromTop + " ned.";
+			String pageNumberString = "" + fromLeft + " \u2192, " + fromTop + " \u2193.";
+			//String pageNumberString = "" + fromLeft + " mod højre, " + fromTop + " ned.";
 			//String pageNumberString = fromLeft + ". from left, " + fromTop + ". from top.";
 			Rectangle2D pageNumberStringBounds = fm.getStringBounds(pageNumberString, g2);
 			float x = xMin + (float)((xMax-xMin)-pageNumberStringBounds.getWidth())/2;
@@ -670,5 +673,10 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		model.set(BrickGraphicsState.PrintShowPageNumber, showPageNumber);
 		model.set(BrickGraphicsState.PrintMagnifiersPerPage, magnifiersPerPage);
 		model.set(BrickGraphicsState.PrintFontSize, fontSizeMM);
+	}
+
+	@Override
+	public void imageChanged(BufferedImage image) {
+		lastPreparedImage = image;
 	}
 }

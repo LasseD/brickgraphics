@@ -20,7 +20,8 @@ public class LEGOColor implements Comparable<LEGOColor>, Serializable {
 		parts = Integer.MAX_VALUE;
 		from = 0;
 		to = Integer.MAX_VALUE;
-		idLEGO = -1;
+		idLEGO = 0;
+		idsLDraw = "0";
 		setRGB(new Color(rgb));
 	}
 	

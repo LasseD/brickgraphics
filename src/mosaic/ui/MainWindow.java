@@ -12,6 +12,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 import mosaic.controllers.*;
 import mosaic.io.BrickGraphicsState;
+import mosaic.rendering.Pipeline;
 import mosaic.ui.menu.*;
 
 public class MainWindow extends JFrame implements ChangeListener, ModelHandler<BrickGraphicsState> {
@@ -20,20 +21,22 @@ public class MainWindow extends JFrame implements ChangeListener, ModelHandler<B
 	private JSplitPane splitPane;
 	private ColorChooserDialog colorChooser;
 	private MainController mc;
+	private Pipeline pipeline;
 
-	public MainWindow(final MainController mc, final Model<BrickGraphicsState> model) {
+	public MainWindow(final MainController mc, final Model<BrickGraphicsState> model, final Pipeline pipeline) {
 		super(MainController.APP_NAME);
 		this.mc = mc;
+		this.pipeline = pipeline;
 		model.addModelHandler(this);
 		long startTime = System.currentTimeMillis();
 		
 		setVisible(true);
 		
-		imagePreparingView = new ImagePreparingView(model, mc.getOptionsController(), mc.getToBricksController());
-		imagePreparingView.addChangeListener(this);
+		imagePreparingView = new ImagePreparingView(model, mc.getOptionsController(), mc.getToBricksController(), pipeline);
+		//imagePreparingView.addChangeListener(this);
 		Log.log("Created left view after " + (System.currentTimeMillis()-startTime) + "ms.");
 		
-		brickedView = new BrickedView(mc, model);
+		brickedView = new BrickedView(mc, model, pipeline);
 		Log.log("Created right view after " + (System.currentTimeMillis()-startTime) + "ms.");
 
 		addWindowListener(new WindowAdapter() {
@@ -88,7 +91,7 @@ public class MainWindow extends JFrame implements ChangeListener, ModelHandler<B
 				int dividerLocation = splitPane.getDividerLocation();
 				imagePreparingView.setVisible(dividerLocation >= getMinDividerLocation());
 				brickedView.setVisible(splitPane.getWidth() == 0 || dividerLocation <= getMaxDividerLocation());
-				mc.getToBricksController().update();
+				pipeline.invalidate();
 			}
 		});
 		
@@ -158,22 +161,20 @@ public class MainWindow extends JFrame implements ChangeListener, ModelHandler<B
 	
 	@Override
 	public void stateChanged(ChangeEvent e) {
-		if(mc.getInImage() == null || e == null || e.getSource() == this) {
+		if(mc.getInImage() == null || e == null || e.getSource() == this)
 			return;
-		}
 		
 		File file = mc.getFile();
 		if(file == null)
 			setTitle(MainController.APP_NAME);
 		else
-			setTitle(MainController.APP_NAME + " - " + mc.getFile().getName());
+			setTitle(MainController.APP_NAME + " - " + file.getName());
 
-		imagePreparingView.setImage(mc.getInImage(), this);						
-		brickedView.setImage(imagePreparingView.getPreparredImage());
+		pipeline.setStartImage(mc.getInImage());						
+		//brickedView.setImage(imagePreparingView.getPreparredImage());
 
-		if(splitPane == null)
-			return;
-		repaint();
+		if(splitPane != null)
+			repaint();
 	}
 	
 	@Override

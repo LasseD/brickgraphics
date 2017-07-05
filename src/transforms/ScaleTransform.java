@@ -125,7 +125,7 @@ public class ScaleTransform extends BufferedTransform {
             g2.dispose();
         }
 		
-        System.out.print(usage + ": " + in.getWidth() + "x" + in.getHeight() + "->" + resized.getWidth() + "x" + resized.getHeight() + ". ");
+        //System.out.print(usage + ": " + in.getWidth() + "x" + in.getHeight() + "->" + resized.getWidth() + "x" + resized.getHeight() + ". ");
 		return resized;
 	}
 	

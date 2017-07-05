@@ -4,29 +4,30 @@ import io.*;
 import mosaic.controllers.OptionsController;
 import mosaic.controllers.ToBricksController;
 import mosaic.io.BrickGraphicsState;
+import mosaic.rendering.Pipeline;
+import mosaic.rendering.PipelineListener;
 import mosaic.ui.menu.ImagePreparingToolBar;
 import java.awt.image.*;
 import java.awt.*;
-import java.util.*;
-import java.util.List;
 import javax.swing.*;
 import javax.swing.event.*;
+
 import transforms.*;
 import transforms.ScaleTransform.ScaleQuality;
 
 /**
  * crop, sharpness, gamma, brightness, contrast, saturation
  */
-public class ImagePreparingView extends JComponent implements ChangeListener, ModelHandler<BrickGraphicsState> {
-	private BufferedImage inImage, baseImage, baseCrop;
-	private PreparedImage prepared;
+public class ImagePreparingView extends JComponent implements ModelHandler<BrickGraphicsState>, ChangeListener {
+	private BufferedImage inImage, preparedImage; // PreparedImage to be set from listener on pipeline.
 	private Cropper cropper;
-	private List<ChangeListener> listeners;
+	private Pipeline pipeline;
 
 	private RGBTransform brightness, gamma, contrast;
 	private StateTransform<Float> saturation, sharpness;
+	private CropTransform cropTransform;
 
-	private Transform[] transforms;
+	private Transform[] movableTransforms;
 	private ImagePreparingToolBar toolBar;
 	private OptionsController optionsController;
 	private ToBricksController toBricksController;
@@ -38,14 +39,15 @@ public class ImagePreparingView extends JComponent implements ChangeListener, Mo
 	private ScaleTransform fullScaler, cropScaler, noCropScaler, toBrickedPixelsSizeScaler;
 	private Transform lastTransformUsedAsSource = null;
 	
-	public ImagePreparingView(final Model<BrickGraphicsState> model, OptionsController optionsController, ToBricksController toBricksController) {
+	public ImagePreparingView(final Model<BrickGraphicsState> model, OptionsController optionsController, final ToBricksController toBricksController, final Pipeline pipeline) {
 		this.optionsController = optionsController;
 		this.toBricksController = toBricksController;
-		optionsController.addChangeListener(this);
-		toBricksController.addChangeListener(this);
+		this.pipeline = pipeline;
+		optionsController.addChangeListener(this); // getScaleQuality and allowFiltersReordering
+		toBricksController.addChangeListener(this); // getMinimalInputImageSize
 		model.addModelHandler(this);
 		setLayout(new BorderLayout());
-		listeners = new LinkedList<ChangeListener>();
+		//listeners = new LinkedList<ChangeListener>();
 
 		ScaleQuality quality = optionsController.getScaleQuality();		
 		allowFilterReordering = optionsController.getAllowFilterReordering();
@@ -56,7 +58,26 @@ public class ImagePreparingView extends JComponent implements ChangeListener, Mo
 		toBrickedPixelsSizeScaler = new ScaleTransform("Construction minimal size", false, quality);
 		
 		cropper = new Cropper(model);		
-		cropper.addChangeListener(this);
+		cropper.addPointerIconListener(new ChangeListener() {			
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				updateCursor();
+			}
+		});
+		cropper.addChangeListener(new ChangeListener() {			
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				if(cropper.isEnabled()) {
+					toBricksController.setOriginalWidthToHeight(cropper.getWidthToHeight());
+				}
+				else {
+					float originalWidthToHeight = inImage.getWidth()/(float)inImage.getHeight();			
+					toBricksController.setOriginalWidthToHeight(originalWidthToHeight);
+				}
+				pipeline.invalidate();
+			}
+		}); // For cursor style.
+		cropTransform = new CropTransform(cropper);
 		addMouseMotionListener(cropper);
 		addMouseListener(cropper);
 		{
@@ -65,142 +86,110 @@ public class ImagePreparingView extends JComponent implements ChangeListener, Mo
 			gamma = new GammaTransform((float[])model.get(BrickGraphicsState.PrepareGamma));
 			contrast = new ContrastTransform((float[])model.get(BrickGraphicsState.PrepareContrast));
 			saturation = new SaturationTransform((Float)model.get(BrickGraphicsState.PrepareSaturation));
-			transforms = new Transform[]{sharpness, brightness, gamma, contrast, saturation};
+			movableTransforms = new Transform[]{sharpness, brightness, gamma, contrast, saturation};
 		}
 		toolBar = new ImagePreparingToolBar(ImagePreparingView.this, model);
 		toolBar.setVisible((Boolean)model.get(BrickGraphicsState.PrepareFiltersEnabled));
+		populatePipeline();
 	}
 	
 	public ImagePreparingToolBar getToolBar() {
 		return toolBar;
 	}
 
-	public void updateBaseImages() {
-		if(inImage == null)
-			return;
-		baseImage = inImage;
+	private void populatePipeline() {
+		// Crop:
+		pipeline.addTransform(cropTransform);
+		// Resizing optimization (if enabled):
+		pipeline.addTransform(new Transform(){
+			private boolean shouldScaleBeforePreparing(BufferedImage in) {
+				return scaleBeforePreparing && 
+				   in.getWidth() > toBrickedPixelsSizeScaler.getWidth() &&
+				   in.getHeight() > toBrickedPixelsSizeScaler.getHeight();				   
+			}			
+			@Override
+			public BufferedImage transform(BufferedImage in) {
+				return shouldScaleBeforePreparing(in) ? toBrickedPixelsSizeScaler.transform(in) : in;
+			}
+			@Override
+			public Dimension getTransformedSize(BufferedImage in) {
+				throw new UnsupportedOperationException();
+			}});
+		// The main filters:
+		for(final Transform t : movableTransforms) {
+			pipeline.addTransform(new Transform(){
+				@Override
+				public BufferedImage transform(BufferedImage in) {
+					if(allowFilterReordering && 
+							lastTransformUsedAsSource != null && 
+							lastTransformUsedAsSource == t)
+						return in;
+					return t.transform(in);
+				}
+				@Override
+				public Dimension getTransformedSize(BufferedImage in) {
+					throw new UnsupportedOperationException();
+				}});
+		}
+		// Skipped main filter:
+		pipeline.addTransform(new Transform(){
+			@Override
+			public BufferedImage transform(BufferedImage in) {
+				if(allowFilterReordering && lastTransformUsedAsSource != null)
+					return lastTransformUsedAsSource.transform(in);
+				return in;
+			}
+			@Override
+			public Dimension getTransformedSize(BufferedImage in) {
+				throw new UnsupportedOperationException();
+			}});
 		
-		int w = baseImage.getWidth();
-		int h = baseImage.getHeight();
-		Rectangle r = cropper.getCrop(0, 0, w, h);
-		baseCrop = baseImage.getSubimage(r.x, r.y, r.width, r.height);		
+		pipeline.addInImageListener(new PipelineListener() {
+			@Override
+			public void imageChanged(BufferedImage image) {
+				inImage = image;
+			}
+		});
+		pipeline.addFinalImageListener(new PipelineListener() {			
+			@Override
+			public void imageChanged(BufferedImage image) {
+				preparedImage = image;
+				repaint();				
+			}
+		}); // Update prepared image.
+	}
+
+	private void transformChangedInvalidatePipeline(Transform source) {
+		lastTransformUsedAsSource = source;
+		pipeline.invalidate();
 	}
 	
-	private Rectangle baseCropRect;
-	public boolean updateBaseCrop() {
-		if(baseImage == null)
-			return false;
-		int w = baseImage.getWidth();
-		int h = baseImage.getHeight();
-		Rectangle r = cropper.getCrop(0, 0, w, h);
-		if(baseCropRect == null || !baseCropRect.equals(r)) {
-			baseCropRect = r;
-			baseCrop = baseImage.getSubimage(r.x, r.y, r.width, r.height);		
-			return true;
-		}
-		return false;
-	}
-
-	public void addChangeListener(ChangeListener listener) {
-		listeners.add(listener);
-	}
-
-	public void notifyListeners(Object sourceToListeners) {
-		if(listeners == null)
-			return;
-		ChangeEvent e = new ChangeEvent(sourceToListeners == null ? this : sourceToListeners);
-		for(ChangeListener listener : listeners) {
-			listener.stateChanged(e);
-		}
-	}
-
-	private void rePrepairImage(Transform source, Object sourceToListeners) {
-		if(inImage == null || inImage.getWidth() == 0 || inImage.getHeight() == 0)
-			return;
-
-		if(cropper.isEnabled()) {
-			prepared = new PreparedImage(baseCrop);
-		}
-		else {
-			prepared = new PreparedImage(inImage);
-		}
-		
-		// Scale "prepared" to not use more pixels than bricked.
-		if(scaleBeforePreparing && 
-		   prepared.originalWidth > toBrickedPixelsSizeScaler.getWidth() &&
-		   prepared.originalHeight > toBrickedPixelsSizeScaler.getHeight()) {
-			prepared.apply(toBrickedPixelsSizeScaler);
-		}
-		
-		//long startTime = System.currentTimeMillis();
-		
-		if(allowFilterReordering) {
-			// Find last to transform:
-			if(source != null) {
-				for(Transform t : transforms) {
-					if(t == source) {
-						lastTransformUsedAsSource = source;
-						break;
-					}
-				}				
-			}
-			for(Transform t : transforms) {
-				if(t != lastTransformUsedAsSource)
-					prepared.apply(t);		
-			}
-			if(lastTransformUsedAsSource != null) {
-				prepared.apply(lastTransformUsedAsSource);
-			}
-		}		
-		else {
-			// No reordering allowed:
-			for(Transform t : transforms)
-				prepared.apply(t);		
-		}
-		
-		//long endTime = System.currentTimeMillis();
-		//Log.log("Performed transformations in " + (endTime-startTime) + "ms. Allow reordering: " + allowFilterReordering);
-
-		notifyListeners(sourceToListeners);
-	}
-
-	public PreparedImage getPreparredImage() {
-		return prepared;
-	}
-	
-	public void setImage(BufferedImage image, Object source) {
-		this.inImage = image;		
-		updateBaseImages();
-		rePrepairImage(null, source);
-	}
-
 	public void setContrast(int index, float contrast) {
 		float[] get = this.contrast.get();
 		get[index] = contrast;
 		this.contrast.set(get);
-		rePrepairImage(this.contrast, null);	
+		transformChangedInvalidatePipeline(this.contrast);	
 	}
 	public void setContrast(float contrast) {
 		float[] get = new float[3];
 		for(int i = 0; i < 3; ++i)
 			get[i] = contrast;
 		this.contrast.set(get);
-		rePrepairImage(this.contrast, null);	
+		transformChangedInvalidatePipeline(this.contrast);	
 	}
 
 	public void setSaturation(float saturation) {
 		this.saturation.set(saturation);
-		rePrepairImage(this.saturation, null);
+		transformChangedInvalidatePipeline(this.saturation);
 	}
 
 	public void setSharpness(float sharpness) {
 		this.sharpness.set(sharpness);
-		rePrepairImage(this.sharpness, null);
+		transformChangedInvalidatePipeline(this.sharpness);
 	}
 	
 	public void switchCropState() {
 		cropper.switchEnabled();
-		rePrepairImage(null, null);
 	}
 	
 	public void switchFiltersEnabled() {
@@ -211,28 +200,28 @@ public class ImagePreparingView extends JComponent implements ChangeListener, Mo
 		float[] get = this.gamma.get();
 		get[index] = gamma;
 		this.gamma.set(get);
-		rePrepairImage(this.gamma, null);
+		transformChangedInvalidatePipeline(this.gamma);
 	}
 	public void setGamma(float gamma) {
 		float[] get = new float[3];
 		for(int i = 0; i < 3; ++i)
 			get[i] = gamma;
 		this.gamma.set(get);
-		rePrepairImage(this.gamma, null);
+		transformChangedInvalidatePipeline(this.gamma);
 	}
 
 	public void setBrightness(int index, float brightness) {
 		float[] get = this.brightness.get();
 		get[index] = brightness;
 		this.brightness.set(get);
-		rePrepairImage(this.brightness, null);
+		transformChangedInvalidatePipeline(this.brightness);
 	}
 	public void setBrightness(float brightness) {
 		float[] get = new float[3];
 		for(int i = 0; i < 3; ++i)
 			get[i] = brightness;
 		this.brightness.set(get);
-		rePrepairImage(this.brightness, null);
+		transformChangedInvalidatePipeline(this.brightness);
 	}
 
 	private boolean updateToBrickedPixelsSizeScaler() {
@@ -273,16 +262,15 @@ public class ImagePreparingView extends JComponent implements ChangeListener, Mo
 			changed = true;			
 		}
 
-		changed |= updateCursor();
-		changed |= updateBaseCrop();
+		//changed |= updateBaseCrop();
 		changed |= updateToBrickedPixelsSizeScaler();
 		if(changed)
-			rePrepairImage(null, null);
+			pipeline.invalidate();
 	}
 
 	@Override 
 	public void paintComponent(Graphics g) {
-		if(ImagePreparingView.this.prepared == null)
+		if(inImage == null)
 			return;
 		Graphics2D g2 = (Graphics2D)g;
 
@@ -296,7 +284,7 @@ public class ImagePreparingView extends JComponent implements ChangeListener, Mo
 		fullScaler.setHeight(size.height);
 		
 		if(cropper.isEnabled()) {
-			BufferedImage full = ImagePreparingView.this.baseImage;
+			BufferedImage full = inImage;
 			full = fullScaler.transform(full);
 			int x = 0;
 			int y = 0;
@@ -305,17 +293,17 @@ public class ImagePreparingView extends JComponent implements ChangeListener, Mo
 			if(w < size.width) {
 				x = (size.width-w)/2;
 			}
-			cropper.setMouseImage(new Rectangle(x, y, w, h));
+			cropper.setMouseImageRect(new Rectangle(x, y, w, h));
 			g2.drawImage(cropper.pollute(full), null, x, 0);
 
 			Rectangle r = cropper.getCrop(x, y, w, h);
 			cropScaler.setWidth(r.width);
 			cropScaler.setHeight(r.height);
 
-			g2.drawImage(cropScaler.transform(ImagePreparingView.this.prepared.getImage()), null, x+r.x+2, r.y+2);
+			g2.drawImage(cropScaler.transform(ImagePreparingView.this.preparedImage), null, x+r.x+2, r.y+2);
 		}
 		else {
-			BufferedImage fullScaled = ImagePreparingView.this.prepared.getImage();
+			BufferedImage fullScaled = ImagePreparingView.this.preparedImage;
 			if(scaleBeforePreparing) {
 				noCropScaler.setWidth(inImage.getWidth());
 				noCropScaler.setHeight(inImage.getHeight());
@@ -327,7 +315,7 @@ public class ImagePreparingView extends JComponent implements ChangeListener, Mo
 			if(w < size.width) {
 				g2.translate((size.width-w)/2, 0);
 			}
-			cropper.setMouseImage(new Rectangle(0, 0, fullScaled.getWidth(), fullScaled.getHeight()));
+			cropper.setMouseImageRect(new Rectangle(0, 0, fullScaled.getWidth(), fullScaled.getHeight()));
 			g2.drawImage(fullScaled, null, 2, 2);
 		}
 	}
@@ -342,8 +330,9 @@ public class ImagePreparingView extends JComponent implements ChangeListener, Mo
 
 		toolBar.setVisible((Boolean)model.get(BrickGraphicsState.PrepareFiltersEnabled));
 		toolBar.reloadModel(model);
-		updateBaseImages();
+		//updateBaseImages();
 	}
+
 	@Override
 	public void save(Model<BrickGraphicsState> model) {
 		model.set(BrickGraphicsState.PrepareSharpness, sharpness.get());
@@ -354,30 +343,4 @@ public class ImagePreparingView extends JComponent implements ChangeListener, Mo
 		model.set(BrickGraphicsState.PrepareFiltersEnabled, toolBar.isVisible());
 	}
 	
-	public static class PreparedImage {
-		private int originalWidth, originalHeight;
-		private BufferedImage image;
-
-		public PreparedImage(BufferedImage image) {
-			if(image == null)
-				throw new IllegalArgumentException("Image is null");
-			this.image = image;
-			this.originalHeight = image.getHeight();
-			this.originalWidth = image.getWidth();
-		}
-		protected void apply(Transform t) {
-			image = t.transform(image);
-		}
-		
-		public BufferedImage getImage() {
-			return image;
-		}
-		
-		public int getOriginalHeight() {
-			return originalHeight;
-		}
-		public int getOriginalWidth() {
-			return originalWidth;
-		}
-	}
 }

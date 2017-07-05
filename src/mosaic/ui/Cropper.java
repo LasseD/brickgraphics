@@ -14,18 +14,19 @@ import io.*;
 public class Cropper implements MouseListener, MouseMotionListener, ModelHandler<BrickGraphicsState> {
 	public static final int TOLERANCE = 3;
 
-	private Rectangle mouseImage;
+	private Rectangle mouseImageRect;
 	private Drag state;
 	private Rectangle2D.Double cropRect;
 	private Point lastPress;
-	private List<ChangeListener> listeners;
+	private List<ChangeListener> changeListeners, pointerIconListeners;
 	private boolean enabled;
 	
 	public Cropper(Model<BrickGraphicsState> model) {
 		model.addModelHandler(this);
 		state = Drag.NONE;
 		lastPress = null;
-		listeners = new LinkedList<ChangeListener>();
+		changeListeners = new LinkedList<ChangeListener>();
+		pointerIconListeners = new LinkedList<ChangeListener>();
 		handleModelChange(model);
 	}
 	
@@ -39,11 +40,19 @@ public class Cropper implements MouseListener, MouseMotionListener, ModelHandler
 	
 	public void switchEnabled() {
 		enabled = !enabled;
-		notifyListeners();
+		notifyChangeListeners();
 	}
 	
 	public void addChangeListener(ChangeListener listener) {
-		listeners.add(listener);
+		changeListeners.add(listener);
+	}
+	
+	public void addPointerIconListener(ChangeListener listener) {
+		pointerIconListeners.add(listener);
+	}
+	
+	public float getWidthToHeight() {
+		return (float)(cropRect.width/cropRect.height);
 	}
 	
 	public Rectangle getCrop(Rectangle r) {
@@ -52,20 +61,20 @@ public class Cropper implements MouseListener, MouseMotionListener, ModelHandler
 		
 	public Rectangle getCrop(int x, int y, int w, int h) {
 		int rx = (int)Math.round(cropRect.x*w);
-		rx = cut(rx, 0, w);
+		rx = clamp(rx, 0, w);
 		
 		int ry = (int)Math.round(cropRect.y*h);
-		ry = cut(ry, 0, h);
+		ry = clamp(ry, 0, h);
 		
 		int rw = (int)Math.round(cropRect.width*w);
-		rw = cut(rw, 0, w-rx);
+		rw = clamp(rw, 0, w-rx);
 		
 		int rh= (int)Math.round(cropRect.height*h);
-		rh = cut(rh, 0, h-ry);
+		rh = clamp(rh, 0, h-ry);
 
 		return new Rectangle(rx, ry, rw, rh);
 	}
-	private static int cut(int i, int min, int max) {
+	private static int clamp(int i, int min, int max) {
 		if(i < min)
 			return min;
 		if(i > max)
@@ -191,9 +200,16 @@ public class Cropper implements MouseListener, MouseMotionListener, ModelHandler
 		}
 	}
 	
-	public void notifyListeners() {
+	private void notifyChangeListeners() {
 		ChangeEvent e = new ChangeEvent(this);
-		for(ChangeListener listener : listeners) {
+		for(ChangeListener listener : changeListeners) {
+			listener.stateChanged(e);
+		}
+	}
+
+	private void notifyPointerIconListeners() {
+		ChangeEvent e = new ChangeEvent(this);
+		for(ChangeListener listener : pointerIconListeners) {
 			listener.stateChanged(e);
 		}
 	}
@@ -211,7 +227,7 @@ public class Cropper implements MouseListener, MouseMotionListener, ModelHandler
 	@Override
 	public void mouseExited(MouseEvent e) {
 		state = Drag.NONE;
-		notifyListeners();
+		notifyChangeListeners();
 	}
 
 	@Override
@@ -223,6 +239,7 @@ public class Cropper implements MouseListener, MouseMotionListener, ModelHandler
 	@Override
 	public void mouseReleased(MouseEvent e) {
 		lastPress = null;
+		notifyChangeListeners();
 	}
 
 	@Override
@@ -234,7 +251,7 @@ public class Cropper implements MouseListener, MouseMotionListener, ModelHandler
 
 		int diffX = p.x - lastPress.x;
 		int diffY = p.y - lastPress.y;
-		Rectangle r = getCrop(mouseImage);
+		Rectangle r = getCrop(mouseImageRect);
 		boolean scaleX = false;
 		boolean scaleY = false;
 		boolean scaleW = false;
@@ -285,16 +302,16 @@ public class Cropper implements MouseListener, MouseMotionListener, ModelHandler
 			r.x = 0;
 		if(r.y < 0)
 			r.y = 0;
-		if(r.x + r.width >= mouseImage.width)
-			r.x = mouseImage.width - r.width;
-		if(r.y + r.height >= mouseImage.height)
-			r.y = mouseImage.height - r.height;
+		if(r.x + r.width >= mouseImageRect.width)
+			r.x = mouseImageRect.width - r.width;
+		if(r.y + r.height >= mouseImageRect.height)
+			r.y = mouseImageRect.height - r.height;
 		
 		// fix unitRect:
-		double ux = (double)r.x / mouseImage.width;
-		double uy = (double)r.y / mouseImage.height;
-		double uw = (double)r.width / mouseImage.width;
-		double uh = (double)r.height / mouseImage.height;
+		double ux = (double)r.x / mouseImageRect.width;
+		double uy = (double)r.y / mouseImageRect.height;
+		double uw = (double)r.width / mouseImageRect.width;
+		double uh = (double)r.height / mouseImageRect.height;
 
 		// fix unitRect for keeping scale/aspect ratio:
 		double scaleWH = cropRect.width / cropRect.height;
@@ -321,21 +338,21 @@ public class Cropper implements MouseListener, MouseMotionListener, ModelHandler
 		cropRect = new Rectangle2D.Double(ux, uy, uw, uh);
 		
 		lastPress = p;
-		notifyListeners();
+		notifyChangeListeners();
 	}
 
 	@Override
 	public void mouseMoved(MouseEvent e) {
-		if(mouseImage == null)
+		if(mouseImageRect == null)
 			return;
 		Point p = e.getPoint();
-		p.translate(-2-mouseImage.x, -2);
-		if(state != (state = Drag.intersecting(p, getCrop(mouseImage))))
-			notifyListeners();
+		p.translate(-2-mouseImageRect.x, -2);
+		if(state != (state = Drag.intersecting(p, getCrop(mouseImageRect))))
+			notifyPointerIconListeners();
 	}
 
-	public void setMouseImage(Rectangle r) {
-		this.mouseImage = r;
+	public void setMouseImageRect(Rectangle r) {
+		this.mouseImageRect = r;
 	}
 
 	@Override

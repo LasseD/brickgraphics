@@ -9,7 +9,7 @@ import transforms.ScaleTransform.ScaleQuality;
 
 public class OptionsDialog extends JDialog implements ChangeListener {
 	private OptionsController oc;
-	private JCheckBox cbAllowFilterReordering, cbScaleBeforePreparing;
+	private JCheckBox cbAllowFilterReordering, cbScale, cbOptimize;
 	private JRadioButton[] rbScaleQuality;
 	private static final String DIALOG_TITLE = "Settings";
 
@@ -25,10 +25,9 @@ public class OptionsDialog extends JDialog implements ChangeListener {
 		Container cp = getContentPane();
 		cp.setLayout(new BorderLayout());
 		
-		JPanel performancePanel = createPerformancePanel();
-		
 		JTabbedPane tabs = new JTabbedPane();
-		tabs.addTab("Performance options", performancePanel);
+		tabs.addTab("Performance", createPerformancePanel());
+		tabs.addTab("Export", createExportPanel());
 
 		cp.add(tabs, BorderLayout.CENTER);
 
@@ -48,7 +47,7 @@ public class OptionsDialog extends JDialog implements ChangeListener {
 
 		stateChanged(null);
 	}
-	
+
 	private JPanel createPerformancePanel() {
 		JPanel performancePanel = new JPanel();
 		performancePanel.setLayout(new BoxLayout(performancePanel, BoxLayout.Y_AXIS));
@@ -62,15 +61,15 @@ public class OptionsDialog extends JDialog implements ChangeListener {
 			{
 				// Scale before prepare:
 				JPanel flowPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-				cbScaleBeforePreparing = new JCheckBox("Attempt to improve performance by scaling the image down before applying the filters.");
+				cbScale = new JCheckBox("Attempt to improve performance by scaling the image down before applying the filters.");
 				ActionListener a = new ActionListener() {				
 					@Override
 					public void actionPerformed(ActionEvent e) {
-						oc.setScaleBeforePreparing(cbScaleBeforePreparing.isSelected(), OptionsDialog.this);
+						oc.setScaleBeforePreparing(cbScale.isSelected(), OptionsDialog.this);
 					}
 				};
-				cbScaleBeforePreparing.addActionListener(a);
-				flowPanel.add(cbScaleBeforePreparing);
+				cbScale.addActionListener(a);
+				flowPanel.add(cbScale);
 				filterOptionsPanel.add(flowPanel);
 			}
 			{
@@ -117,15 +116,46 @@ public class OptionsDialog extends JDialog implements ChangeListener {
 		
 		return performancePanel;
 	}
+		
+	private JPanel createExportPanel() {
+		JPanel exportPanel = new JPanel();
+		exportPanel.setLayout(new BoxLayout(exportPanel, BoxLayout.Y_AXIS));
+		
+		// Optimize parts options:
+		{
+			JPanel optimizePartsOptionsPanel = new JPanel();
+			optimizePartsOptionsPanel.setLayout(new BoxLayout(optimizePartsOptionsPanel, BoxLayout.Y_AXIS));
+			optimizePartsOptionsPanel.setBorder(BorderFactory.createTitledBorder("Optimize parts when exporting"));
+			
+			{
+				// Scale before prepare:
+				JPanel flowPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+				cbOptimize = new JCheckBox("Substituting parts from the file 'part_types.txt' when exporting. Notice: LDD, SNOT and tiles are not yet supported!");
+				ActionListener a = new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						oc.setOptimizeUseOfBricksBeforeExporting(cbOptimize.isSelected(), OptionsDialog.this);
+					}
+				};
+				cbOptimize.addActionListener(a);
+				flowPanel.add(cbOptimize);
+				optimizePartsOptionsPanel.add(flowPanel);
+			}
+			exportPanel.add(optimizePartsOptionsPanel);
+		}
+		
+		return exportPanel;
+	}
 	
 	@Override
 	public void stateChanged(ChangeEvent e) {
 		if(e != null && e.getSource() == this)
 			return;
 		
-		rbScaleQuality[oc.getScaleQuality().ordinal()].setSelected(true);		
+		rbScaleQuality[oc.getScaleQuality().ordinal()].setSelected(true);
 		cbAllowFilterReordering.setSelected(oc.getAllowFilterReordering());
-		cbScaleBeforePreparing.setSelected(oc.getScaleBeforePreparing());
+		cbScale.setSelected(oc.getScaleBeforePreparing());
+		cbOptimize.setSelected(oc.getOptimizeUseOfBricksBeforeExporting());
 	}
 	
 	@Override

@@ -4,7 +4,7 @@ import icon.*;
 
 import java.awt.Dimension;
 import java.awt.image.*;
-import colors.LEGOColor;
+import colors.*;
 import transforms.*;
 
 /**
@@ -50,8 +50,8 @@ public enum ToBricksType {
 
 			LEGOColorTransform mainTransform = tbt.getMainTransform();
 			
-			LEGOColor[][] normalColors = mainTransform.lcTransform(normal);
-			LEGOColor[][] sidewaysColors = mainTransform.lcTransform(sideways);			
+			LEGOColorGrid normalColors = mainTransform.lcTransform(normal);
+			LEGOColorGrid sidewaysColors = mainTransform.lcTransform(sideways);			
 
 			in = tbt.getSnotOutputTransform().transform(in);
 			//System.out.println("SNOT transform prepared in: " + (System.currentTimeMillis()-start) + "ms.");

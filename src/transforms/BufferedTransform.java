@@ -1,6 +1,6 @@
 package transforms;
 
-import io.Log;
+//import io.Log;
 
 import java.awt.image.*;
 
@@ -29,7 +29,7 @@ public abstract class BufferedTransform implements Transform {
 			}
 		}
 		
-		long startTime = System.currentTimeMillis();
+		//long startTime = System.currentTimeMillis();
 		BufferedImage newOut = transformUnbuffered(in);
 		if(imagePairs.length == 0)
 			return newOut;
@@ -38,8 +38,8 @@ public abstract class BufferedTransform implements Transform {
 		pairIndex++;
 		if(pairIndex == imagePairs.length)
 			pairIndex = 0;
-		long endTime = System.currentTimeMillis();
-		Log.log(getClass().getName() + " transformation performed in " + (endTime-startTime) + "ms.");
+		//long endTime = System.currentTimeMillis();
+		//Log.log(getClass().getName() + " transformation performed in " + (endTime-startTime) + "ms.");
 		return newOut;
 	}
 	

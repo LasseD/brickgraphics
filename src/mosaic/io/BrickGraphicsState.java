@@ -74,7 +74,10 @@ public enum BrickGraphicsState implements ModelState {
 	ToBricksPropagationPercentage(50),
 	SelectedColors(new int[]{0, 1, 2, 14, 15, 19, 70, 71, 72, 320}),
 	ToBricksFiltered(ToBricksType.getDefaultTypes()),
-	ToBricksTypeIndex(0);
+	ToBricksTypeIndex(0),
+	
+	// Export:
+	ExportOptimize(true);
 		
 	private Object defaultValue;
 	private Class<?> objectType;

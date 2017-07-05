@@ -26,6 +26,7 @@ public class Optimizer {
 		hollow();
 		optimize();
 		placeRemaining1by1Plates();
+		Collections.sort(placedParts);
 	}
 	
 	private void checkInputAndSetDimensions(LEGOColor[][][] oneByOnePlatePositions) {
@@ -106,48 +107,30 @@ public class Optimizer {
 	 * @param oneByOnePlatePositions true where a 1 x 1 plate resides [z][y][x]
 	 * @return
 	 */
-	public void optimize() {
-		List<PartType> bricksEven = new LinkedList<PartType>();
-		List<PartType> bricksOdd = new LinkedList<PartType>();
-		List<PartType> plates = new LinkedList<PartType>();		
+	private void optimize() {
+		List<PartType> bricksThenPlates = new LinkedList<PartType>();
+		List<PartType> platesThenBricks = new LinkedList<PartType>();		
 		for(PartType pt : PartType.partTypes) {
-			if(pt.isBrick()) {
-				if(pt.getWidth() > pt.getDepth()) {
-					bricksEven.add(pt);					
-				}
-				else if(pt.getWidth() > pt.getDepth()) {
-					bricksOdd.add(pt);					
-				}
-				else {	
-					bricksEven.add(pt);					
-					bricksOdd.add(pt);			
-				}
-			}
+			if(pt.isBrick())
+				bricksThenPlates.add(pt);					
 			else
-				plates.add(pt);
+				platesThenBricks.add(pt);
+		}
+		for(PartType pt : PartType.partTypes) {
+			if(!pt.isBrick())
+				bricksThenPlates.add(pt);					
+			else
+				platesThenBricks.add(pt);
 		}
 		
 		placedParts = new LinkedList<Part>();
-		
-		// Run for each z*3 value, then z*3+1 and z*3+2 to add bricks:
-		boolean runOddFirst = true;
-		for(int z = 0; z + 2 < height; z += 3) {
-			if(runOddFirst) {
-				addBestOccupationsForBricks(z, bricksOdd);
-				addBestOccupationsForBricks(z, bricksEven);				
-			}
-			else {
-				addBestOccupationsForBricks(z, bricksEven);								
-				addBestOccupationsForBricks(z, bricksOdd);
-			}
-		} // z
 		
 		// Do the same with plates:
 		for(int z = 0; z < height; ++z) {
 			while(true) {
 				Occupation bestOccupation = null;
 				
-				for(PartType pt : plates) {
+				for(PartType pt : z % 3 == 0 ? bricksThenPlates : platesThenBricks) {
 					for(int y = 0; y + pt.getDepth() <= depth; ++y) {
 						for(int x = 0; x + pt.getWidth() <= width; ++x) {		
 							Occupation runner = getOccupation(x, y, z, pt);
@@ -167,10 +150,12 @@ public class Optimizer {
 						rebrickableIdToLEGOColor[bestOccupation.color], bestOccupation.pt);
 				placedParts.add(newPart);
 				int partIdx = FIRST_PLACED_INDEX + placedParts.size();
-				for(int yy = 0; yy < bestOccupation.pt.getDepth(); ++yy) {
-					for(int xx = 0; xx < bestOccupation.pt.getWidth(); ++xx) {
-						partPositions[z][yy+bestOccupation.y][xx+bestOccupation.x] = partIdx; 
-					}
+				for(int zz = 0; zz < bestOccupation.getHeight(); ++zz) {
+					for(int yy = 0; yy < bestOccupation.pt.getDepth(); ++yy) {
+						for(int xx = 0; xx < bestOccupation.pt.getWidth(); ++xx) {
+							partPositions[z+zz][yy+bestOccupation.y][xx+bestOccupation.x] = partIdx; 
+						}
+					}					
 				}
 			} // while true				
 		} // z		
@@ -181,6 +166,9 @@ public class Optimizer {
 		occupation.color = -1;
 				
 		int height = pt.isBrick() ? 3 : 1;
+		if(startZ + height - 1 >= partPositions.length)
+			return null;
+			
 		for(int zz = 0; zz < height; ++zz) {
 			for(int yy = 0; yy < pt.getDepth(); ++yy) {
 				for(int xx = 0; xx < pt.getWidth(); ++xx) {
@@ -211,6 +199,9 @@ public class Optimizer {
 	private static class Occupation {
 		int x, y, score, color;
 		PartType pt;
+		int getHeight() {
+			return pt.isBrick() ? 3 : 1;
+		}
 	}
 	
 	private boolean isSurrounded(int x, int y, int z) {

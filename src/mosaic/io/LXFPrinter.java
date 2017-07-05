@@ -173,16 +173,17 @@ public class LXFPrinter {
 
 	private void buildFromTop(PrintWriter out, double startX, double multX, double startY, double multY, String orient, String element, 
 			boolean isElementSection, boolean decorationSection) {
-		LEGOColor[][] instructions = tbt.getMainTransform().lastInstructions();
-		int w = instructions.length;
-		int h = instructions[0].length;
+		LEGOColorGrid instructions = tbt.getMainTransform().lastInstructions();
+		int w = instructions.getWidth();
+		int h = instructions.getHeight();
 		int i = 0;
 
-		for(int x = 0; x < w; x++) {
+		for(int y = 0; y < h; y++) {
+			LEGOColor[] row = instructions.getRow(y);
+			double yy = startY - (h/2)*multY + y*multY;
+			for(int x = 0; x < w; x++) {
 			double xx = startX - (w/2*multX) + x*multX;
-			for(int y = 0; y < h; y++) {
-				int color = instructions[x][y].getIDLEGO();
-				double yy = startY - (h/2)*multY + y*multY;
+				int color = row[x].getIDLEGO();
 				if(isElementSection)
 					printElement(out, i++, element, orient, color, xx, yy, 0, decorationSection);
 				else
@@ -193,16 +194,17 @@ public class LXFPrinter {
 	
 	private void buildFromSide(PrintWriter out, double startX, double multX, double startY, double multZ, 
 			String orient, String element, boolean isElementSection) {
-		LEGOColor[][] instructions = tbt.getMainTransform().lastInstructions();
-		int w = instructions.length;
-		int h = instructions[0].length;
+		LEGOColorGrid instructions = tbt.getMainTransform().lastInstructions();
+		int w = instructions.getWidth();
+		int h = instructions.getHeight();
 		int i = 0;
 
-		for(int x = 0; x < w; x++) {
+		for(int z = 0; z < h; z++) {
+			LEGOColor[] row = instructions.getRow(z);
+			double zz = -z*multZ;
+			for(int x = 0; x < w; x++) {
 			double xx = startX - (w/2*multX) + x*multX;
-			for(int z = 0; z < h; z++) {
-				int color = instructions[x][z].getIDLEGO();
-				double zz = -z*multZ;
+				int color = row[x].getIDLEGO();
 				if(isElementSection)
 					printElement(out, i++, element, orient, color, xx, startY, zz, false);
 				else

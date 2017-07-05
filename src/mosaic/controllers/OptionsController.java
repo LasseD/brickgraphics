@@ -21,7 +21,7 @@ import mosaic.ui.OptionsDialog;
 public class OptionsController implements ModelHandler<BrickGraphicsState> {
 	private List<ChangeListener> listeners;
 	
-	private boolean allowFilterReordering, scaleBeforePreparing;
+	private boolean allowFilterReordering, scaleBeforePreparing, optimizeUseOfBricksBeforeExporting;
 	private ScaleQuality scaleQuality;
 	
 	private OptionsDialog optionsDialog;
@@ -46,6 +46,14 @@ public class OptionsController implements ModelHandler<BrickGraphicsState> {
 	}
 	public void setScaleBeforePreparing(boolean b, Object caller) {
 		scaleBeforePreparing = b;
+		notifyListeners(new ChangeEvent(caller));		
+	}	
+	
+	public boolean getOptimizeUseOfBricksBeforeExporting() {
+		return optimizeUseOfBricksBeforeExporting;
+	}
+	public void setOptimizeUseOfBricksBeforeExporting(boolean b, Object caller) {
+		optimizeUseOfBricksBeforeExporting = b;
 		notifyListeners(new ChangeEvent(caller));		
 	}	
 
@@ -76,6 +84,7 @@ public class OptionsController implements ModelHandler<BrickGraphicsState> {
 		model.set(BrickGraphicsState.PrepareAllowFilterReordering, allowFilterReordering);
 		model.set(BrickGraphicsState.PrepareScaleBeforePreparing, scaleBeforePreparing);	
 		model.set(BrickGraphicsState.PrepareScaleQuality, scaleQuality.ordinal());
+		model.set(BrickGraphicsState.ExportOptimize, optimizeUseOfBricksBeforeExporting);		
 	}
 
 	@Override
@@ -83,5 +92,6 @@ public class OptionsController implements ModelHandler<BrickGraphicsState> {
 		allowFilterReordering = (Boolean)model.get(BrickGraphicsState.PrepareAllowFilterReordering);
 		scaleBeforePreparing = (Boolean)model.get(BrickGraphicsState.PrepareScaleBeforePreparing);
 		scaleQuality = ScaleQuality.values()[(Integer)model.get(BrickGraphicsState.PrepareScaleQuality)];
+		optimizeUseOfBricksBeforeExporting = (Boolean)model.get(BrickGraphicsState.ExportOptimize);
 	}
 }

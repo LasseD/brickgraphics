@@ -55,10 +55,8 @@ public class FloydSteinbergTransform extends BufferedLEGOColorTransform {
 	private static void processPixel(final int pixel, LEGOColor[][] out, final int x, final int y, int[] diff) {
 		LEGOColor nearest = LEGOColorLookUp.lookUp(pixel);
 		
-		out[x][y] = nearest;
+		out[y][x] = nearest;
 		diff(pixel, nearest.getRGB().getRGB(), diff);
-		//if(nearest.getName().equals("Orange") && Math.random() < 0.25)
-		//	out[x][y] = LEGOColor.parse("28|Dark Tan|#958a73|19864|1109|2002|2015|Sand yellow|28|69|DkTan|138");
 	}	
 	private void sub(int[] pixels, int pixelIndex, int weight, int[] diff) {
 		if(pixelIndex < 0 || pixelIndex >= pixels.length)
@@ -73,7 +71,7 @@ public class FloydSteinbergTransform extends BufferedLEGOColorTransform {
 	}
 	
 	@Override
-	public LEGOColor[][] lcTransformUnbuffered(BufferedImage in) {		
+	public LEGOColorGrid lcTransformUnbuffered(BufferedImage in) {		
 		int w = in.getWidth();
 		int h = in.getHeight();
 		if(w == 0 || h == 0)
@@ -82,7 +80,7 @@ public class FloydSteinbergTransform extends BufferedLEGOColorTransform {
 		
 		int[] pixels = new int[w*h];
 		in.getRGB(0, 0, w, h, pixels, 0, w);
-		LEGOColor[][] out = new LEGOColor[w][h];
+		LEGOColor[][] out = new LEGOColor[h][w];
 
 		int[] diff = new int[3];
 		int dir = 1, start = 0;
@@ -118,7 +116,7 @@ public class FloydSteinbergTransform extends BufferedLEGOColorTransform {
 		//handle last pixel in last row specially:
 		processPixel(pixels[w*(h-1)+w-1-start], out, w-1-start, h-1, diff);
 
-	    return out;
+	    return new LEGOColorGrid(out);
 	}
 
 	@Override

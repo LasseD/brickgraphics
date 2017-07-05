@@ -5,5 +5,5 @@ import colors.*;
 import java.awt.image.*;
 
 public interface LEGOColorTransform extends Transform {
-	LEGOColor[][] lcTransform(BufferedImage in);
+	LEGOColorGrid lcTransform(BufferedImage in);
 }
