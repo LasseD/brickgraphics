@@ -119,6 +119,47 @@ public class Icons {
 		};		
 	}
 	
+	public static Icon dimensionLockOpen(int size) {
+		return new HalfWidthIcon(size) {
+			@Override
+			public void paint(Graphics2D g2) {
+				Stroke oldStroke = g2.getStroke();
+				g2.setStroke(new BasicStroke(2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+				g2.setColor(Color.BLACK);
+				
+				// Upper and lower rectangle:
+				int linkHeight = getIconHeight()/3;
+				int linkWidth = getIconWidth()-4;
+				g2.drawRect(2, 2, linkWidth, linkHeight);
+				g2.drawRect(2, getIconHeight()-2-linkHeight, linkWidth, linkHeight);
+								
+				g2.setStroke(oldStroke);
+			}
+		};				
+	}
+	public static Icon dimensionLockClosed(int size) {
+		return new HalfWidthIcon(size) {
+			@Override
+			public void paint(Graphics2D g2) {
+				Stroke oldStroke = g2.getStroke();
+				g2.setStroke(new BasicStroke(2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+				g2.setColor(Color.BLACK);
+				
+				// Upper and lower rectangle:
+				int linkHeight = getIconHeight()/3;
+				int linkWidth = getIconWidth()-4;
+				g2.drawRect(2, getIconHeight()/2 - linkHeight - 2, linkWidth, linkHeight);
+				g2.drawRect(2, getIconHeight()/2 + 2, linkWidth, linkHeight);
+
+				// Middle link:
+				g2.drawLine(getIconWidth()/2, getIconHeight()/2-linkHeight/2, 
+						getIconWidth()/2, getIconHeight()/2+linkHeight/2);
+								
+				g2.setStroke(oldStroke);
+			}
+		};				
+	}	
+	
 	public static Icon totalsSymbol(final int size) {
 		return new BrickGraphicsIcon(size) {
 			@Override
@@ -152,10 +193,11 @@ public class Icons {
 		return new BrickGraphicsIcon(size) {
 			@Override
 			public void paint(Graphics2D g2) {
+				brightness(size/2).paint(g2);
 				g2.translate(size/2, 0);
 				sharpness(size/2).paint(g2);
 				g2.translate(0, size/2);
-				plus(size/2).paint(g2);
+				contrast(size/2).paint(g2);
 				g2.translate(-size/2, 0);
 				gamma(size/2).paint(g2);
 				g2.translate(0, -size/2);
@@ -704,7 +746,7 @@ public class Icons {
 			}
 		};
 	}
-	public static Icon contrast(final int size) {
+	public static BrickGraphicsIcon contrast(final int size) {
 		return new BrickGraphicsIcon(size) {
 			@Override
 			public void paint(Graphics2D g2) {
@@ -722,15 +764,17 @@ public class Icons {
 			public void paint(Graphics2D g2) {
 				g2.setColor(Color.BLACK);
 				Stroke stroke = new BasicStroke(2);
+				Stroke formerStroke = g2.getStroke();
 				g2.setStroke(stroke);
 				int q = size/3;
 				CubicCurve2D.Double curve = new CubicCurve2D.Double(mid-q, size-1, mid-q, mid, mid+q, mid, mid+q, 0);
 				
 				g2.draw(curve);
+				g2.setStroke(formerStroke);
 			}
 		};
 	}
-	public static Icon brightness(final int size) {
+	public static BrickGraphicsIcon brightness(final int size) {
 		return new BrickGraphicsIcon(size) {
 			@Override
 			public void paint(Graphics2D g2) {
@@ -744,6 +788,7 @@ public class Icons {
 					g2.drawLine(q + 2, 0, mid, 0);
 					g2.rotate(2*Math.PI/8);
 				}
+				g2.translate(-mid, -mid);
 			}
 		};
 	}
@@ -759,7 +804,6 @@ public class Icons {
 			}
 		};
 	}
-	
 
 	public static BrickGraphicsIcon checkbox(final int size, final boolean selected) {
 		return new BrickGraphicsIcon(size) {

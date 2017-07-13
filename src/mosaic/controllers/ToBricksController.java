@@ -7,14 +7,11 @@ import javax.swing.*;
 import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.event.*;
-import java.awt.image.BufferedImage;
 
 import io.*;
 import javax.swing.event.*;
 
 import mosaic.io.*;
-import mosaic.rendering.Pipeline;
-import mosaic.rendering.PipelineListener;
 import ui.IconizedTextfield;
 import ui.LividTextField;
 
@@ -203,7 +200,7 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 		return availableToBricksTypes;
 	}
 	
-	public void setAvailableToBricksTypes(boolean[] availableToBricksTypes, ChangeEvent e) {
+	public void setAvailableToBricksTypes(boolean[] availableToBricksTypes) {
 		if(availableToBricksTypes == null)
 			throw new NullPointerException("UIController::setAvailableToBricksTypes called with null argument.");
 		if(availableToBricksTypes.length != ToBricksType.values().length)
@@ -211,7 +208,6 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 
 		this.availableToBricksTypes = availableToBricksTypes;
 		update();
-		notifyListeners(e);
 	}
 
 	private void update() {		
@@ -263,11 +259,6 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 		listeners.add(listener);
 	}
 	
-	public void notifyListeners(ChangeEvent e) {
-		for(ChangeListener l : listeners) {
-			l.stateChanged(e);
-		}
-	}
 	@Override
 	public void save(Model<BrickGraphicsState> model) {
 		model.set(BrickGraphicsState.ToBricksWidth, constructionWidthInBasicUnits);

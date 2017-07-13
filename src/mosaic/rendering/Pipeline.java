@@ -4,33 +4,48 @@ import io.Log;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+
+import transforms.ToBricksTransform;
 import transforms.Transform;
 
 public class Pipeline extends Thread {
-	public static final int WAIT_TIME_MS = 100;
+	public static final int WAIT_TIME_MS = 150;
 	
 	private ArrayList<Transform> transforms;
-	private ArrayList<PipelineListener> inImageListeners, finalImageListeners;
+	private ToBricksTransform toBricksTransform;
+
+	private ArrayList<PipelineListener> inImageListeners, preparedImageListeners, mosaicImageListeners;
 	private Object token = new Object(); // For locking.
 	private BufferedImage startImage;
 	private long lastInvalidated; // Synchronized. May only be accessed when token is held!
+	private RenderingProgressBar renderingProgressBar;
 
-	public Pipeline() {
+	public Pipeline(RenderingProgressBar renderingProgressBar) {
 		transforms = new ArrayList<Transform>();
-		finalImageListeners = new ArrayList<PipelineListener>();
 		inImageListeners = new ArrayList<PipelineListener>();
+		preparedImageListeners = new ArrayList<PipelineListener>();
+		mosaicImageListeners = new ArrayList<PipelineListener>();
+		this.renderingProgressBar = renderingProgressBar;
 	}
 	
 	public void addTransform(Transform t) {
 		transforms.add(t);
+		renderingProgressBar.registerTransform(t);
+	}
+	public void setToBricksTransform(ToBricksTransform toBricksTransform) {
+		this.toBricksTransform = toBricksTransform;
+		renderingProgressBar.registerTransform(toBricksTransform);
 	}
 	public void addInImageListener(PipelineListener l) {
 		inImageListeners.add(l);
 		if(startImage != null)
 			l.imageChanged(startImage);
 	}
-	public void addFinalImageListener(PipelineListener l) {
-		finalImageListeners.add(l);
+	public void addPreparedImageListener(PipelineListener l) {
+		preparedImageListeners.add(l);
+	}
+	public void addMosaicImageListener(PipelineListener l) {
+		mosaicImageListeners.add(l);
 	}
 	
 	public void invalidate() {
@@ -84,7 +99,16 @@ public class Pipeline extends Thread {
 			}
 			image = t.transform(image);
 		}
-		for(PipelineListener l : finalImageListeners)
-			l.imageChanged(image);
+		for(PipelineListener l : preparedImageListeners) {
+			l.imageChanged(image);			
+		}
+		// Run toBrickStep:
+		if(toBricksTransform != null) {
+			image = toBricksTransform.transform(image);
+			for(PipelineListener l : mosaicImageListeners) {
+				l.imageChanged(image);			
+			}			
+		}
+		renderingProgressBar.resetProgress();
 	}
 }

@@ -11,6 +11,7 @@ import javax.swing.event.*;
 import colors.parsers.*;
 import mosaic.io.*;
 import mosaic.rendering.Pipeline;
+import mosaic.rendering.RenderingProgressBar;
 import mosaic.ui.*;
 
 /**
@@ -48,7 +49,7 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 	private DataFile imageDataFile;
 	private File mosaicFile;
 
-	public MainController() {		
+	private MainController() {		
 		listeners = new ArrayList<ChangeListener>();		
 		mosaicFile = null;
 
@@ -60,7 +61,9 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 		long startTime = System.currentTimeMillis();
 		Log.log("Initiating components");
 		model = new Model<BrickGraphicsState>(STATE_FILE_NAME, BrickGraphicsState.class);
-		pipeline = new Pipeline();
+		
+		RenderingProgressBar renderingProgressBar = new RenderingProgressBar();
+		pipeline = new Pipeline(renderingProgressBar);
 		Log.log("Model file loaded");
 		handleModelChange(model);
 		model.addModelHandler(this);
@@ -74,7 +77,7 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 		Log.log("Created controllers after " + (System.currentTimeMillis()-startTime) + "ms.");
 
 		// Set up UI:
-		mw = new MainWindow(this, model, pipeline);
+		mw = new MainWindow(this, model, pipeline, renderingProgressBar);
 		listeners.add(mw);
 		Log.log("LDDMC main window operational after " + (System.currentTimeMillis()-startTime) + "ms.");
 
@@ -96,7 +99,7 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 			notifyListeners(model);
 		
 		printController = new PrintController(model, this, mw);
-		pipeline.addFinalImageListener(printController);
+		pipeline.addPreparedImageListener(printController);
 		new MagnifierWindow(MainController.this, mw); // Do your own thing little window.
 		saveDialog = new SaveDialog(mw);
 		toBricksTypeFilterDialog = new ToBricksTypeFilterDialog(toBricksController, mw);

@@ -106,6 +106,10 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform,
 		int cellW = (int) Math.round(scaleW);
 		int cellH = (int) Math.round(scaleH);
 
+		Set<LEGOColor> used = new TreeSet<LEGOColor>();
+		if(lastIndex == -1)
+			return used;
+		
 		LEGOColorGrid transformedColors = sets[lastIndex].colors;
 		Font font = LEGOColor.makeFont(g2, cellW - 4, cellH - 4, cc,
 				lastUsedColorCounts());
@@ -114,7 +118,6 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform,
 		int fontHeight = (fm.getDescent() + fm.getAscent()) / 2;
 
 		g2.setColor(Color.BLACK);
-		Set<LEGOColor> used = new TreeSet<LEGOColor>();
 		for (int y = 0; y < h; y++) {
 			int yIndent = (int) Math.round(scaleH * y);
 			int iy = unitBounds.y / blockHeight + y;
@@ -156,8 +159,11 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform,
 		int cellH = (int) Math.ceil(scaleH);
 
 		// draw colors and studs:
-		LEGOColorGrid transformedColors = sets[lastIndex].colors;
 		Set<LEGOColor> used = new TreeSet<LEGOColor>();
+		if(lastIndex == -1)
+			return used;
+		LEGOColorGrid transformedColors = sets[lastIndex].colors;
+		
 		for (int y = 0; y < h; y++) {
 			int yIndent = (int) Math.round(scaleH * y);
 			int iy = unitBounds.y / blockHeight + y;
@@ -233,7 +239,7 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform,
 
 	@Override
 	public LEGOColor.CountingLEGOColor[] lastUsedColorCounts() {
-		if (lastIndex == -1)
+		if (lastIndex == -1 || sets[lastIndex] == null)
 			return new LEGOColor.CountingLEGOColor[] {};
 		LEGOColorGrid transformedColors = sets[lastIndex].colors;
 		if (transformedColors == null)

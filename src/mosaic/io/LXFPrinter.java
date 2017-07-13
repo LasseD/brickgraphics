@@ -9,6 +9,7 @@ import java.util.zip.ZipOutputStream;
 import javax.imageio.ImageIO;
 import bricks.*;
 import mosaic.controllers.*;
+import mosaic.rendering.ProgressCallback;
 import mosaic.ui.*;
 import colors.*;
 import transforms.*;
@@ -79,7 +80,7 @@ public class LXFPrinter {
 			ScaleTransform t = new ScaleTransform("Thumbnail for LXF file", true, ScaleQuality.BiLinear, 0);
 			t.setHeight(128);
 			t.setWidth(128);
-			ImageIO.write(t.transformUnbuffered(image), "png", zos);
+			ImageIO.write(t.transformUnbuffered(image, ProgressCallback.NOP), "png", zos);
 			zos.flush();			
 		}
 		

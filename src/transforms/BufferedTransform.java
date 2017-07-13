@@ -4,11 +4,16 @@ package transforms;
 
 import java.awt.image.*;
 
+import mosaic.rendering.ProgressCallback;
+
 public abstract class BufferedTransform implements Transform {
 	private BufferedImage[][] imagePairs;
 	private int pairIndex;
+	private ProgressCallback progressCallback = ProgressCallback.NOP;
 	
 	public BufferedTransform(int bufferSize) {
+		if(bufferSize == 0)
+			throw new IllegalArgumentException();
 		imagePairs = new BufferedImage[bufferSize][2];
 	}
 
@@ -21,18 +26,24 @@ public abstract class BufferedTransform implements Transform {
 	}
 	
 	@Override
+	public void setProgressCallback(ProgressCallback progressCallback) {
+		this.progressCallback = progressCallback;
+	}
+	
+	@Override
 	public BufferedImage transform(BufferedImage in) {
+		progressCallback.reportProgress(0);
+		
 		for(BufferedImage[] pair : imagePairs) {
 			if(pair[0] == in) {
-				//Log.log(getClass().getName() + " transformation buffer skip.");
+				if(progressCallback != null)
+					progressCallback.reportProgress(1000);
 				return pair[1];
 			}
 		}
 		
 		//long startTime = System.currentTimeMillis();
-		BufferedImage newOut = transformUnbuffered(in);
-		if(imagePairs.length == 0)
-			return newOut;
+		BufferedImage newOut = transformUnbuffered(in, progressCallback);
 		imagePairs[pairIndex] = new BufferedImage[]{in, newOut};
 		
 		pairIndex++;
@@ -40,8 +51,9 @@ public abstract class BufferedTransform implements Transform {
 			pairIndex = 0;
 		//long endTime = System.currentTimeMillis();
 		//Log.log(getClass().getName() + " transformation performed in " + (endTime-startTime) + "ms.");
+		progressCallback.reportProgress(1000);
 		return newOut;
 	}
 	
-	public abstract BufferedImage transformUnbuffered(BufferedImage in);
+	public abstract BufferedImage transformUnbuffered(BufferedImage in, ProgressCallback progressCallback);
 }

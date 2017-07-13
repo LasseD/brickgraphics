@@ -8,6 +8,7 @@ import java.util.List;
 import transforms.ScaleTransform.ScaleQuality;
 import mosaic.controllers.ColorController;
 import mosaic.io.InstructionsBuilderI;
+import mosaic.rendering.ProgressCallback;
 import colors.*;
 import bricks.*;
 
@@ -430,5 +431,16 @@ public class ToBricksTransform implements InstructionsTransform {
 				}
 			}
 		}
+	}
+
+	@Override
+	public void paintIcon(Graphics2D g, int size) {
+		getMainTransform().paintIcon(g, size);
+	}
+
+	@Override
+	public void setProgressCallback(ProgressCallback p) {
+		thresholdTransform.setProgressCallback(p);
+		ditheringTransform.setProgressCallback(p);
 	}
 }

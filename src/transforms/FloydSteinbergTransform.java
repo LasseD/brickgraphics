@@ -1,13 +1,18 @@
 package transforms;
 
+import icon.Icons;
+
 import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.image.*;
 
 import mosaic.controllers.ColorController;
+import mosaic.rendering.ProgressCallback;
 import colors.*;
 
 public class FloydSteinbergTransform extends BufferedLEGOColorTransform {
 	private int propagationPercentage;
+	private ProgressCallback progressCallback = ProgressCallback.NOP;
 	
 	public FloydSteinbergTransform(int pp, ColorController cc) {
 		super(1, cc);
@@ -85,6 +90,7 @@ public class FloydSteinbergTransform extends BufferedLEGOColorTransform {
 		int[] diff = new int[3];
 		int dir = 1, start = 0;
 		for(int y = 0; y < h-1; y++, dir = -dir, start = (w-1)-start) {
+			progressCallback.reportProgress(1000*y/h);
 			//handle first pixel in each row specially:
 			processPixel(pixels[y*w+start], out, start, y, diff);
 			sub(pixels, y*w+start+dir, 8, diff);
@@ -124,5 +130,15 @@ public class FloydSteinbergTransform extends BufferedLEGOColorTransform {
 		int w = in.getWidth();
 		int h = in.getHeight();
 		return new Dimension(w, h);
+	}
+
+	@Override
+	public void paintIcon(Graphics2D g, int size) {
+		Icons.floydSteinberg(size).paintIcon(null, g, 0, 0);
+	}
+
+	@Override
+	public void setProgressCallback(ProgressCallback p) {
+		this.progressCallback = p;
 	}
 }

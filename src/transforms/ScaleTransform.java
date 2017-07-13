@@ -1,5 +1,7 @@
 package transforms;
 
+import icon.Icons;
+
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -7,18 +9,20 @@ import java.awt.RenderingHints;
 //import java.awt.geom.*;
 import java.awt.image.*;
 
+import mosaic.rendering.ProgressCallback;
+
 public class ScaleTransform extends BufferedTransform {
 	private int width, height;
 	private double scaleX, scaleY;
 	private boolean bounded;
 	private ScaleQuality quality;
-	private String usage;
+	//private String usage;
 
 	public ScaleTransform(String usage, boolean bounded, ScaleQuality quality, int bufferSize) {
 		super(bufferSize);
 		this.bounded = bounded;
 		this.quality = quality;
-		this.usage = usage;
+		//this.usage = usage;
 	}
 
 	public ScaleTransform(String usage, boolean bounded, ScaleQuality quality) {
@@ -85,7 +89,7 @@ public class ScaleTransform extends BufferedTransform {
 	}
 	
 	@Override
-	public BufferedImage transformUnbuffered(BufferedImage in) {
+	public BufferedImage transformUnbuffered(BufferedImage in, ProgressCallback progressCallback) {
 		int w = in.getWidth();
 		int h = in.getHeight();
 		if(w <= 0 || h <= 0 || width <= 0 || height <= 0)
@@ -111,6 +115,7 @@ public class ScaleTransform extends BufferedTransform {
         	
         	// Fill the output array:
         	for(int y = 0; y < h; ++y) {
+        		progressCallback.reportProgress(1000*y/h);
         		int fromY = (int)(y*in.getHeight()/(double)h);
             	for(int x = 0; x < w; ++x) {
             		rgbArray[y*w + x] = fromPixels[fromY*in.getWidth() + xArray[x]];
@@ -119,10 +124,14 @@ public class ScaleTransform extends BufferedTransform {
         	resized.setRGB(0, 0, w, h, rgbArray, 0, w);
         }
         else {
+        	progressCallback.reportProgress(100);
             Graphics2D g2 = resized.createGraphics();
             g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, renderingHint);
+        	progressCallback.reportProgress(300);
             g2.drawImage(in, 0, 0, w, h, null);        	
+        	progressCallback.reportProgress(600);
             g2.dispose();
+        	progressCallback.reportProgress(1000);
         }
 		
         //System.out.print(usage + ": " + in.getWidth() + "x" + in.getHeight() + "->" + resized.getWidth() + "x" + resized.getHeight() + ". ");
@@ -164,5 +173,10 @@ public class ScaleTransform extends BufferedTransform {
 		w = (int)Math.round(scale.w*w);
 		h = (int)Math.round(scale.h*h);
 		return new Dimension(w, h);
+	}
+
+	@Override
+	public void paintIcon(Graphics2D g, int size) {
+		Icons.wider(size).paintIcon(null, g, 0, 0);
 	}
 }

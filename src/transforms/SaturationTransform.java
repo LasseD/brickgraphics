@@ -1,8 +1,13 @@
 package transforms;
 
+import icon.Icons;
+
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.image.*;
+
+import mosaic.rendering.ProgressCallback;
 
 public class SaturationTransform extends StateTransform<Float> {
 	public SaturationTransform(Float initialState) {
@@ -10,7 +15,7 @@ public class SaturationTransform extends StateTransform<Float> {
 	}
 
 	@Override
-	public BufferedImage transformUnbuffered(BufferedImage in) {
+	public BufferedImage transformUnbuffered(BufferedImage in, ProgressCallback progressCallback) {
 		if(get().equals(1f))
 			return in;
 
@@ -20,6 +25,7 @@ public class SaturationTransform extends StateTransform<Float> {
 		int[] rgbs = in.getRGB(0, 0, w, h, null, 0, w);
 		float[] hsb = new float[3];
 		for(int i = 0; i < rgbs.length; i++) {
+			progressCallback.reportProgress((int)(1000.0 * i / rgbs.length));
 			int rgb = rgbs[i];
 			Color c = new Color(rgb);
 			Color.RGBtoHSB(c.getRed(), c.getGreen(), c.getBlue(), hsb);
@@ -40,5 +46,10 @@ public class SaturationTransform extends StateTransform<Float> {
 	@Override
 	public Dimension getTransformedSize(BufferedImage in) {
 		return new Dimension(in.getWidth(), in.getHeight());
+	}
+
+	@Override
+	public void paintIcon(Graphics2D g, int size) {
+		Icons.saturation(size).paintIcon(null, g, 0, 0);
 	}
 }

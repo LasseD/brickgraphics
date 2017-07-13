@@ -23,7 +23,7 @@ public abstract class RGBTransform extends StateTransform<float[]> {
 		get()[index] = val;
 	}
 	
-	public boolean allAre() {
+	public boolean allAreOne() {
 		float[] scales = get();
 		return scales[0] == 1f && scales[1] == 1f && scales[2] == 1f;
 	}

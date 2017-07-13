@@ -52,7 +52,7 @@ public class ToBricksTypeFilterDialog extends JDialog implements ChangeListener,
 			if(boxes[i].isSelected())
 				selected[i] = true;
 		}
-		controller.setAvailableToBricksTypes(selected, new ChangeEvent(ToBricksTypeFilterDialog.this));
+		controller.setAvailableToBricksTypes(selected);
 	}
 	
 	@Override

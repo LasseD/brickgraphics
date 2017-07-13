@@ -1,8 +1,13 @@
 package transforms;
 
+import icon.Icons;
+
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.image.*;
+
+import mosaic.rendering.ProgressCallback;
 
 public class ContrastTransform extends RGBTransform {
 	public ContrastTransform(float[] initialState) {
@@ -10,8 +15,8 @@ public class ContrastTransform extends RGBTransform {
 	}
 
 	@Override
-	public BufferedImage transformUnbuffered(BufferedImage in) {
-		if(allAre())
+	public BufferedImage transformUnbuffered(BufferedImage in, ProgressCallback progressCallback) {
+		if(allAreOne())
 			return in;
 
 		int w = in.getWidth();
@@ -21,11 +26,13 @@ public class ContrastTransform extends RGBTransform {
 		int sumG = 0;
 		int sumB = 0;
 		int[] rgbs = in.getRGB(0, 0, w, h, null, 0, w);
-		for(int rgb : rgbs) {
+		for(int i = 0; i < rgbs.length; ++i) {			
+			int rgb = rgbs[i];
 			Color color = new Color(rgb);
 			sumR += color.getRed();
 			sumG += color.getGreen();
 			sumB += color.getBlue();
+			progressCallback.reportProgress((int)(700.0 * i / rgbs.length));
 		}
 		float meanR = sumR / rgbs.length;
 		float meanG = sumG / rgbs.length;
@@ -40,9 +47,11 @@ public class ContrastTransform extends RGBTransform {
 			contrastSpectrum[1][i] = cut(g);
 			contrastSpectrum[2][i] = cut(b);
 		}
+		progressCallback.reportProgress(800);
 
 		LookupTable table = new ShortLookupTable(0,contrastSpectrum);
 		BufferedImage tmp = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+		progressCallback.reportProgress(900);
 		return new LookupOp(table, null).filter(in, tmp);
 	}
 
@@ -57,5 +66,10 @@ public class ContrastTransform extends RGBTransform {
 	@Override
 	public Dimension getTransformedSize(BufferedImage in) {
 		return new Dimension(in.getWidth(), in.getHeight());
+	}
+
+	@Override
+	public void paintIcon(Graphics2D g, int size) {
+		Icons.contrast(size).paintIcon(null, g, 0, 0);
 	}
 }

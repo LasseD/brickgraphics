@@ -13,6 +13,7 @@ import javax.swing.event.*;
 import mosaic.controllers.*;
 import mosaic.io.BrickGraphicsState;
 import mosaic.rendering.Pipeline;
+import mosaic.rendering.RenderingProgressBar;
 import mosaic.ui.menu.*;
 
 public class MainWindow extends JFrame implements ChangeListener, ModelHandler<BrickGraphicsState> {
@@ -22,8 +23,10 @@ public class MainWindow extends JFrame implements ChangeListener, ModelHandler<B
 	private ColorChooserDialog colorChooser;
 	private MainController mc;
 	private Pipeline pipeline;
+	private Rectangle lastNormalPlacement;
 
-	public MainWindow(final MainController mc, final Model<BrickGraphicsState> model, final Pipeline pipeline) {
+	public MainWindow(final MainController mc, final Model<BrickGraphicsState> model, 
+			final Pipeline pipeline, RenderingProgressBar renderingProgressBar) {
 		super(MainController.APP_NAME);
 		this.mc = mc;
 		this.pipeline = pipeline;
@@ -64,19 +67,7 @@ public class MainWindow extends JFrame implements ChangeListener, ModelHandler<B
 			private void updateModel() {
 				int state = MainWindow.this.getExtendedState();
 				if((state | Frame.NORMAL) == Frame.NORMAL) {
-					model.set(BrickGraphicsState.MainWindowPlacement, MainWindow.this.getBounds());
-				}
-				else if((state | Frame.MAXIMIZED_HORIZ) == Frame.MAXIMIZED_HORIZ) {
-					Rectangle inModel = (Rectangle)model.get(BrickGraphicsState.MainWindowPlacement);
-					Rectangle bounds = MainWindow.this.getBounds();
-					inModel.y = bounds.y;
-					inModel.height = bounds.height;
-				}
-				else if((state | Frame.MAXIMIZED_VERT) == Frame.MAXIMIZED_VERT) {
-					Rectangle inModel = (Rectangle)model.get(BrickGraphicsState.MainWindowPlacement);
-					Rectangle bounds = MainWindow.this.getBounds();
-					inModel.x = bounds.x;
-					inModel.width = bounds.width;
+					lastNormalPlacement = MainWindow.this.getBounds();
 				}
 			}
 		});
@@ -104,7 +95,7 @@ public class MainWindow extends JFrame implements ChangeListener, ModelHandler<B
 		add(pPrepairToolBar, BorderLayout.WEST);
 
 		add(splitPane, BorderLayout.CENTER);
-		//add(Log.makeStatusBar(), BorderLayout.SOUTH);
+		add(renderingProgressBar, BorderLayout.SOUTH);
 
 		SwingUtilities.invokeLater(new Runnable() {			
 			@Override
@@ -177,16 +168,35 @@ public class MainWindow extends JFrame implements ChangeListener, ModelHandler<B
 			repaint();
 	}
 	
+	private void setBoundsSafe(Rectangle r) {
+		if(r.x < 0)
+			r.x = 0;
+		if(r.y < 0)
+			r.y = 0;
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		Rectangle defaultSize = (Rectangle)BrickGraphicsState.MainWindowPlacement.getDefaultValue();
+		if(r.x + r.width > screenSize.width) {
+			r.x = 0;
+			r.width = Math.min(screenSize.width, defaultSize.width);
+		}
+		if(r.y + r.height > screenSize.height) {
+			r.y = 0;
+			r.height = Math.min(screenSize.height, defaultSize.height);
+		}
+			
+		setBounds(r);		
+	}
+	
 	@Override
 	public void handleModelChange(Model<BrickGraphicsState> model) {
-		Rectangle placement = (Rectangle)model.get(BrickGraphicsState.MainWindowPlacement);
-		setBounds(placement);
+		Rectangle placement = (Rectangle)model.get(BrickGraphicsState.MainWindowPlacement);		
+		setBoundsSafe(placement);
 		splitPane.setDividerLocation((Integer)model.get(BrickGraphicsState.MainWindowDividerLocation));
 	}
 	
 	@Override
 	public void save(Model<BrickGraphicsState> model) {
 		model.set(BrickGraphicsState.MainWindowDividerLocation, splitPane.getDividerLocation());
-		model.set(BrickGraphicsState.MainWindowPlacement, new Rectangle(getLocation().x, getLocation().y, getWidth(), getHeight()));
+		model.set(BrickGraphicsState.MainWindowPlacement, lastNormalPlacement);
 	}
 }

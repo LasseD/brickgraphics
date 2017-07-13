@@ -8,6 +8,7 @@ import java.awt.image.*;
 
 import javax.swing.*;
 import javax.swing.event.*;
+
 import colors.*;
 import mosaic.controllers.*;
 import mosaic.io.*;
@@ -17,27 +18,22 @@ import bricks.ToBricksType;
 import java.awt.event.*;
 
 public class BrickedView extends JComponent implements ChangeListener, PipelineListener {
-	private BufferedImage bricked, preparedImage;
-	private ToBricksTransform toBricksTransform;
+	private BufferedImage mosaicImage;
+	private ToBricksTransform toBricksTransform; // Used by CAD accessing functions.
+	private Pipeline pipeline;
 	private ToBricksController toBricksController;
 	private MagnifierController magnifierController;
 	private ColorController colorController;
 	private JComponent mainComponent;
 	
 	public BrickedView(MainController mc, Model<BrickGraphicsState> model, Pipeline pipeline) {
+		this.pipeline = pipeline;
 		magnifierController = mc.getMagnifierController();
 		colorController = mc.getColorController();
 		// UI:
 		toBricksController = mc.getToBricksController();
 		toBricksController.addChangeListener(magnifierController);
 		magnifierController.addChangeListener(this);
-
-		SwingUtilities.invokeLater(new Runnable() {			
-			@Override
-			public void run() {
-				setUI();
-			}
-		});
 		
 		toBricksTransform = new ToBricksTransform(colorController.getColorChooserSelectedColors(), 
 				toBricksController.getToBricksType(), 
@@ -46,30 +42,38 @@ public class BrickedView extends JComponent implements ChangeListener, PipelineL
 				toBricksController.getConstructionHeightInBasicUnits(),
 				colorController);
 		magnifierController.setTBTransform(toBricksTransform);
-		pipeline.addFinalImageListener(this);
+
+		SwingUtilities.invokeLater(new Runnable() {			
+			@Override
+			public void run() {
+				setUI();
+			}
+		});
+		
+		pipeline.setToBricksTransform(toBricksTransform);
+		pipeline.addMosaicImageListener(magnifierController);
+		pipeline.addMosaicImageListener(this);
 	}
 	
 	private void setUI() {
 		setLayout(new BorderLayout());
 		mainComponent = new JComponent() {
-			private static final long serialVersionUID = 5749886635907597779L;
 			private ScaleTransform scaler = new ScaleTransform("Constructed view", true, ScaleQuality.RetainColors);
 
 			@Override 
 			public void paintComponent(Graphics g) {				
 				super.paintComponent(g);
-				if(bricked == null)
+				if(mosaicImage == null)
 					return;
-				magnifierController.setCoreImage(bricked);
 
 				Dimension size = getSize();
 				scaler.setWidth(size.width-2);
 				scaler.setHeight(size.height-2);
 				
-				BufferedImage shownImage = scaler.transform(bricked);
-				magnifierController.setShownImage(shownImage);
+				BufferedImage shownImage = scaler.transform(mosaicImage);
 				if(shownImage == null)
 					return;
+				magnifierController.setShownImageSize(new Dimension(shownImage.getWidth(), shownImage.getHeight()));
 					
 				Graphics2D g2 = (Graphics2D)g;
 				g2.translate(1, 1); // make space for highlight rect
@@ -104,19 +108,16 @@ public class BrickedView extends JComponent implements ChangeListener, PipelineL
 		toBricksTransform.setPropagationPercentage(t.getPropagationPercentage());
 		toBricksTransform.setToBricksType(t.getToBricksType());
 		toBricksTransform.setColors(colorController.getColorChooserSelectedColors());
-		toBricksTransform.setBasicUnitSize(t.getConstructionWidthInBasicUnits(), t.getConstructionHeightInBasicUnits());		
+		toBricksTransform.setBasicUnitSize(t.getConstructionWidthInBasicUnits(), t.getConstructionHeightInBasicUnits());
+		pipeline.invalidate();
 	}
 
 	@Override
 	public void stateChanged(ChangeEvent e) {
-		if(e != null && preparedImage != null && e.getSource() instanceof ToBricksController) {
+		if(e != null && e.getSource() instanceof ToBricksController) {
 			updateTransform((ToBricksController)e.getSource());
-			bricked = toBricksTransform.transform(preparedImage);
-			magnifierController.setTBTransform(toBricksTransform);
-			magnifierController.setCoreImage(bricked);
 		}
-		if(mainComponent != null)
-			mainComponent.repaint();
+		repaint();
 	}
 	
 	public LEGOColor.CountingLEGOColor[] getLegendColors() {
@@ -126,20 +127,19 @@ public class BrickedView extends JComponent implements ChangeListener, PipelineL
 		return toBricksTransform.getMainTransform().lastUsedColorCounts();								
 	}
 	
+	// Used by CAD exports
 	public ToBricksTransform getToBricksTransform() {
 		return toBricksTransform;
 	}
 	
+	// Used by CAD exports
 	public Dimension getBrickedSize() {
-		return new Dimension(bricked.getWidth(), bricked.getHeight());
+		return new Dimension(mosaicImage.getWidth(), mosaicImage.getHeight());
 	}
 
 	@Override
 	public void imageChanged(BufferedImage image) {
-		preparedImage = image;
-		bricked = toBricksTransform.transform(preparedImage);
-		magnifierController.setTBTransform(toBricksTransform);
-		magnifierController.setCoreImage(bricked);
+		mosaicImage = image;
 		repaint();
 	}
 }

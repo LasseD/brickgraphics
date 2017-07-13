@@ -6,9 +6,11 @@ import mosaic.controllers.ToBricksController;
 import mosaic.io.BrickGraphicsState;
 import mosaic.rendering.Pipeline;
 import mosaic.rendering.PipelineListener;
+import mosaic.rendering.ProgressCallback;
 import mosaic.ui.menu.ImagePreparingToolBar;
 import java.awt.image.*;
 import java.awt.*;
+
 import javax.swing.*;
 import javax.swing.event.*;
 
@@ -38,6 +40,7 @@ public class ImagePreparingView extends JComponent implements ModelHandler<Brick
 	// For showing image:
 	private ScaleTransform fullScaler, cropScaler, noCropScaler, toBrickedPixelsSizeScaler;
 	private Transform lastTransformUsedAsSource = null;
+	private ProgressCallback progressCallbackForLastTransformUsedAsSource = ProgressCallback.NOP;
 	
 	public ImagePreparingView(final Model<BrickGraphicsState> model, OptionsController optionsController, final ToBricksController toBricksController, final Pipeline pipeline) {
 		this.optionsController = optionsController;
@@ -68,7 +71,9 @@ public class ImagePreparingView extends JComponent implements ModelHandler<Brick
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				if(cropper.isEnabled()) {
-					toBricksController.setOriginalWidthToHeight(cropper.getWidthToHeight());
+					float cropperWidthToHeight = cropper.getWidthToHeight();
+					float w2h = cropperWidthToHeight * inImage.getWidth() / inImage.getHeight();
+					toBricksController.setOriginalWidthToHeight(w2h);
 				}
 				else {
 					float originalWidthToHeight = inImage.getWidth()/(float)inImage.getHeight();			
@@ -82,11 +87,11 @@ public class ImagePreparingView extends JComponent implements ModelHandler<Brick
 		addMouseListener(cropper);
 		{
 			sharpness = new SharpnessTransform((Float)model.get(BrickGraphicsState.PrepareSharpness));
-			brightness = new BrightnessTransform((float[])model.get(BrickGraphicsState.PrepareBrightness));
 			gamma = new GammaTransform((float[])model.get(BrickGraphicsState.PrepareGamma));
+			brightness = new BrightnessTransform((float[])model.get(BrickGraphicsState.PrepareBrightness));
 			contrast = new ContrastTransform((float[])model.get(BrickGraphicsState.PrepareContrast));
 			saturation = new SaturationTransform((Float)model.get(BrickGraphicsState.PrepareSaturation));
-			movableTransforms = new Transform[]{sharpness, brightness, gamma, contrast, saturation};
+			movableTransforms = new Transform[]{sharpness, gamma, brightness, contrast, saturation};
 		}
 		toolBar = new ImagePreparingToolBar(ImagePreparingView.this, model);
 		toolBar.setVisible((Boolean)model.get(BrickGraphicsState.PrepareFiltersEnabled));
@@ -114,6 +119,14 @@ public class ImagePreparingView extends JComponent implements ModelHandler<Brick
 			@Override
 			public Dimension getTransformedSize(BufferedImage in) {
 				throw new UnsupportedOperationException();
+			}
+			@Override
+			public void paintIcon(Graphics2D g, int size) {
+				toBrickedPixelsSizeScaler.paintIcon(g, size); // Use their icon even when skipping.
+			}
+			@Override
+			public void setProgressCallback(ProgressCallback p) {
+				toBrickedPixelsSizeScaler.setProgressCallback(p); // They should report progress when applicable.
 			}});
 		// The main filters:
 		for(final Transform t : movableTransforms) {
@@ -123,12 +136,35 @@ public class ImagePreparingView extends JComponent implements ModelHandler<Brick
 					if(allowFilterReordering && 
 							lastTransformUsedAsSource != null && 
 							lastTransformUsedAsSource == t)
-						return in;
-					return t.transform(in);
+						return in; // Ignore progress here.
+					return t.transform(in); // t reports progress.
 				}
 				@Override
 				public Dimension getTransformedSize(BufferedImage in) {
 					throw new UnsupportedOperationException();
+				}
+				@Override
+				public void paintIcon(Graphics2D g, int size) {
+					if(allowFilterReordering && 
+							lastTransformUsedAsSource != null && 
+							lastTransformUsedAsSource == t)
+						g.drawOval(0,  0, size, size); // empty icon.
+					else
+						t.paintIcon(g, size); // Use same icon as t.
+				}
+				@Override
+				public void setProgressCallback(final ProgressCallback p) {
+					t.setProgressCallback(new ProgressCallback() {						
+						@Override
+						public void reportProgress(int progressInPromilles) {
+							if(allowFilterReordering && 
+									lastTransformUsedAsSource != null && 
+									lastTransformUsedAsSource == t)
+								progressCallbackForLastTransformUsedAsSource.reportProgress(progressInPromilles);
+							else
+								p.reportProgress(progressInPromilles);
+						}
+					});
 				}});
 		}
 		// Skipped main filter:
@@ -137,11 +173,23 @@ public class ImagePreparingView extends JComponent implements ModelHandler<Brick
 			public BufferedImage transform(BufferedImage in) {
 				if(allowFilterReordering && lastTransformUsedAsSource != null)
 					return lastTransformUsedAsSource.transform(in);
+				progressCallbackForLastTransformUsedAsSource.reportProgress(1000);
 				return in;
 			}
 			@Override
 			public Dimension getTransformedSize(BufferedImage in) {
 				throw new UnsupportedOperationException();
+			}
+			@Override
+			public void paintIcon(Graphics2D g, int size) {
+				if(allowFilterReordering && lastTransformUsedAsSource != null)
+					lastTransformUsedAsSource.paintIcon(g, size);
+				else
+					g.drawOval(0,  0, size, size); // empty icon.
+			}
+			@Override
+			public void setProgressCallback(ProgressCallback p) {
+				progressCallbackForLastTransformUsedAsSource = p; // Save this callback to be used in the other transforms.				
 			}});
 		
 		pipeline.addInImageListener(new PipelineListener() {
@@ -150,7 +198,7 @@ public class ImagePreparingView extends JComponent implements ModelHandler<Brick
 				inImage = image;
 			}
 		});
-		pipeline.addFinalImageListener(new PipelineListener() {			
+		pipeline.addPreparedImageListener(new PipelineListener() {			
 			@Override
 			public void imageChanged(BufferedImage image) {
 				preparedImage = image;
@@ -304,6 +352,8 @@ public class ImagePreparingView extends JComponent implements ModelHandler<Brick
 		}
 		else {
 			BufferedImage fullScaled = ImagePreparingView.this.preparedImage;
+			if(fullScaled == null)
+				return; // not ready yet.
 			if(scaleBeforePreparing) {
 				noCropScaler.setWidth(inImage.getWidth());
 				noCropScaler.setHeight(inImage.getHeight());
@@ -323,8 +373,8 @@ public class ImagePreparingView extends JComponent implements ModelHandler<Brick
 	@Override
 	public void handleModelChange(Model<BrickGraphicsState> model) {
 		sharpness.set((Float)model.get(BrickGraphicsState.PrepareSharpness));
-		brightness.set((float[])model.get(BrickGraphicsState.PrepareBrightness));
 		gamma.set((float[])model.get(BrickGraphicsState.PrepareGamma));
+		brightness.set((float[])model.get(BrickGraphicsState.PrepareBrightness));
 		contrast.set((float[])model.get(BrickGraphicsState.PrepareContrast));
 		saturation.set((Float)model.get(BrickGraphicsState.PrepareSaturation));
 
@@ -336,8 +386,8 @@ public class ImagePreparingView extends JComponent implements ModelHandler<Brick
 	@Override
 	public void save(Model<BrickGraphicsState> model) {
 		model.set(BrickGraphicsState.PrepareSharpness, sharpness.get());
-		model.set(BrickGraphicsState.PrepareBrightness, brightness.get());
 		model.set(BrickGraphicsState.PrepareGamma, gamma.get());
+		model.set(BrickGraphicsState.PrepareBrightness, brightness.get());
 		model.set(BrickGraphicsState.PrepareContrast, contrast.get());
 		model.set(BrickGraphicsState.PrepareSaturation, saturation.get());
 		model.set(BrickGraphicsState.PrepareFiltersEnabled, toolBar.isVisible());

@@ -87,10 +87,12 @@ public class Cropper implements MouseListener, MouseMotionListener, ModelHandler
 		g2.drawRect(rect.x-1, rect.y-1, rect.width+1, rect.height+1);
 		g2.drawRect(rect.x-2, rect.y-2, rect.width+3, rect.height+3);
 		g2.setColor(Color.WHITE);
+		Stroke formerStroke = g2.getStroke();
 		g2.setStroke(new BasicStroke(1f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1, new float[]{4, 4}, 0f));
 		g2.drawRect(rect.x-1, rect.y-2, rect.width+1, rect.height+3);
 		g2.setStroke(new BasicStroke(1f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1, new float[]{4, 4}, 3f));
 		g2.drawRect(rect.x-2, rect.y-1, rect.width+3, rect.height+1);
+		g2.setStroke(formerStroke);
 	}
 	
 	public BufferedImage pollute(BufferedImage in) {

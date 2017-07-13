@@ -10,6 +10,7 @@ import java.awt.*;
 import javax.swing.event.*;
 import transforms.ToBricksTransform;
 import mosaic.io.BrickGraphicsState;
+import mosaic.rendering.PipelineListener;
 import mosaic.ui.Cropper;
 
 /**
@@ -20,7 +21,7 @@ import mosaic.ui.Cropper;
  *  - switch view of symbols/colors (matching legend)
  * @author LD
  */
-public class MagnifierController implements ChangeListener, MouseListener, MouseMotionListener, KeyListener, ModelHandler<BrickGraphicsState> {
+public class MagnifierController implements ChangeListener, MouseListener, MouseMotionListener, KeyListener, ModelHandler<BrickGraphicsState>, PipelineListener {
 	private List<ChangeListener> listeners; // such as GUI components (actual magnifier) and bricked view with rectangle.
 	private UIController uiController;
 
@@ -59,10 +60,6 @@ public class MagnifierController implements ChangeListener, MouseListener, Mouse
 		model.set(BrickGraphicsState.MagnifierSize, sizeInMosaicBlocks);
 	}
 
-	public void updateColorsInMagnifier() {
-		notifyListeners(null);
-	}
-	
 	public void setSizeInMosaicBlocks(Dimension size) {
 		this.sizeInMosaicBlocks = size;
 		sanify();
@@ -161,11 +158,6 @@ public class MagnifierController implements ChangeListener, MouseListener, Mouse
 		return new Rectangle(corePositionInCoreUnits.x, corePositionInCoreUnits.y, getMagnifierWidthInCoreUnits(), getMagnifierHeightInCoreUnits());
 	}
 
-	public void setCoreImage(BufferedImage coreImage) {
-		this.coreImageInCoreUnits = coreImage;
-		sanify();
-	}
-	
 	public BufferedImage getCoreImageInCoreUnits() {
 		return coreImageInCoreUnits;
 	}
@@ -174,10 +166,8 @@ public class MagnifierController implements ChangeListener, MouseListener, Mouse
 		mouseOffset = new Point(x, y);
 	}
 
-	public void setShownImage(BufferedImage shownImage) {
-		if(shownImage == null)
-			return;
-		this.shownImageSizeInPixels = new Dimension(shownImage.getWidth(), shownImage.getHeight());
+	public void setShownImageSize(Dimension shownImageSizeInPixels) {
+		this.shownImageSizeInPixels = shownImageSizeInPixels;
 		sanify();
 	}
 	
@@ -320,5 +310,11 @@ public class MagnifierController implements ChangeListener, MouseListener, Mouse
 	@Override
 	public void stateChanged(ChangeEvent e) {
 		notifyListeners(e);
+	}
+
+	@Override
+	public void imageChanged(BufferedImage image) {
+		this.coreImageInCoreUnits = image;
+		sanify();
 	}
 }

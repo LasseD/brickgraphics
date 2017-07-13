@@ -1,7 +1,12 @@
 package transforms;
 
+import icon.Icons;
+
 import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.image.*;
+
+import mosaic.rendering.ProgressCallback;
 
 public class BrightnessTransform extends RGBTransform {
 	public BrightnessTransform(float[] initialState) {
@@ -9,18 +14,25 @@ public class BrightnessTransform extends RGBTransform {
 	}
 
 	@Override
-	public BufferedImage transformUnbuffered(BufferedImage in) {
-		if(allAre())
+	public BufferedImage transformUnbuffered(BufferedImage in,
+			ProgressCallback progressCallback) {
+		if(allAreOne())
 			return in;
 
 		RescaleOp op = new RescaleOp(get(), new float[3], null);
 		BufferedImage out = new BufferedImage(in.getWidth(), in.getHeight(), BufferedImage.TYPE_INT_RGB);
 		op.filter(in, out);
+		// TODO: Use progressCallback!
 		return out;
 	}
 
 	@Override
 	public Dimension getTransformedSize(BufferedImage in) {
 		return new Dimension(in.getWidth(), in.getHeight());
+	}
+
+	@Override
+	public void paintIcon(Graphics2D g, int size) {
+		Icons.brightness(size).paintIcon(null, g, 0, 0);
 	}
 }
