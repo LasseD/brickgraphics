@@ -3,6 +3,8 @@ package mosaic.controllers;
 import io.Model;
 import io.ModelHandler;
 import java.util.*;
+
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import transforms.ScaleTransform.ScaleQuality;
@@ -26,11 +28,19 @@ public class OptionsController implements ModelHandler<BrickGraphicsState> {
 	
 	private OptionsDialog optionsDialog;
 
-	public OptionsController(Model<BrickGraphicsState> model, MainWindow mw) {
+	public OptionsController(Model<BrickGraphicsState> model) {
 		listeners = new LinkedList<ChangeListener>();
 		model.addModelHandler(this);
 		handleModelChange(model);
-		optionsDialog = new OptionsDialog(mw, this);
+	}
+	
+	public void initiateOptionsDialog(final MainWindow mw) {
+		SwingUtilities.invokeLater(new Runnable() {			
+			@Override
+			public void run() {
+				optionsDialog = new OptionsDialog(mw, OptionsController.this);
+			}
+		});
 	}
 	
 	public boolean getAllowFilterReordering() {

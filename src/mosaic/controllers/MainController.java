@@ -69,7 +69,7 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 		model.addModelHandler(this);
 		
 		// Set up controllers:
-		optionsController = new OptionsController(model, mw);
+		optionsController = new OptionsController(model);
 		colorController = ColorController.instance(model);
 		uiController = new UIController(model);
 		magnifierController = new MagnifierController(model, uiController);
@@ -79,6 +79,8 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 		// Set up UI:
 		mw = new MainWindow(this, model, pipeline, renderingProgressBar);
 		listeners.add(mw);
+		toBricksController.initiateUI(mw);
+		optionsController.initiateOptionsDialog(mw);
 		Log.log("LDDMC main window operational after " + (System.currentTimeMillis()-startTime) + "ms.");
 
 		if(colorController.usesBackupColors()) {

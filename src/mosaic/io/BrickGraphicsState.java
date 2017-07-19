@@ -53,6 +53,9 @@ public enum BrickGraphicsState implements ModelState {
 	// Color Chooser:
 	ColorDistributionChartShow(true),
 	
+	// Divider Location Button:
+	DividerLocationButtonShow(false),
+	
 	// Prepare:
 	PrepareSharpness(1.0f),
 	PrepareGamma(new float[]{1.0f, 1.0f, 1.0f}),

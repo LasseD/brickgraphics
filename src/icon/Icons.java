@@ -764,14 +764,15 @@ public class Icons {
 		return new BrickGraphicsIcon(size) {
 			@Override
 			public void paint(Graphics2D g2) {
+				Stroke formerStroke = g2.getStroke();
+
 				g2.setColor(Color.BLACK);
 				Stroke stroke = new BasicStroke(2);
-				Stroke formerStroke = g2.getStroke();
 				g2.setStroke(stroke);
 				int q = size/3;
-				CubicCurve2D.Double curve = new CubicCurve2D.Double(mid-q, size-1, mid-q, mid, mid+q, mid, mid+q, 0);
-				
+				CubicCurve2D.Double curve = new CubicCurve2D.Double(mid-q, size-1, mid-q, mid, mid+q, mid, mid+q, 0);				
 				g2.draw(curve);
+
 				g2.setStroke(formerStroke);
 			}
 		};
@@ -788,8 +789,9 @@ public class Icons {
 				g2.drawOval(-q, -q, 2*q, 2*q);
 				for(int i = 0; i < 8; i++) {
 					g2.drawLine(q + 2, 0, mid, 0);
-					g2.rotate(2*Math.PI/8);
+					g2.rotate(Math.PI/4);
 				}
+				g2.rotate(-4*Math.PI); // Rotate back.
 				g2.translate(-mid, -mid);
 			}
 		};

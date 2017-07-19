@@ -9,6 +9,8 @@ import java.awt.event.*;
 import io.*;
 import javax.swing.event.*;
 import mosaic.io.*;
+import mosaic.ui.MainWindow;
+import mosaic.ui.actions.ToggleDivider;
 import ui.IconizedTextfield;
 import ui.LividTextField;
 import java.util.*;
@@ -18,14 +20,14 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 	private JButton[] toBricksTypeButtons;
 	private LividTextField propagationPercentageField;
 	private IconizedTextfield sizeFieldWidth, sizeFieldHeight; 
-	private JButton buttonLessPP, buttonMorePP, buttonToggleLockSizeRatio;
+	private JButton buttonLessPP, buttonMorePP, buttonToggleLockSizeRatio, buttonToggleDividerLocation;
 	private List<ChangeListener> listeners;
 	
 	private int constructionWidthInBasicUnits, constructionHeightInBasicUnits; // in basicUnits
 	private float originalWidthToHeight;
 	private ToBricksType toBricksType;
 	private boolean[] availableToBricksTypes;
-	private boolean sizeChoiceFromWidth, sizeRatioLocked;
+	private boolean sizeChoiceFromWidth, sizeRatioLocked, showDividerLocationButton;
 	private int propagationPercentage;
 	private volatile boolean uiReady;
 	
@@ -39,13 +41,15 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 		toBricksTypeButtons = new JButton[ToBricksType.values().length];
 		availableToBricksTypes = new boolean[ToBricksType.values().length];
 		handleModelChange(model);
-
+	}
+	
+	public void initiateUI(final MainWindow mw) {
 		SwingUtilities.invokeLater(new Runnable() {			
 			@Override
 			public void run() {
-				setUI();
+				setUI(mw);
 			}
-		});
+		});		
 	}
 	
 	public void setOriginalWidthToHeight(float originalWidthToHeight) {
@@ -53,11 +57,14 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 		update();		
 	}
 	
-	public void addComponents(JToolBar toolBar, boolean append, MainController mc) {
+	public void addComponents(JToolBar toolBar, MainController mc) {
 		if(!uiReady)
 			throw new IllegalStateException();
-		if(append)
-			toolBar.add(Box.createHorizontalStrut(10));
+		
+		toolBar.add(buttonToggleDividerLocation);	
+		
+		toolBar.add(Box.createHorizontalStrut(10));
+		
 		for(JButton b : toBricksTypeButtons)
 			toolBar.add(b);
 		//toolBar.add(new ShowToBricksTypeFilterDialog(mc));
@@ -73,7 +80,11 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 		toolBar.add(buttonToggleLockSizeRatio);
 	}
 	
-	private void setUI() {
+	private void setUI(MainWindow mw) {
+		if(mw == null)
+			throw new IllegalArgumentException("MainWindow is null!");
+		buttonToggleDividerLocation = new JButton(new ToggleDivider(mw));
+		
 		int i = 0;
 		for(final ToBricksType type : ToBricksType.values()) {
 			JButton toBricksTypeButton = new JButton();
@@ -179,6 +190,8 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 				
 		// finish:
 		uiReady = true;
+		
+		mw.finishUpRibbonMenuAndIcon();
 		update();		
 	}
 	
@@ -228,6 +241,11 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 		this.availableToBricksTypes = availableToBricksTypes;
 		update();
 	}
+	
+	public void toggleShowDividerLocationButton() {
+		showDividerLocationButton = !showDividerLocationButton;
+		update();
+	}
 
 	private void update() {		
 		if(!uiReady)
@@ -249,6 +267,7 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 		buttonToggleLockSizeRatio.setIcon(sizeRatioLocked ? 
 				Icons.dimensionLockClosed(Icons.SIZE_LARGE) : 
 				Icons.dimensionLockOpen(Icons.SIZE_LARGE));
+		buttonToggleDividerLocation.setVisible(showDividerLocationButton);
 		
 		if(propagationPercentage < 0)
 			propagationPercentage = 0;
@@ -301,6 +320,7 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 		model.set(BrickGraphicsState.ToBricksPropagationPercentage, propagationPercentage);
 		model.set(BrickGraphicsState.ToBricksFiltered, availableToBricksTypes);
 		model.set(BrickGraphicsState.ToBricksSizeRatioLocked, sizeRatioLocked);
+		model.set(BrickGraphicsState.DividerLocationButtonShow, showDividerLocationButton);
 	}
 	@Override
 	public void handleModelChange(Model<BrickGraphicsState> model) {
@@ -312,6 +332,7 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 		toBricksType = ToBricksType.values()[((Integer)model.get(BrickGraphicsState.ToBricksTypeIndex))%tbtl];
 		availableToBricksTypes = (boolean[])model.get(BrickGraphicsState.ToBricksFiltered);
 		sizeRatioLocked = (Boolean)model.get(BrickGraphicsState.ToBricksSizeRatioLocked);
+		showDividerLocationButton = (Boolean)model.get(BrickGraphicsState.DividerLocationButtonShow);
 		update();
 	}
 }

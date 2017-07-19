@@ -20,7 +20,7 @@ public class MainWindow extends JFrame implements ChangeListener, ModelHandler<B
 	private ImagePreparingView imagePreparingView;
 	private BrickedView brickedView;
 	private JSplitPane splitPane;
-	private ColorChooserDialog colorChooser;
+	private ColorChooserDialog colorChooserDialog;
 	private MainController mc;
 	private Pipeline pipeline;
 	private Rectangle lastNormalPlacement;
@@ -33,8 +33,8 @@ public class MainWindow extends JFrame implements ChangeListener, ModelHandler<B
 		model.addModelHandler(this);
 		long startTime = System.currentTimeMillis();
 		
-		setVisible(true);
-		
+		setVisible(true);		
+
 		imagePreparingView = new ImagePreparingView(model, mc.getOptionsController(), mc.getToBricksController(), pipeline);
 		//imagePreparingView.addChangeListener(this);
 		Log.log("Created left view after " + (System.currentTimeMillis()-startTime) + "ms.");
@@ -97,21 +97,34 @@ public class MainWindow extends JFrame implements ChangeListener, ModelHandler<B
 		add(splitPane, BorderLayout.CENTER);
 		add(renderingProgressBar, BorderLayout.SOUTH);
 
-		SwingUtilities.invokeLater(new Runnable() {			
+		/*SwingUtilities.invokeLater(new Runnable() {			
 			@Override
 			public void run() {
-				colorChooser = new ColorChooserDialog(mc, MainWindow.this); // Must be made before ribbon!
+				colorChooserDialog = new ColorChooserDialog(mc, MainWindow.this); // Must be made before ribbon!
 				Ribbon ribbon = new Ribbon(mc, MainWindow.this);
-				mc.getToBricksController().addComponents(ribbon, true, mc);
+				mc.getToBricksController().addComponents(ribbon, mc);
 				add(ribbon, BorderLayout.NORTH);
 				ColorSettingsDialog csd = new ColorSettingsDialog(MainWindow.this, mc.getColorController());
 				setJMenuBar(new MainMenu(mc, MainWindow.this, model, csd));
 				setIconImage(Icons.get(32, "icon").getImage());
 			}
-		});
+		});*/
 
 		handleModelChange(model);
 		Log.log("LDDMC main window operational after " + (System.currentTimeMillis()-startTime) + "ms.");
+	}
+	
+	public void finishUpRibbonMenuAndIcon() {
+		colorChooserDialog = new ColorChooserDialog(mc, MainWindow.this); // Must be made before ribbon!
+		Ribbon ribbon = new Ribbon(mc, MainWindow.this);
+		mc.getToBricksController().addComponents(ribbon, mc);
+		add(ribbon, BorderLayout.NORTH);
+		ColorSettingsDialog csd = new ColorSettingsDialog(MainWindow.this, mc.getColorController());
+		setJMenuBar(new MainMenu(mc, MainWindow.this, mc.getModel(), csd));
+		setIconImage(Icons.get(32, "icon").getImage());		
+		
+		setVisible(false);
+		setVisible(true);		
 	}
 
 	private int getMinDividerLocation() {
@@ -123,9 +136,9 @@ public class MainWindow extends JFrame implements ChangeListener, ModelHandler<B
 	}
 	
 	public ColorChooserDialog getColorChooser() {
-		if(colorChooser == null)
+		if(colorChooserDialog == null)
 			throw new IllegalStateException();
-		return colorChooser;
+		return colorChooserDialog;
 	}
 	
 	public BrickedView getBrickedView() {

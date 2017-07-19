@@ -32,7 +32,7 @@ public class MainMenu extends JMenuBar {
 		editMenu.setDisplayedMnemonicIndex(0);
 		editMenu.setMnemonic('E');
 		editMenu.add(new ShowToBricksTypeFilterDialog(mc));
-		editMenu.add(new ShowOptionsAction(mc.getOptionsController().getOptionsDialog()));
+		editMenu.add(new ShowOptionsAction(mc.getOptionsController()));
 		
 		// View menu:
 		JMenu viewMenu = new JMenu("View");
@@ -41,6 +41,7 @@ public class MainMenu extends JMenuBar {
 		ImagePreparingView ipv = mw.getImagePreparingView();
 		viewMenu.add(new ToggleCrop(ipv));
 		viewMenu.add(new ToggleFilters(ipv));
+		viewMenu.add(new ToggleShowDividerLocationButton(mc.getToBricksController()));
 		viewMenu.addSeparator();
 		viewMenu.add(new ToggleColorChooser(mw.getColorChooser()));
 		viewMenu.add(new ToggleMagnifier(mc.getUIController()));
