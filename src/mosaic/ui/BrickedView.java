@@ -101,7 +101,7 @@ public class BrickedView extends JComponent implements ChangeListener, PipelineL
 				grabFocus();
 			}
 		});
-		add(mainComponent, BorderLayout.CENTER);		
+		add(mainComponent, BorderLayout.CENTER);
 	}
 	
 	private void updateTransform(ToBricksController t) {

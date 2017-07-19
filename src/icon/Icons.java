@@ -124,14 +124,15 @@ public class Icons {
 			@Override
 			public void paint(Graphics2D g2) {
 				Stroke oldStroke = g2.getStroke();
-				g2.setStroke(new BasicStroke(2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-				g2.setColor(Color.BLACK);
+				g2.setStroke(new BasicStroke(3, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+				g2.setColor(Color.DARK_GRAY);
 				
 				// Upper and lower rectangle:
 				int linkHeight = getIconHeight()/3;
-				int linkWidth = getIconWidth()-4;
-				g2.drawRect(2, 2, linkWidth, linkHeight);
-				g2.drawRect(2, getIconHeight()-2-linkHeight, linkWidth, linkHeight);
+				int linkWidth = 5*getIconWidth()/9;
+				int startX = (getIconWidth()-linkWidth)/2;
+				g2.drawRect(startX, 3, linkWidth, linkHeight);
+				g2.drawRect(startX, getIconHeight()-3-linkHeight, linkWidth, linkHeight);
 								
 				g2.setStroke(oldStroke);
 			}
@@ -142,14 +143,15 @@ public class Icons {
 			@Override
 			public void paint(Graphics2D g2) {
 				Stroke oldStroke = g2.getStroke();
-				g2.setStroke(new BasicStroke(2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-				g2.setColor(Color.BLACK);
+				g2.setStroke(new BasicStroke(3, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+				g2.setColor(Color.DARK_GRAY);
 				
 				// Upper and lower rectangle:
 				int linkHeight = getIconHeight()/3;
-				int linkWidth = getIconWidth()-4;
-				g2.drawRect(2, getIconHeight()/2 - linkHeight - 2, linkWidth, linkHeight);
-				g2.drawRect(2, getIconHeight()/2 + 2, linkWidth, linkHeight);
+				int linkWidth = 5*getIconWidth()/9;
+				int startX = (getIconWidth()-linkWidth)/2;
+				g2.drawRect(startX, getIconHeight()/2 - linkHeight - 2, linkWidth, linkHeight);
+				g2.drawRect(startX, getIconHeight()/2 + 2, linkWidth, linkHeight);
 
 				// Middle link:
 				g2.drawLine(getIconWidth()/2, getIconHeight()/2-linkHeight/2, 

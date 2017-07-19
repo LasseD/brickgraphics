@@ -71,6 +71,7 @@ public enum BrickGraphicsState implements ModelState {
 	// ToBrick:
 	ToBricksWidth(480),
 	ToBricksHeight(160),
+	ToBricksSizeRatioLocked(true),
 	ToBricksPropagationPercentage(50),
 	SelectedColors(new int[]{0, 1, 2, 14, 15, 19, 70, 71, 72, 320}),
 	ToBricksFiltered(ToBricksType.getDefaultTypes()),

@@ -3,18 +3,14 @@ package mosaic.controllers;
 import icon.*;
 import icon.ToBricksIcon.ToBricksIconType;
 import javax.swing.*;
-
 import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.event.*;
-
 import io.*;
 import javax.swing.event.*;
-
 import mosaic.io.*;
 import ui.IconizedTextfield;
 import ui.LividTextField;
-
 import java.util.*;
 import bricks.*;
 
@@ -22,14 +18,14 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 	private JButton[] toBricksTypeButtons;
 	private LividTextField propagationPercentageField;
 	private IconizedTextfield sizeFieldWidth, sizeFieldHeight; 
-	private JButton buttonLessPP, buttonMorePP;
+	private JButton buttonLessPP, buttonMorePP, buttonToggleLockSizeRatio;
 	private List<ChangeListener> listeners;
 	
 	private int constructionWidthInBasicUnits, constructionHeightInBasicUnits; // in basicUnits
 	private float originalWidthToHeight;
 	private ToBricksType toBricksType;
 	private boolean[] availableToBricksTypes;
-	private boolean sizeChoiceFromWidth;
+	private boolean sizeChoiceFromWidth, sizeRatioLocked;
 	private int propagationPercentage;
 	private volatile boolean uiReady;
 	
@@ -74,6 +70,7 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 		toolBar.add(sizeFieldWidth);
 		toolBar.add(new JLabel(" X "));
 		toolBar.add(sizeFieldHeight);
+		toolBar.add(buttonToggleLockSizeRatio);
 	}
 	
 	private void setUI() {
@@ -86,7 +83,8 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 					toBricksType = type;
 					update();
 				}
-			});		
+			});
+			toBricksTypeButton.setToolTipText(type.getDescription());
 			toBricksTypeButtons[i++] = toBricksTypeButton;
 		}		
 		
@@ -98,6 +96,7 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 				update();
 			}
 		});		
+		buttonLessPP.setToolTipText("Decrease dithering by 10%");
 		final int PAD = IconizedTextfield.PADDING;
 		propagationPercentageField = new LividTextField(propagationPercentage + "", 3);
 		propagationPercentageField.setMargin(new Insets(PAD, PAD, PAD, PAD));
@@ -117,6 +116,8 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 				}
 			}
 		});
+		propagationPercentageField.setToolTipText("Amount of dithering/error correction used.");
+
 		buttonMorePP = new JButton(Icons.floydSteinberg(Icons.SIZE_LARGE));
 		buttonMorePP.addActionListener(new ActionListener() {			
 			@Override
@@ -125,6 +126,7 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 				update();
 			}
 		});
+		buttonMorePP.setToolTipText("Increase dithering by 10%");
 
 		sizeFieldWidth = new IconizedTextfield(4, toBricksType.getIcon().get(ToBricksIconType.MeasureWidth, Icons.SIZE_SMALL));
 		sizeFieldWidth.setMargin(new Insets(PAD, PAD, PAD, Icons.SIZE_SMALL));
@@ -134,9 +136,9 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 				sizeChoiceFromWidth = true;
 				try {
 					int w = toBricksType.getUnitWidth()*Integer.parseInt(sizeFieldWidth.getText().trim());
-					if(w == ToBricksController.this.constructionWidthInBasicUnits)
+					if(w == constructionWidthInBasicUnits)
 						return;
-					ToBricksController.this.constructionWidthInBasicUnits = w;
+					constructionWidthInBasicUnits = w;
 					update();
 				}
 				catch(NumberFormatException ex) {
@@ -144,6 +146,7 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 				}
 			}
 		});
+		sizeFieldWidth.setToolTipText("Set the width.");
 		sizeFieldHeight = new IconizedTextfield(4, toBricksType.getIcon().get(ToBricksIconType.MeasureHeight, Icons.SIZE_SMALL));
 		sizeFieldHeight.setMargin(new Insets(PAD, PAD, PAD, Icons.SIZE_SMALL));
 		sizeFieldHeight.addActionListener(new ActionListener() {
@@ -152,9 +155,9 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 				sizeChoiceFromWidth = false;
 				try {
 					int h = toBricksType.getUnitHeight()*Integer.parseInt(sizeFieldHeight.getText().trim());
-					if(ToBricksController.this.constructionHeightInBasicUnits == h)
+					if(constructionHeightInBasicUnits == h)
 						return;
-					ToBricksController.this.constructionHeightInBasicUnits = h;
+					constructionHeightInBasicUnits = h;
 					update();
 				}
 				catch(NumberFormatException ex) {
@@ -162,6 +165,17 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 				}
 			}
 		});
+		sizeFieldHeight.setToolTipText("Set the height.");
+		
+		buttonToggleLockSizeRatio = new JButton();
+		buttonToggleLockSizeRatio.addActionListener(new ActionListener() {			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				sizeRatioLocked = !sizeRatioLocked;
+				update();
+			}
+		});
+		buttonToggleLockSizeRatio.setToolTipText("Lock or unlock the width/height ratio.");
 				
 		// finish:
 		uiReady = true;
@@ -196,8 +210,13 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 	public int getPropagationPercentage() {
 		return propagationPercentage;
 	}
+	
 	public boolean[] getAvailableToBricksTypes() {
 		return availableToBricksTypes;
+	}
+	
+	public boolean getSizeRatioLocked() {
+		return sizeRatioLocked;
 	}
 	
 	public void setAvailableToBricksTypes(boolean[] availableToBricksTypes) {
@@ -227,6 +246,9 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 		}
 		sizeFieldWidth.setIcon(toBricksType.getIcon().get(ToBricksIconType.MeasureWidth, Icons.SIZE_SMALL));
 		sizeFieldHeight.setIcon(toBricksType.getIcon().get(ToBricksIconType.MeasureHeight, Icons.SIZE_SMALL));
+		buttonToggleLockSizeRatio.setIcon(sizeRatioLocked ? 
+				Icons.dimensionLockClosed(Icons.SIZE_LARGE) : 
+				Icons.dimensionLockOpen(Icons.SIZE_LARGE));
 		
 		if(propagationPercentage < 0)
 			propagationPercentage = 0;
@@ -236,12 +258,24 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 			propagationPercentageField.setText(propagationPercentage+"");
 		
 		if(sizeChoiceFromWidth) {
-			constructionWidthInBasicUnits = toBricksType.closestCompatibleWidth(constructionWidthInBasicUnits, toBricksType.getUnitWidth());
-			constructionHeightInBasicUnits = toBricksType.closestCompatibleHeight(Math.round(constructionWidthInBasicUnits/originalWidthToHeight), toBricksType.getUnitHeight());	
+			constructionWidthInBasicUnits = toBricksType.closestCompatibleWidth(
+					constructionWidthInBasicUnits, toBricksType.getUnitWidth());
+			if(sizeRatioLocked)
+				constructionHeightInBasicUnits = toBricksType.closestCompatibleHeight(
+						Math.round(constructionWidthInBasicUnits/originalWidthToHeight), toBricksType.getUnitHeight());
+			else
+				constructionHeightInBasicUnits = toBricksType.closestCompatibleHeight(
+						constructionHeightInBasicUnits, toBricksType.getUnitHeight());
 		}
 		else {
-			constructionHeightInBasicUnits = toBricksType.closestCompatibleHeight(constructionHeightInBasicUnits, toBricksType.getUnitHeight());		
-			constructionWidthInBasicUnits = toBricksType.closestCompatibleWidth(Math.round(originalWidthToHeight*constructionHeightInBasicUnits), toBricksType.getUnitWidth());
+			constructionHeightInBasicUnits = toBricksType.closestCompatibleHeight(
+					constructionHeightInBasicUnits, toBricksType.getUnitHeight());		
+			if(sizeRatioLocked)
+				constructionWidthInBasicUnits = toBricksType.closestCompatibleWidth(
+						Math.round(originalWidthToHeight*constructionHeightInBasicUnits), toBricksType.getUnitWidth());
+			else
+				constructionWidthInBasicUnits = toBricksType.closestCompatibleWidth(
+						constructionWidthInBasicUnits, toBricksType.getUnitWidth());
 		}
 		String w = "" + (constructionWidthInBasicUnits/toBricksType.getUnitWidth());
 		if(!sizeFieldWidth.getText().trim().equals(w))
@@ -266,6 +300,7 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 		model.set(BrickGraphicsState.ToBricksTypeIndex, toBricksType.ordinal());
 		model.set(BrickGraphicsState.ToBricksPropagationPercentage, propagationPercentage);
 		model.set(BrickGraphicsState.ToBricksFiltered, availableToBricksTypes);
+		model.set(BrickGraphicsState.ToBricksSizeRatioLocked, sizeRatioLocked);
 	}
 	@Override
 	public void handleModelChange(Model<BrickGraphicsState> model) {
@@ -276,6 +311,7 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 		int tbtl = ToBricksType.values().length;
 		toBricksType = ToBricksType.values()[((Integer)model.get(BrickGraphicsState.ToBricksTypeIndex))%tbtl];
 		availableToBricksTypes = (boolean[])model.get(BrickGraphicsState.ToBricksFiltered);
+		sizeRatioLocked = (Boolean)model.get(BrickGraphicsState.ToBricksSizeRatioLocked);
 		update();
 	}
 }
