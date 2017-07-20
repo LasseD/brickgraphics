@@ -21,6 +21,7 @@ public class MainWindow extends JFrame implements ChangeListener, ModelHandler<B
 	private BrickedView brickedView;
 	private JSplitPane splitPane;
 	private ColorChooserDialog colorChooserDialog;
+	private MagnifierWindow magnifierWindow;
 	private MainController mc;
 	private Pipeline pipeline;
 	private Rectangle lastNormalPlacement;
@@ -33,7 +34,7 @@ public class MainWindow extends JFrame implements ChangeListener, ModelHandler<B
 		model.addModelHandler(this);
 		long startTime = System.currentTimeMillis();
 		
-		setVisible(true);		
+		setVisible(true);
 
 		imagePreparingView = new ImagePreparingView(model, mc.getOptionsController(), mc.getToBricksController(), pipeline);
 		//imagePreparingView.addChangeListener(this);
@@ -41,6 +42,8 @@ public class MainWindow extends JFrame implements ChangeListener, ModelHandler<B
 		
 		brickedView = new BrickedView(mc, model, pipeline);
 		Log.log("Created right view after " + (System.currentTimeMillis()-startTime) + "ms.");
+		magnifierWindow = new MagnifierWindow(mc, this);
+		Log.log("Created magnifier after " + (System.currentTimeMillis()-startTime) + "ms.");
 
 		addWindowListener(new WindowAdapter() {
 			@Override
@@ -85,30 +88,26 @@ public class MainWindow extends JFrame implements ChangeListener, ModelHandler<B
 				pipeline.invalidate();
 			}
 		});
-		
-		setLayout(new BorderLayout());
 
-		// Preparing view tool bar:
-		JPanel pPrepairToolBar = new JPanel();
-		ImagePreparingToolBar prepareToolBar = imagePreparingView.getToolBar();
-		pPrepairToolBar.add(prepareToolBar);
-		add(pPrepairToolBar, BorderLayout.WEST);
+		Container cp = getContentPane();
+		cp.setLayout(new BorderLayout());
+		{
+			// Preparing view tool bar:
+			JPanel pPrepairToolBar = new JPanel();
+			ImagePreparingToolBar prepareToolBar = imagePreparingView.getToolBar();
+			pPrepairToolBar.add(prepareToolBar);
+			cp.add(pPrepairToolBar, BorderLayout.WEST);			
+		}
+		{
+			// Legend:
+			JPanel pLegend = new JPanel(new BorderLayout());
+			ColorLegend colorLegend = magnifierWindow.getLegend();
+			pLegend.add(colorLegend, BorderLayout.CENTER);
+			cp.add(pLegend, BorderLayout.EAST);
+		}
 
-		add(splitPane, BorderLayout.CENTER);
-		add(renderingProgressBar, BorderLayout.SOUTH);
-
-		/*SwingUtilities.invokeLater(new Runnable() {			
-			@Override
-			public void run() {
-				colorChooserDialog = new ColorChooserDialog(mc, MainWindow.this); // Must be made before ribbon!
-				Ribbon ribbon = new Ribbon(mc, MainWindow.this);
-				mc.getToBricksController().addComponents(ribbon, mc);
-				add(ribbon, BorderLayout.NORTH);
-				ColorSettingsDialog csd = new ColorSettingsDialog(MainWindow.this, mc.getColorController());
-				setJMenuBar(new MainMenu(mc, MainWindow.this, model, csd));
-				setIconImage(Icons.get(32, "icon").getImage());
-			}
-		});*/
+		cp.add(splitPane, BorderLayout.CENTER);
+		cp.add(renderingProgressBar, BorderLayout.SOUTH);
 
 		handleModelChange(model);
 		Log.log("LDDMC main window operational after " + (System.currentTimeMillis()-startTime) + "ms.");
@@ -118,13 +117,13 @@ public class MainWindow extends JFrame implements ChangeListener, ModelHandler<B
 		colorChooserDialog = new ColorChooserDialog(mc, MainWindow.this); // Must be made before ribbon!
 		Ribbon ribbon = new Ribbon(mc, MainWindow.this);
 		mc.getToBricksController().addComponents(ribbon, mc);
-		add(ribbon, BorderLayout.NORTH);
+		getContentPane().add(ribbon, BorderLayout.NORTH);
 		ColorSettingsDialog csd = new ColorSettingsDialog(MainWindow.this, mc.getColorController());
 		setJMenuBar(new MainMenu(mc, MainWindow.this, mc.getModel(), csd));
 		setIconImage(Icons.get(32, "icon").getImage());		
 		
-		setVisible(false);
-		setVisible(true);		
+		ribbon.setVisible(false);
+		ribbon.setVisible(true);		
 	}
 
 	private int getMinDividerLocation() {

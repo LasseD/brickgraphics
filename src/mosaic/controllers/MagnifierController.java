@@ -11,7 +11,7 @@ import javax.swing.event.*;
 import transforms.ToBricksTransform;
 import mosaic.io.BrickGraphicsState;
 import mosaic.rendering.PipelineListener;
-import mosaic.ui.Cropper;
+import mosaic.ui.*;
 
 /**
  * Functions: 

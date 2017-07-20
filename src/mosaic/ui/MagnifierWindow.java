@@ -18,7 +18,7 @@ public class MagnifierWindow extends JDialog implements ChangeListener {
 	private MagnifierCanvas canvas;
 	private boolean everShown;
 	private ColorLegend legend;
-	private JSplitPane splitPane;
+	//private JSplitPane splitPane;
 
 	public MagnifierWindow(final MainController mc, MainWindow mw) {
 		super(mw, "Magnifier", false);
@@ -38,10 +38,11 @@ public class MagnifierWindow extends JDialog implements ChangeListener {
 		add(new MagnifierToolBar(magnifierController, uiController), BorderLayout.NORTH);
 
 		legend = new ColorLegend(mc, mw);
-		legend.setBackground(getBackground());
-		JScrollPane scrollPane = new JScrollPane(legend);
-		splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, canvas, scrollPane);
-		add(splitPane, BorderLayout.CENTER);
+		//legend.setBackground(getBackground());
+		//JScrollPane scrollPane = new JScrollPane(legend);
+		//splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, canvas, scrollPane);
+		//add(splitPane, BorderLayout.CENTER);
+		add(canvas, BorderLayout.CENTER);
 				
 		// listener for key presses:
 		addKeyListener(magnifierController);
@@ -53,6 +54,10 @@ public class MagnifierWindow extends JDialog implements ChangeListener {
 			}			
 		});
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+	}
+	
+	public ColorLegend getLegend() {
+		return legend;
 	}
 	
 	private class MagnifierCanvas extends JPanel {
@@ -124,12 +129,12 @@ public class MagnifierWindow extends JDialog implements ChangeListener {
 		setVisible(visible);
 
 		if(visible) {
-			if(!uiController.enableLegend()) {
+			/*if(!uiController.enableLegend()) {
 				splitPane.setDividerLocation(1.0);
 			}
 			else if(splitPane.getDividerLocation() > splitPane.getSize().height * 8 / 10){
 				splitPane.setDividerLocation(canvas.getPreferredSize().height);				
-			}
+			}*/
 			canvas.repaint();			
 		}
 	}

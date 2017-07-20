@@ -104,6 +104,13 @@ public class BrickedView extends JComponent implements ChangeListener, PipelineL
 		add(mainComponent, BorderLayout.CENTER);
 	}
 	
+	public LEGOColor.CountingLEGOColor[] getLegendColors() {
+		if(toBricksTransform.getToBricksType() == ToBricksType.SNOT_IN_2_BY_2) {
+			return toBricksTransform.lastUsedColorCounts();				
+		}
+		return toBricksTransform.getMainTransform().lastUsedColorCounts();								
+	}
+	
 	private void updateTransform(ToBricksController t) {
 		toBricksTransform.setPropagationPercentage(t.getPropagationPercentage());
 		toBricksTransform.setToBricksType(t.getToBricksType());
@@ -118,13 +125,6 @@ public class BrickedView extends JComponent implements ChangeListener, PipelineL
 			updateTransform((ToBricksController)e.getSource());
 		}
 		repaint();
-	}
-	
-	public LEGOColor.CountingLEGOColor[] getLegendColors() {
-		if(toBricksTransform.getToBricksType() == ToBricksType.SNOT_IN_2_BY_2) {
-			return toBricksTransform.lastUsedColorCounts();				
-		}
-		return toBricksTransform.getMainTransform().lastUsedColorCounts();								
 	}
 	
 	// Used by CAD exports

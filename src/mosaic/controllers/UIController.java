@@ -23,7 +23,7 @@ public class UIController implements ChangeListener, ModelHandler<BrickGraphicsS
 	public boolean showColors() {
 		return showColors;
 	}
-	public boolean enableLegend() {
+	public boolean showLegend() {
 		return showLegend;
 	}
 	public boolean showTotals() {
@@ -42,17 +42,17 @@ public class UIController implements ChangeListener, ModelHandler<BrickGraphicsS
 	public void flipShowMagnifier() {
 		showMagnifier = !showMagnifier;
 		notifyListeners();
-	}	
+	}
 	public void flipLegendEnabled() {
 		showLegend = !showLegend;
-		if(!showMagnifier)
-			showMagnifier = true;
+		//if(!showMagnifier)
+		//	showMagnifier = true;
 		notifyListeners();
 	}	
 	public void flipViewTotals() {
 		showTotals = !showTotals;
-		if(!showMagnifier)
-			showMagnifier = true;
+		//if(!showMagnifier)
+		//	showMagnifier = true;
 		notifyListeners();
 	}	
 	public void flipViewColorDistributionChart() {

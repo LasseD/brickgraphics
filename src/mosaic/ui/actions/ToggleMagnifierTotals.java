@@ -1,14 +1,15 @@
 package mosaic.ui.actions;
 
 import icon.Icons;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.JButton;
 import javax.swing.KeyStroke;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import mosaic.controllers.*;
 
@@ -32,5 +33,18 @@ public class ToggleMagnifierTotals extends AbstractAction {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		controller.flipViewTotals();
+	}
+	
+	public static JButton createHidingButton(final UIController controller) {
+		final JButton ret = new JButton(new ToggleMagnifierTotals(controller));
+		ret.setText(null);
+		controller.addChangeListener(new ChangeListener() {			
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				ret.setVisible(controller.showLegend());
+			}
+		});
+		ret.setVisible(controller.showLegend());
+		return ret;
 	}
 }

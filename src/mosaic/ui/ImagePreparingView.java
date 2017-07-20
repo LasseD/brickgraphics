@@ -392,5 +392,4 @@ public class ImagePreparingView extends JComponent implements ModelHandler<Brick
 		model.set(BrickGraphicsState.PrepareSaturation, saturation.get());
 		model.set(BrickGraphicsState.PrepareFiltersEnabled, toolBar.isVisible());
 	}
-	
 }

@@ -102,7 +102,6 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 		
 		printController = new PrintController(model, this, mw);
 		pipeline.addPreparedImageListener(printController);
-		new MagnifierWindow(MainController.this, mw); // Do your own thing little window.
 		saveDialog = new SaveDialog(mw);
 		toBricksTypeFilterDialog = new ToBricksTypeFilterDialog(toBricksController, mw);
 		

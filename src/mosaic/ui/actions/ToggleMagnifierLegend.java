@@ -12,7 +12,7 @@ public class ToggleMagnifierLegend extends AbstractAction {
 	public ToggleMagnifierLegend(UIController controller) {
 		this.controller = controller;
 
-		putValue(Action.SHORT_DESCRIPTION, "Toggle the legend in the magnifier.");
+		putValue(Action.SHORT_DESCRIPTION, "Toggle the legend.");
 		putValue(Action.SMALL_ICON, Icons.colorLegend(Icons.SIZE_SMALL));
 		putValue(Action.LARGE_ICON_KEY, Icons.colorLegend(Icons.SIZE_LARGE));
 		putValue(Action.NAME, "Legend");

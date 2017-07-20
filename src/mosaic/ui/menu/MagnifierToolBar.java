@@ -22,7 +22,7 @@ public class MagnifierToolBar extends JToolBar {
 		add(new MagnifierSlimmer(magnifierController));
 		addSeparator();
 		add(new ToggleMagnifierColors(uiController));
-		add(new ToggleMagnifierLegend(uiController));
-		add(new ToggleMagnifierTotals(uiController));
+		//add(new ToggleMagnifierLegend(uiController));
+		//add(new ToggleMagnifierTotals(uiController));
 	}
 }

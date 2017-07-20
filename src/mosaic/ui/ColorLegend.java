@@ -9,20 +9,31 @@ import javax.swing.event.ChangeListener;
 import mosaic.controllers.*;
 import colors.LEGOColor;
 
-public class ColorLegend extends JList<LEGOColor.CountingLEGOColor> implements ChangeListener {
-	private BrickedView brickedController;
+public class ColorLegend extends JToolBar implements ChangeListener {
+	private BrickedView brickedView;
 	private LEGOColor.CountingLEGOColor[] colors;
 	private ColorController cc;
 	private UIController uc;
+	private JScrollPane scrollPane;
+	private JList<LEGOColor.CountingLEGOColor> list;
 
 	public ColorLegend(MainController mc, MainWindow mw) {
+		super("Legend");
 		cc = mc.getColorController();
 		uc = mc.getUIController();
-		brickedController = mw.getBrickedView();
-		setAutoscrolls(true);
-		setCellRenderer(new CellRenderer());
-		setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+		uc.addChangeListener(this);
+		brickedView = mw.getBrickedView();
+		
+		list = new JList<LEGOColor.CountingLEGOColor>();
+		list.setAutoscrolls(true);
+		list.setCellRenderer(new CellRenderer());
+		list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+		list.setBackground(getBackground());
 		mc.getMagnifierController().addChangeListener(this);
+
+		setLayout(new BorderLayout());
+		scrollPane = new JScrollPane(list);
+		add(scrollPane, BorderLayout.CENTER);
 	}
 
 	private class CellRenderer extends JLabel implements ListCellRenderer<LEGOColor.CountingLEGOColor> {
@@ -72,16 +83,16 @@ public class ColorLegend extends JList<LEGOColor.CountingLEGOColor> implements C
 	}
 	
 	public void setHighlightedColors(Set<LEGOColor> highlights) {
-		if(!uc.enableLegend() || colors == null || highlights.isEmpty())
+		if(!uc.showLegend() || colors == null || highlights.isEmpty())
 			return;
 		// Remove already selected indices:
-		int[] alreadySelected = getSelectedIndices();
+		int[] alreadySelected = list.getSelectedIndices();
 		for(int index : alreadySelected) {
 			if(highlights.contains(colors[index].c)) {
 				highlights.remove(colors[index].c);
 			}
 			else {
-				this.removeSelectionInterval(index,  index);
+				list.removeSelectionInterval(index,  index);
 			}
 		}		
 		if(highlights.isEmpty())
@@ -89,16 +100,15 @@ public class ColorLegend extends JList<LEGOColor.CountingLEGOColor> implements C
 		
 		for(int i = 0; i < colors.length; i++) {
 			if(highlights.contains(colors[i].c)) {
-				addSelectionInterval(i, i);
+				list.addSelectionInterval(i, i);
 			}
-		}			
+		}
 	}
 
 	@Override
 	public void stateChanged(ChangeEvent e) {
-		if(!uc.enableLegend())
-			return;
-		colors = brickedController.getLegendColors();
-		setListData(colors);
+		setVisible(uc.showLegend());
+		colors = brickedView.getLegendColors();
+		list.setListData(colors);
 	}
 }
