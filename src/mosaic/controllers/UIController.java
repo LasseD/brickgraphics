@@ -35,8 +35,10 @@ public class UIController implements ChangeListener, ModelHandler<BrickGraphicsS
 	
 	public void flipShowColors() {
 		showColors = !showColors;
-		if(!showMagnifier)
-			showMagnifier = true;
+		notifyListeners();
+	}	
+	public void setShowColors(boolean b) {
+		showColors = b;
 		notifyListeners();
 	}	
 	public void flipShowMagnifier() {
@@ -45,14 +47,10 @@ public class UIController implements ChangeListener, ModelHandler<BrickGraphicsS
 	}
 	public void flipLegendEnabled() {
 		showLegend = !showLegend;
-		//if(!showMagnifier)
-		//	showMagnifier = true;
 		notifyListeners();
 	}	
 	public void flipViewTotals() {
 		showTotals = !showTotals;
-		//if(!showMagnifier)
-		//	showMagnifier = true;
 		notifyListeners();
 	}	
 	public void flipViewColorDistributionChart() {

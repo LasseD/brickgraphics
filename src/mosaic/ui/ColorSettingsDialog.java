@@ -15,7 +15,7 @@ import mosaic.controllers.ColorController;
 import mosaic.io.MosaicIO;
 
 /**
- * @author ld
+ * @author LD
  */
 public class ColorSettingsDialog extends JDialog implements ChangeListener {
 	private ColorController cc;

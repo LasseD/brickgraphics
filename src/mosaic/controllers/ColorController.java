@@ -428,7 +428,7 @@ public class ColorController implements ModelHandler<BrickGraphicsState> {
 	public void setShownName(ShownName shownName) {
 		this.shownName = shownName;
 		if(shownName != ShownName.LOCALIZED)
-			notifyListeners(null);
+			notifyListeners(null); // TODO: Why only when not localized?
 	}
 	public String getShownName(LEGOColor c) {
 		switch(shownName) {
@@ -580,17 +580,25 @@ public class ColorController implements ModelHandler<BrickGraphicsState> {
 	public static enum ShownID {
 		NONE("None"), ID("Rebrickable ID"), LDRAW("LDraw IDs"), BRICKLINK("Bricklink IDs"), INCREMENTAL("Incremental number"), LEGO("LEGO/LDD ID");
 
-		public final String displayName;
+		private final String displayName;
 		private ShownID(String displayName) {
 			this.displayName = displayName;
+		}
+		@Override
+		public String toString() {
+			return displayName;
 		}
 	}
 	public static enum ShownName {
 		NONE("None"), NAME("Rebrickable name"), RGB("#RGB-value"), LAB("CIE Lab components"), LEGO("Official LEGO Names"), PEERON("Peeron names"), LOCALIZED(null);
 
-		public final String displayName;
+		private final String displayName;
 		private ShownName(String displayName) {
 			this.displayName = displayName;
+		}
+		@Override
+		public String toString() {
+			return displayName;
 		}
 	}
 }

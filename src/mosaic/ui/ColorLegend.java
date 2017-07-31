@@ -2,14 +2,17 @@ package mosaic.ui;
 
 import icon.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.util.*;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import mosaic.controllers.*;
+import mosaic.rendering.Pipeline;
+import mosaic.rendering.PipelineListener;
 import colors.LEGOColor;
 
-public class ColorLegend extends JToolBar implements ChangeListener {
+public class ColorLegend extends JToolBar implements ChangeListener, PipelineListener {
 	private BrickedView brickedView;
 	private LEGOColor.CountingLEGOColor[] colors;
 	private ColorController cc;
@@ -17,12 +20,13 @@ public class ColorLegend extends JToolBar implements ChangeListener {
 	private JScrollPane scrollPane;
 	private JList<LEGOColor.CountingLEGOColor> list;
 
-	public ColorLegend(MainController mc, MainWindow mw) {
+	public ColorLegend(MainController mc, MainWindow mw, Pipeline pipeline) {
 		super("Legend");
 		cc = mc.getColorController();
 		uc = mc.getUIController();
 		uc.addChangeListener(this);
 		brickedView = mw.getBrickedView();
+		pipeline.addMosaicImageListener(this);
 		
 		list = new JList<LEGOColor.CountingLEGOColor>();
 		list.setAutoscrolls(true);
@@ -108,6 +112,12 @@ public class ColorLegend extends JToolBar implements ChangeListener {
 	@Override
 	public void stateChanged(ChangeEvent e) {
 		setVisible(uc.showLegend());
+		colors = brickedView.getLegendColors();
+		list.setListData(colors);
+	}
+
+	@Override
+	public void imageChanged(BufferedImage image) {
 		colors = brickedView.getLegendColors();
 		list.setListData(colors);
 	}

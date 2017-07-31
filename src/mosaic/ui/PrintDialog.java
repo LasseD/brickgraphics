@@ -15,61 +15,163 @@ import javax.swing.event.*;
 
 import ui.LividTextField;
 import mosaic.controllers.*;
+import mosaic.controllers.ColorController.ShownName;
 import mosaic.controllers.PrintController.CoverPagePictureType;
 import mosaic.controllers.PrintController.ShowPosition;
+import mosaic.rendering.Pipeline;
 
 /**
  * Construction:
  * 
- * Top: Button for page setup.
- * Upper middle: Settings for cover page on left, preview on right.
- * Lower Middle: Settings for normal pages: COntrols on left, preview on right. 
- * Bottom: OK/Cancel buttons. OK => Call to controller.
+ * 1: Common settings:
+ *  - Button for page layout.
+ *  - Common settings
+ * 3: Settings for cover page on left, preview on right.
+ * 4: Settings for normal pages: COntrols on left, preview on right. 
+ * 5: OK/Cancel buttons. OK => Call to controller.
  * 
- * @author ld
+ * @author LD
  */
 public class PrintDialog extends JDialog implements ChangeListener {
 	private PrintController pc;
+	private ColorController cc;
+	private MagnifierController mc;
 	// Input boxes:
-	private LividTextField tfMagnifiersPerPageWidth, tfMagnifiersPerPageHeight, tfFontSize;
-	private JCheckBox cbCoverPageShow, cbCoverPageShowFileName, cbCoverPageShowLegend, cbShowLegend, cbShowPageNumber;
+	private LividTextField tfMagnifiersPerPageWidth, tfMagnifiersPerPageHeight, tfMagnifierSizeWidth, tfMagnifierSizeHeight, tfFontSize;
+	private JCheckBox cbCoverPageShow, cbCoverPageShowFileName, cbCoverPageShowLegend, cbShowColors, cbShowLegend, cbShowPageNumber;
 	private JRadioButton[] rbCoverPagePictureType, rbShowPosition;
 	
-	public PrintDialog(MainWindow mw, PrintController pc) {
+	public PrintDialog(MainWindow mw, PrintController pc, ColorController cc, MagnifierController mc, Pipeline pipeline) {
 		super(mw, "Print Setup");
 		this.pc = pc;
-		pc.addListener(this);
+		this.cc = cc;
+		this.mc = mc;
+		pc.addChangeListener(this);
+		mc.addChangeListener(this);
 		
 		// Set up:
 		setModal(true);
-		buildUI();
-		
-		update();
+		buildUI(pipeline);
     }
 	
-	private void buildUI() {
+	@Override
+	public void setVisible(boolean v) {
+		if(v)
+			update();
+		super.setVisible(v);
+	}
+	
+	private void buildUI(Pipeline pipeline) {
 		setLayout(new BorderLayout());
-		// Top: Page setup
-		JPanel topPanel = new JPanel(new FlowLayout());
-		JButton bPageFormat = new JButton("Page layout");
-		bPageFormat.addActionListener(new ActionListener() {			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				PrinterJob job = pc.getPrinterJob();
-		        PageFormat pf = job.pageDialog(pc.getPageFormat()); // job.pageDialog(attributes);
-		        pc.setPageFormat(pf, PrintDialog.this);
+		{
+			// 1: Common settings
+			JPanel topPanel = new JPanel();
+			topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
+			topPanel.setBorder(BorderFactory.createTitledBorder("Common settings"));
+			
+			// Page layout button
+			JPanel pPageLayout = new JPanel(new FlowLayout(FlowLayout.LEFT));			
+			JButton bPageFormat = new JButton("Page layout");
+			bPageFormat.addActionListener(new ActionListener() {			
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					PrinterJob job = pc.getPrinterJob();
+			        PageFormat pf = job.pageDialog(pc.getPageFormat()); // job.pageDialog(attributes);
+			        pc.setPageFormat(pf, PrintDialog.this);
+				}
+			});
+			pPageLayout.add(bPageFormat);
+			topPanel.add(pPageLayout);
+			
+			// Text size:
+			tfFontSize = new LividTextField(3);
+			tfFontSize.addActionListener(new ActionListener() {			
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					try {
+						float s = Float.parseFloat(tfFontSize.getText());
+						if(s < 0.2)
+							return;
+						pc.setFontSize(s, PrintDialog.this);
+						update();
+					}
+					catch(NumberFormatException ignore) {}
+				}
+			});
+			JPanel pFontSize = new JPanel(new FlowLayout(FlowLayout.LEFT));
+			pFontSize.add(new JLabel("Text size"));
+			pFontSize.add(tfFontSize);
+			topPanel.add(pFontSize);
+			
+			{
+				// Color number
+				JPanel pColorNumber = new JPanel(new FlowLayout(FlowLayout.LEFT));
+				pColorNumber.add(new JLabel("Color number"));
+				final JComboBox<ColorController.ShownID> cColorNumber = new JComboBox<ColorController.ShownID>(ColorController.ShownID.values());
+				cColorNumber.setSelectedItem(cc.getShownID());
+				cColorNumber.addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						cc.setShownID((ColorController.ShownID)cColorNumber.getSelectedItem());
+					}
+				});			
+				pColorNumber.add(cColorNumber);
+				topPanel.add(pColorNumber);				
 			}
-		});
-		topPanel.add(bPageFormat);
-		add(topPanel, BorderLayout.NORTH);
+
+			{
+				// Color name 
+				JPanel pColorName = new JPanel(new FlowLayout(FlowLayout.LEFT));
+				pColorName.add(new JLabel("Color name"));
+				final JComboBox<String> cColorName = new JComboBox<String>();
+				for(final ColorController.ShownName shownName : ColorController.ShownName.values()) {
+					if(shownName.toString() == null)
+						continue;
+					cColorName.addItem(shownName.toString());
+				}
+				for(final String localizationName : cc.getLocalizedFileNamesNoTXT()) {
+					cColorName.addItem(localizationName);
+				}
+				// Set selected index:
+				int i = 0;
+				for(final ColorController.ShownName shownName : ColorController.ShownName.values()) {
+					if(shownName.toString() == null)
+						continue;				
+					if(cc.getShownName() == shownName)
+						cColorName.setSelectedIndex(i);
+					++i;
+				}
+				for(final String localizationName : cc.getLocalizedFileNamesNoTXT()) {
+					if(cc.getShownName() == ShownName.LOCALIZED && cc.getLocalizedFileNameNoTXT().equals(localizationName))
+						cColorName.setSelectedIndex(i);
+					++i;
+				}
+				cColorName.addActionListener(new ActionListener() {				
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						int selectedIndex = cColorName.getSelectedIndex();
+						if(selectedIndex < ColorController.ShownName.values().length-1)
+							cc.setShownName(ColorController.ShownName.values()[selectedIndex]);
+						else {
+							cc.setShownName(ShownName.LOCALIZED);
+							cc.setLocalizedFileNameNoTXT((String)cColorName.getSelectedItem(), PrintDialog.this);						
+						}
+					}
+				});
+				pColorName.add(cColorName);
+				topPanel.add(pColorName);				
+			}
+			
+			add(topPanel, BorderLayout.NORTH);			
+		}
 		
 		// Middle: Main components + preview.
 		JPanel midPanel = new JPanel(new GridLayout(2,1));
 		
 		JPanel midTopPanel = new JPanel(new BorderLayout());
 		midTopPanel.setBorder(BorderFactory.createTitledBorder("Cover page"));
-		PrintPreviewPanel previewCover = new PrintPreviewPanel(true, pc);
-		pc.addListener(previewCover);
+		PrintPreviewPanel previewCover = new PrintPreviewPanel(true, pc, cc, pipeline);
+		pc.addChangeListener(previewCover);
 		midTopPanel.add(previewCover, BorderLayout.EAST);
 		JPanel midTopLeftPanel = new JPanel();
 		midTopLeftPanel.setLayout(new BoxLayout(midTopLeftPanel, BoxLayout.Y_AXIS));
@@ -125,38 +227,90 @@ public class PrintDialog extends JDialog implements ChangeListener {
 		
 		JPanel midBottomPanel = new JPanel(new BorderLayout());
 		midBottomPanel.setBorder(BorderFactory.createTitledBorder("Page setup"));
-		PrintPreviewPanel previewPage = new PrintPreviewPanel(false, pc);
-		pc.addListener(previewPage);
+		PrintPreviewPanel previewPage = new PrintPreviewPanel(false, pc, cc, pipeline);
+		pc.addChangeListener(previewPage);
 		midBottomPanel.add(previewPage, BorderLayout.EAST);			
 		JPanel midBottomLeftPanel = new JPanel();	
 		midBottomLeftPanel.setLayout(new BoxLayout(midBottomLeftPanel, BoxLayout.Y_AXIS));
 
-		JPanel pMagnifiersPerPage = new JPanel(new FlowLayout());
-		pMagnifiersPerPage.setAlignmentX(Component.LEFT_ALIGNMENT);
-		pMagnifiersPerPage.add(new JLabel("Number of magnifiers per page: "));
-		tfMagnifiersPerPageWidth = new LividTextField(3);		
-		pMagnifiersPerPage.add(tfMagnifiersPerPageWidth);
-		pMagnifiersPerPage.add(new JLabel("X"));
-		tfMagnifiersPerPageHeight = new LividTextField(3);		
-		pMagnifiersPerPage.add(tfMagnifiersPerPageHeight);	
-		ActionListener aMagnifiersPerPage = new ActionListener() {			
+		// Magnifier size:
+		{
+			JPanel pMagnifierSize = new JPanel(new FlowLayout());
+			pMagnifierSize.setAlignmentX(Component.LEFT_ALIGNMENT);
+			pMagnifierSize.add(new JLabel("Size of the magnifier: "));
+			tfMagnifierSizeWidth = new LividTextField(3);		
+			pMagnifierSize.add(tfMagnifierSizeWidth);
+			pMagnifierSize.add(new JLabel("X"));
+			tfMagnifierSizeHeight = new LividTextField(3);		
+			pMagnifierSize.add(tfMagnifierSizeHeight);	
+			tfMagnifierSizeWidth.addActionListener(new ActionListener() {				
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					try {
+						int w = Integer.parseInt(tfMagnifierSizeWidth.getText());
+						if(w <= 0)
+							return;
+						mc.setWidthInMosaicBlocks(w);
+					}
+					catch(NumberFormatException ignore) {
+					}
+				}
+			});
+			tfMagnifierSizeHeight.addActionListener(new ActionListener() {				
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					try {
+						int h = Integer.parseInt(tfMagnifierSizeHeight.getText());
+						if(h <= 0)
+							return;
+						mc.setHeightInMosaicBlocks(h);
+					}
+					catch(NumberFormatException ignore) {
+					}
+				}
+			});
+			midBottomLeftPanel.add(pMagnifierSize);
+		}
+		
+		// Magnifiers per page:
+		{
+			JPanel pMagnifiersPerPage = new JPanel(new FlowLayout());
+			pMagnifiersPerPage.setAlignmentX(Component.LEFT_ALIGNMENT);
+			pMagnifiersPerPage.add(new JLabel("Number of magnifiers per page: "));
+			tfMagnifiersPerPageWidth = new LividTextField(3);		
+			pMagnifiersPerPage.add(tfMagnifiersPerPageWidth);
+			pMagnifiersPerPage.add(new JLabel("X"));
+			tfMagnifiersPerPageHeight = new LividTextField(3);		
+			pMagnifiersPerPage.add(tfMagnifiersPerPageHeight);	
+			ActionListener aMagnifiersPerPage = new ActionListener() {			
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					try {
+						int w = Integer.parseInt(tfMagnifiersPerPageWidth.getText());
+						int h = Integer.parseInt(tfMagnifiersPerPageHeight.getText());
+						if(w <= 0 || h <= 0)
+							return;
+						pc.setMagnifiersPerPage(new Dimension(w, h), PrintDialog.this);
+						update();
+					}
+					catch(NumberFormatException ignore) {
+					}
+				}
+			};
+			tfMagnifiersPerPageWidth.addActionListener(aMagnifiersPerPage);
+			tfMagnifiersPerPageHeight.addActionListener(aMagnifiersPerPage);
+			midBottomLeftPanel.add(pMagnifiersPerPage);			
+		}
+		
+		cbShowColors = new JCheckBox("Show colors");
+		cbShowColors.setAlignmentX(Component.LEFT_ALIGNMENT);
+		cbShowColors.addActionListener(new ActionListener() {			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				try {
-					int w = Integer.parseInt(tfMagnifiersPerPageWidth.getText());
-					int h = Integer.parseInt(tfMagnifiersPerPageHeight.getText());
-					if(w <= 0 || h <= 0)
-						return;
-					pc.setMagnifiersPerPage(new Dimension(w, h), PrintDialog.this);
-					update();
-				}
-				catch(NumberFormatException ignore) {
-				}
+				pc.setShowColors(cbShowColors.isSelected(), PrintDialog.this);
 			}
-		};
-		tfMagnifiersPerPageWidth.addActionListener(aMagnifiersPerPage);
-		tfMagnifiersPerPageHeight.addActionListener(aMagnifiersPerPage);
-		midBottomLeftPanel.add(pMagnifiersPerPage);
+		});
+		midBottomLeftPanel.add(cbShowColors);
 		
 		cbShowLegend = new JCheckBox("Show parts callout for each page");
 		cbShowLegend.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -176,26 +330,6 @@ public class PrintDialog extends JDialog implements ChangeListener {
 			}
 		});
 		midBottomLeftPanel.add(cbShowPageNumber);
-		tfFontSize = new LividTextField(3);
-		tfFontSize.addActionListener(new ActionListener() {			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				try {
-					float s = Float.parseFloat(tfFontSize.getText());
-					if(s < 0.2)
-						return;
-					pc.setFontSize(s, PrintDialog.this);
-					update();
-				}
-				catch(NumberFormatException ignore) {
-				}
-			}
-		});
-		JPanel pFontSize = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		pFontSize.setAlignmentX(Component.LEFT_ALIGNMENT);
-		pFontSize.add(new JLabel("Text size"));
-		pFontSize.add(tfFontSize);
-		midBottomLeftPanel.add(pFontSize);
 		
 		JPanel bottomButtonGroupPanel = new JPanel();
 		bottomButtonGroupPanel.setLayout(new BoxLayout(bottomButtonGroupPanel, BoxLayout.Y_AXIS));
@@ -248,12 +382,23 @@ public class PrintDialog extends JDialog implements ChangeListener {
 		String fs = "" + pc.getFontSize();
 		if(!tfFontSize.getText().trim().equals(fs))
 			tfFontSize.setText(fs);
-		String w = ""+pc.getMagnifiersPerPage().width;
-		if(!tfMagnifiersPerPageWidth.getText().trim().equals(w))
-			tfMagnifiersPerPageWidth.setText(w);
-		String h = ""+pc.getMagnifiersPerPage().height;
-		if(!tfMagnifiersPerPageHeight.getText().trim().equals(h))
-			tfMagnifiersPerPageHeight.setText(h);
+		{
+			String w = ""+pc.getMagnifiersPerPage().width;
+			if(!tfMagnifiersPerPageWidth.getText().trim().equals(w))
+				tfMagnifiersPerPageWidth.setText(w);
+			String h = ""+pc.getMagnifiersPerPage().height;
+			if(!tfMagnifiersPerPageHeight.getText().trim().equals(h))
+				tfMagnifiersPerPageHeight.setText(h);			
+		}
+		{
+			String w = ""+mc.getSizeInMosaicBlocks().width;
+			if(!tfMagnifierSizeWidth.getText().trim().equals(w))
+				tfMagnifierSizeWidth.setText(w);
+			String h = ""+mc.getSizeInMosaicBlocks().height;
+			if(!tfMagnifierSizeHeight.getText().trim().equals(h))
+				tfMagnifierSizeHeight.setText(h);			
+		}		
+		cbShowColors.setSelected(pc.getShowColors());
 		cbShowLegend.setSelected(pc.getShowLegend());
 		cbShowPageNumber.setSelected(pc.getShowPageNumber());
 		rbShowPosition[pc.getShowPosition().ordinal()].setSelected(true);
@@ -278,10 +423,12 @@ public class PrintDialog extends JDialog implements ChangeListener {
 
 	@Override
 	public void stateChanged(ChangeEvent e) {
-		if(e != null && e.getSource() != this)
+		if(!isVisible())
+			return;
+		//if(e != null && e.getSource() != this)
 			update();
-		else 
-			updateEnabledFields();
+		//else
+			//updateEnabledFields();
 	}
 	
 	@Override

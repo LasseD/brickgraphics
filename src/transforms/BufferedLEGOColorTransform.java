@@ -107,7 +107,7 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform,
 		int cellH = (int) Math.round(scaleH);
 
 		Set<LEGOColor> used = new TreeSet<LEGOColor>();
-		if(lastIndex == -1)
+		if(lastIndex == -1 || sets[lastIndex] == null)
 			return used;
 		
 		LEGOColorGrid transformedColors = sets[lastIndex].colors;
@@ -160,7 +160,7 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform,
 
 		// draw colors and studs:
 		Set<LEGOColor> used = new TreeSet<LEGOColor>();
-		if(lastIndex == -1)
+		if(lastIndex == -1 || sets[lastIndex] == null)
 			return used;
 		LEGOColorGrid transformedColors = sets[lastIndex].colors;
 		

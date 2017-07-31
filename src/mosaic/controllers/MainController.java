@@ -100,7 +100,7 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 		else
 			notifyListeners(model);
 		
-		printController = new PrintController(model, this, mw);
+		printController = new PrintController(model, this, mw, pipeline);
 		pipeline.addPreparedImageListener(printController);
 		saveDialog = new SaveDialog(mw);
 		toBricksTypeFilterDialog = new ToBricksTypeFilterDialog(toBricksController, mw);

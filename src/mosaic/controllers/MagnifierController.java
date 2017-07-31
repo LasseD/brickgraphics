@@ -60,8 +60,18 @@ public class MagnifierController implements ChangeListener, MouseListener, Mouse
 		model.set(BrickGraphicsState.MagnifierSize, sizeInMosaicBlocks);
 	}
 
-	public void setSizeInMosaicBlocks(Dimension size) {
-		this.sizeInMosaicBlocks = size;
+	public void setWidthInMosaicBlocks(int w) {
+		if(this.sizeInMosaicBlocks.width == w)
+			return;
+		this.sizeInMosaicBlocks.width = w;
+		sanify();
+		notifyListeners(null);
+	}
+
+	public void setHeightInMosaicBlocks(int h) {
+		if(this.sizeInMosaicBlocks.height == h)
+			return;
+		this.sizeInMosaicBlocks.height = h;
 		sanify();
 		notifyListeners(null);
 	}

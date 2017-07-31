@@ -6,17 +6,21 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
 import java.awt.print.*;
 import javax.swing.*;
 import javax.swing.event.*;
 
 import ui.LividTextField;
+import mosaic.controllers.ColorController;
 import mosaic.controllers.PrintController;
+import mosaic.rendering.Pipeline;
+import mosaic.rendering.PipelineListener;
 
 /**
- * @author ld
+ * @author LD
  */
-public class PrintPreviewPanel extends JPanel implements ChangeListener {
+public class PrintPreviewPanel extends JPanel implements ChangeListener, PipelineListener {
 	public static final int PADDING_PIXELS = 20;
 	
 	private boolean isCoverPage;
@@ -24,10 +28,12 @@ public class PrintPreviewPanel extends JPanel implements ChangeListener {
 	private LividTextField tf;
 	private int shownPage;
 	
-	public PrintPreviewPanel(boolean isCoverPage, final PrintController pc) {
+	public PrintPreviewPanel(boolean isCoverPage, final PrintController pc, final ColorController cc, Pipeline pipeline) {
 		this.isCoverPage = isCoverPage;
 		this.pc = pc;
-		pc.addListener(this);
+		pc.addChangeListener(this);
+		cc.addChangeListener(this);
+		pipeline.addMosaicImageListener(this);
 		setBorder(BorderFactory.createTitledBorder("Preview"));
 		setLayout(new BorderLayout());
 		PicturePanel picturePanel = new PicturePanel();
@@ -126,8 +132,10 @@ public class PrintPreviewPanel extends JPanel implements ChangeListener {
 	private class PicturePanel extends JPanel {
 		@Override
 		public void paintComponent(Graphics g) {
-			super.paintComponent(g);
+			super.paintComponent(g);			
 			Graphics2D g2 = (Graphics2D)g;
+			if(!isVisible())
+				return;
 			
 			sanitizePage();
 			// Compute where to draw page:
@@ -169,6 +177,11 @@ public class PrintPreviewPanel extends JPanel implements ChangeListener {
 
 	@Override
 	public void stateChanged(ChangeEvent arg0) {
+		update();
+	}
+
+	@Override
+	public void imageChanged(BufferedImage image) {
 		update();
 	}
 }

@@ -34,8 +34,8 @@ public class ColorMenu extends JMenu implements ChangeListener {
 		// Color indices:
 		ButtonGroup ids = new ButtonGroup();
 		for(final ColorController.ShownID shownID : ColorController.ShownID.values()) {
-			JRadioButtonMenuItem item = new JRadioButtonMenuItem(shownID.displayName);
-			item.setMnemonic(shownID.displayName.charAt(0));
+			JRadioButtonMenuItem item = new JRadioButtonMenuItem(shownID.toString());
+			item.setMnemonic(shownID.toString().charAt(0));
 			item.setDisplayedMnemonicIndex(0);
 			if(cc.getShownID() == shownID)
 				item.setSelected(true);
@@ -59,14 +59,14 @@ public class ColorMenu extends JMenu implements ChangeListener {
 	}
 	
 	private void updateColorTextMenu() {
-		colorTextMenu.removeAll();
+		colorTextMenu.removeAll(); // TODO: This makes no sense. Why reload everything all the time?
 		// Color names:
 		ButtonGroup names = new ButtonGroup();
 		for(final ColorController.ShownName shownName : ColorController.ShownName.values()) {
-			if(shownName.displayName == null)
+			if(shownName.toString() == null)
 				continue;
-			JRadioButtonMenuItem item = new JRadioButtonMenuItem(shownName.displayName);
-			item.setMnemonic(shownName.displayName.charAt(0));
+			JRadioButtonMenuItem item = new JRadioButtonMenuItem(shownName.toString());
+			item.setMnemonic(shownName.toString().charAt(0));
 			item.setDisplayedMnemonicIndex(0);
 			if(cc.getShownName() == shownName)
 				item.setSelected(true);

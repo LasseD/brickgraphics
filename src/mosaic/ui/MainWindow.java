@@ -42,7 +42,7 @@ public class MainWindow extends JFrame implements ChangeListener, ModelHandler<B
 		
 		brickedView = new BrickedView(mc, model, pipeline);
 		Log.log("Created right view after " + (System.currentTimeMillis()-startTime) + "ms.");
-		magnifierWindow = new MagnifierWindow(mc, this);
+		magnifierWindow = new MagnifierWindow(mc, this, pipeline);
 		Log.log("Created magnifier after " + (System.currentTimeMillis()-startTime) + "ms.");
 
 		addWindowListener(new WindowAdapter() {

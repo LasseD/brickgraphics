@@ -12,10 +12,12 @@ import java.util.*;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.event.*;
+
 import bricks.ToBricksType;
 import colors.LEGOColor;
 import mosaic.controllers.MagnifierController;
 import mosaic.io.BrickGraphicsState;
+import mosaic.rendering.Pipeline;
 import mosaic.rendering.PipelineListener;
 import mosaic.ui.*;
 import transforms.ToBricksTransform;
@@ -23,7 +25,7 @@ import icon.*;
 
 /**
  * This class takes care of the printing mechanism
- * @author ld
+ * @author LD
  */
 public class PrintController implements Printable, ModelHandler<BrickGraphicsState>, PipelineListener {
 	private MainController mc;
@@ -43,7 +45,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 	private PrinterJob printerJob;
 	private MainWindow mw;
 	
-	public PrintController(Model<BrickGraphicsState> model, MainController mc, MainWindow mw) {
+	public PrintController(Model<BrickGraphicsState> model, MainController mc, MainWindow mw, Pipeline pipeline) {
 		this.mc = mc;
 		this.mw = mw;
 		magnifierController = mc.getMagnifierController();
@@ -54,8 +56,14 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		pageFormat = printerJob.defaultPage();
 		model.addModelHandler(this);
 		handleModelChange(model);
+		magnifierController.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				notifyListeners(e);
+			}
+		});
 
-		printDialog = new PrintDialog(mw, this);
+		printDialog = new PrintDialog(mw, this, colorController, magnifierController, pipeline);
 	}
 	
 	public void print() {
@@ -85,7 +93,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		fontSizeMM = (Float)model.get(BrickGraphicsState.PrintFontSize);
 	}
 	
-	public void addListener(ChangeListener l) {
+	public void addChangeListener(ChangeListener l) {
 		listeners.add(l);
 	}
 	
@@ -109,6 +117,10 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 	}
 	public void setCoverPageShowLegend(boolean b, Object caller) {
 		coverPageShowLegend = b;
+		notifyListeners(new ChangeEvent(caller));
+	}
+	public void setShowColors(boolean b, Object caller) {
+		uiController.setShowColors(b);
 		notifyListeners(new ChangeEvent(caller));
 	}
 	public void setShowLegend(boolean b, Object caller) {
@@ -146,6 +158,9 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 	}
 	public boolean getCoverPageShowLegend() {
 		return coverPageShowLegend;
+	}
+	public boolean getShowColors() {
+		return uiController.showColors();
 	}
 	public boolean getShowLegend() {
 		return showLegend;
@@ -211,7 +226,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		
 		int rowHeight = fontSizeIn1_72inches*6/5;
 		int rows = Math.max(1, (yMax-yMin)/rowHeight);		
-		int columns = (bom.length+rows-1)/rows;
+		int columns = Math.max(1, (bom.length+rows-1)/rows);
 		int columnWidth = (xMax-xMin)/columns;
 		int i = 0;
 		int maxWidth = columnWidth - rowHeight;
@@ -253,7 +268,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		String widestText = "";
 		for(LEGOColor color : colors) {
 			String s = colorController.getNormalIdentifier(color);
-			if(s.length() > widestText.length())
+			if(s != null && s.length() > widestText.length())
 				widestText = s;
 		}
 		return reduceFontSize(widestText, g2, maxWidth);
@@ -551,8 +566,8 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 			return;
 		int rowHeight = fontSizeIn1_72inches*6/5;
 		int rows = Math.max(1, (yMax-yMin)/rowHeight);
-		int columns = (used.size()+rows-1)/rows;
-		int columnWidth = (xMax-xMin)/columns;
+		int columns = Math.max(1, (used.size()+rows-1)/rows);
+		int columnWidth = Math.max(1, (xMax-xMin)/columns);
 		int i = 0;
 		
 		int maxWidth = columnWidth-rowHeight;
@@ -570,7 +585,9 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 			g2.fillRect(xIndent, yIndent, fontSizeIn1_72inches, fontSizeIn1_72inches);
 			g2.setColor(Color.BLACK);
 			g2.drawRect(xIndent, yIndent, fontSizeIn1_72inches, fontSizeIn1_72inches);
-			g2.drawString(colorController.getNormalIdentifier(c), 
+			String id = colorController.getNormalIdentifier(c);
+			if(id != null)
+				g2.drawString(id, 
 					xMin + x*columnWidth + rowHeight, 
 					yMin + y*rowHeight + fontSizeIn1_72inches*9/10 - (fontSizeIn1_72inches - textHeight)/2);
 			++i;
@@ -579,8 +596,11 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 	
 	public int getNumberOfPages() {
 		// Find out how big the magnifier is:
-		final int coreImageInCoreUnitsW = magnifierController.getCoreImageInCoreUnits().getWidth();
-		final int coreImageInCoreUnitsH = magnifierController.getCoreImageInCoreUnits().getHeight();
+		BufferedImage coreImage = magnifierController.getCoreImageInCoreUnits();
+		if(coreImage == null)
+			return 0; // Not ready.
+		final int coreImageInCoreUnitsW = coreImage.getWidth();
+		final int coreImageInCoreUnitsH = coreImage.getHeight();
 		final Dimension magnifierSizeInCoreUnits = magnifierController.getSizeInUnits();
 		final int pageSizeInCoreUnitsW = magnifierSizeInCoreUnits.width * magnifiersPerPage.width;
 		final int pageSizeInCoreUnitsH = magnifierSizeInCoreUnits.height * magnifiersPerPage.height;
