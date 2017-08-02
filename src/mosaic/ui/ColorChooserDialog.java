@@ -12,6 +12,7 @@ import java.util.List;
 
 import javax.swing.event.*;
 import mosaic.controllers.*;
+import mosaic.rendering.Pipeline;
 import mosaic.ui.menu.ColorChooserToolBar;
 
 public class ColorChooserDialog extends JDialog implements ChangeListener {
@@ -21,7 +22,7 @@ public class ColorChooserDialog extends JDialog implements ChangeListener {
 	private JPanel mainPanel;
 	private JSplitPane splitPane;
 	
-	public ColorChooserDialog(final MainController mc, MainWindow mw) {
+	public ColorChooserDialog(final MainController mc, MainWindow mw, Pipeline pipeline) {
 		super(mw, "Colors", false);
 
 		this.cc = mc.getColorController();
@@ -44,7 +45,7 @@ public class ColorChooserDialog extends JDialog implements ChangeListener {
 		splitPane.add(new JScrollPane(mainPanel, 
 				 ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, 
 				 ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED));
-		splitPane.add(new ColorDistributionChart(mc, mw));
+		splitPane.add(new ColorDistributionChart(mc, mw, pipeline));
 		
 		Container contentPane = getContentPane();
 		contentPane.setLayout(new BorderLayout());

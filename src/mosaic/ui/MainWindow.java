@@ -114,7 +114,7 @@ public class MainWindow extends JFrame implements ChangeListener, ModelHandler<B
 	}
 	
 	public void finishUpRibbonMenuAndIcon() {
-		colorChooserDialog = new ColorChooserDialog(mc, MainWindow.this); // Must be made before ribbon!
+		colorChooserDialog = new ColorChooserDialog(mc, MainWindow.this, pipeline); // Must be made before ribbon!
 		Ribbon ribbon = new Ribbon(mc, MainWindow.this);
 		mc.getToBricksController().addComponents(ribbon, mc);
 		getContentPane().add(ribbon, BorderLayout.NORTH);

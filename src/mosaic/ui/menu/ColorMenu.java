@@ -2,6 +2,7 @@ package mosaic.ui.menu;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JMenu;
@@ -17,10 +18,16 @@ import mosaic.ui.actions.ShowColorOptionsAction;
 public class ColorMenu extends JMenu implements ChangeListener {
 	private JMenu colorTextMenu;
 	private ColorController cc;
+	private String[] lastSeenLocalizedNames;
+	private ArrayList<JRadioButtonMenuItem> colorNameButtons;
+	private ArrayList<JRadioButtonMenuItem> colorIDButtons;
 	
 	public ColorMenu(ColorSettingsDialog csd, final ColorController cc) {
 		super("Colors");
 		this.cc = cc;
+		lastSeenLocalizedNames = new String[]{};
+		colorNameButtons = new ArrayList<JRadioButtonMenuItem>();
+		colorIDButtons = new ArrayList<JRadioButtonMenuItem>();
 		cc.addChangeListener(this);
 		setDisplayedMnemonicIndex(1);
 		setMnemonic('o');
@@ -35,6 +42,7 @@ public class ColorMenu extends JMenu implements ChangeListener {
 		ButtonGroup ids = new ButtonGroup();
 		for(final ColorController.ShownID shownID : ColorController.ShownID.values()) {
 			JRadioButtonMenuItem item = new JRadioButtonMenuItem(shownID.toString());
+			colorIDButtons.add(item);			
 			item.setMnemonic(shownID.toString().charAt(0));
 			item.setDisplayedMnemonicIndex(0);
 			if(cc.getShownID() == shownID)
@@ -56,16 +64,57 @@ public class ColorMenu extends JMenu implements ChangeListener {
 		add(colorTextMenu);
 		
 		updateColorTextMenu();
+		updateSelectedItems();
+	}
+	
+	private void updateSelectedItems() {
+		// ID's:
+		ColorController.ShownID shownID = cc.getShownID();
+		colorIDButtons.get(shownID.ordinal()).setSelected(true);
+		
+		// Names:
+		ColorController.ShownName shownName = cc.getShownName();
+		if(cc.getShownName() != ShownName.LOCALIZED) {
+			colorNameButtons.get(shownName.ordinal()).setSelected(true);
+			return;
+		}
+		int i = ColorController.ShownName.values().length-1;
+		for(final String localizationName : cc.getLocalizedFileNamesNoTXT()) {
+			if(cc.getLocalizedFileNameNoTXT().equals(localizationName)) {
+				colorNameButtons.get(i).setSelected(true);
+				break;
+			}
+			++i;
+		}		
 	}
 	
 	private void updateColorTextMenu() {
-		colorTextMenu.removeAll(); // TODO: This makes no sense. Why reload everything all the time?
+		// Only change if files have changed!
+		boolean same = true;
+		String[] newLocalizedNames = cc.getLocalizedFileNamesNoTXT();
+		if(lastSeenLocalizedNames.length != newLocalizedNames.length)
+			same = false;
+		else {
+			for(int i = 0; i < lastSeenLocalizedNames.length; ++i) {
+				if(!lastSeenLocalizedNames[i].equals(newLocalizedNames[i])) {
+					same = false;
+					break;
+				}
+			}
+		}
+		if(same)
+			return;
+		lastSeenLocalizedNames = newLocalizedNames;
+		
+		colorNameButtons.clear();
+		colorTextMenu.removeAll(); // Reload everything because a new file in the translations directory might have been added.
 		// Color names:
 		ButtonGroup names = new ButtonGroup();
 		for(final ColorController.ShownName shownName : ColorController.ShownName.values()) {
 			if(shownName.toString() == null)
 				continue;
 			JRadioButtonMenuItem item = new JRadioButtonMenuItem(shownName.toString());
+			colorNameButtons.add(item);
 			item.setMnemonic(shownName.toString().charAt(0));
 			item.setDisplayedMnemonicIndex(0);
 			if(cc.getShownName() == shownName)
@@ -81,6 +130,7 @@ public class ColorMenu extends JMenu implements ChangeListener {
 		}
 		for(final String localizationName : cc.getLocalizedFileNamesNoTXT()) {
 			JRadioButtonMenuItem item = new JRadioButtonMenuItem(localizationName);
+			colorNameButtons.add(item);
 			if(cc.getShownName() == ShownName.LOCALIZED && cc.getLocalizedFileNameNoTXT().equals(localizationName))
 				item.setSelected(true);
 			item.addActionListener(new ActionListener() {				
@@ -97,7 +147,7 @@ public class ColorMenu extends JMenu implements ChangeListener {
 
 	@Override
 	public void stateChanged(ChangeEvent e) {
-		if(e != null && e.getSource() != this)
-			updateColorTextMenu();
+		updateColorTextMenu();
+		updateSelectedItems();
 	}
 }

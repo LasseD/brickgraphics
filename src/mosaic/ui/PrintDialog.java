@@ -40,12 +40,16 @@ public class PrintDialog extends JDialog implements ChangeListener {
 	private LividTextField tfMagnifiersPerPageWidth, tfMagnifiersPerPageHeight, tfMagnifierSizeWidth, tfMagnifierSizeHeight, tfFontSize;
 	private JCheckBox cbCoverPageShow, cbCoverPageShowFileName, cbCoverPageShowLegend, cbShowColors, cbShowLegend, cbShowPageNumber;
 	private JRadioButton[] rbCoverPagePictureType, rbShowPosition;
+	private JComboBox<String> cColorName;
+	private JComboBox<ColorController.ShownID> cColorNumber;
+	private String[] lastSeenLocalizedNames;
 	
 	public PrintDialog(MainWindow mw, PrintController pc, ColorController cc, MagnifierController mc, Pipeline pipeline) {
 		super(mw, "Print Setup");
 		this.pc = pc;
 		this.cc = cc;
 		this.mc = mc;
+		lastSeenLocalizedNames = new String[]{};
 		pc.addChangeListener(this);
 		mc.addChangeListener(this);
 		
@@ -59,6 +63,51 @@ public class PrintDialog extends JDialog implements ChangeListener {
 		if(v)
 			update();
 		super.setVisible(v);
+	}
+	
+	private void setSelectedColorName() {
+		// Set selected index:
+		ColorController.ShownName shownName = cc.getShownName();
+		if(shownName != ShownName.LOCALIZED) {
+			cColorName.setSelectedIndex(shownName.ordinal());
+		}
+		int i = ColorController.ShownName.values().length-1;
+		for(final String localizationName : cc.getLocalizedFileNamesNoTXT()) {
+			if(cc.getLocalizedFileNameNoTXT().equals(localizationName)) {
+				cColorName.setSelectedIndex(i);
+				break;
+			}
+			++i;
+		}		
+	}
+	
+	private void loadColorNames() {
+		// Only change if files have changed!
+		boolean same = true;
+		String[] newLocalizedNames = cc.getLocalizedFileNamesNoTXT();
+		if(lastSeenLocalizedNames.length != newLocalizedNames.length)
+			same = false;
+		else {
+			for(int i = 0; i < lastSeenLocalizedNames.length; ++i) {
+				if(!lastSeenLocalizedNames[i].equals(newLocalizedNames[i])) {
+					same = false;
+					break;
+				}
+			}
+		}
+		if(same)
+			return;
+		lastSeenLocalizedNames = newLocalizedNames;
+		
+		cColorName.removeAllItems();
+		for(final ColorController.ShownName shownName : ColorController.ShownName.values()) {
+			if(shownName.toString() == null)
+				continue;
+			cColorName.addItem(shownName.toString());
+		}
+		for(final String localizationName : newLocalizedNames) {
+			cColorName.addItem(localizationName);
+		}
 	}
 	
 	private void buildUI(Pipeline pipeline) {
@@ -107,7 +156,7 @@ public class PrintDialog extends JDialog implements ChangeListener {
 				// Color number
 				JPanel pColorNumber = new JPanel(new FlowLayout(FlowLayout.LEFT));
 				pColorNumber.add(new JLabel("Color number"));
-				final JComboBox<ColorController.ShownID> cColorNumber = new JComboBox<ColorController.ShownID>(ColorController.ShownID.values());
+				cColorNumber = new JComboBox<ColorController.ShownID>(ColorController.ShownID.values());
 				cColorNumber.setSelectedItem(cc.getShownID());
 				cColorNumber.addActionListener(new ActionListener() {
 					@Override
@@ -123,35 +172,19 @@ public class PrintDialog extends JDialog implements ChangeListener {
 				// Color name 
 				JPanel pColorName = new JPanel(new FlowLayout(FlowLayout.LEFT));
 				pColorName.add(new JLabel("Color name"));
-				final JComboBox<String> cColorName = new JComboBox<String>();
-				for(final ColorController.ShownName shownName : ColorController.ShownName.values()) {
-					if(shownName.toString() == null)
-						continue;
-					cColorName.addItem(shownName.toString());
-				}
-				for(final String localizationName : cc.getLocalizedFileNamesNoTXT()) {
-					cColorName.addItem(localizationName);
-				}
-				// Set selected index:
-				int i = 0;
-				for(final ColorController.ShownName shownName : ColorController.ShownName.values()) {
-					if(shownName.toString() == null)
-						continue;				
-					if(cc.getShownName() == shownName)
-						cColorName.setSelectedIndex(i);
-					++i;
-				}
-				for(final String localizationName : cc.getLocalizedFileNamesNoTXT()) {
-					if(cc.getShownName() == ShownName.LOCALIZED && cc.getLocalizedFileNameNoTXT().equals(localizationName))
-						cColorName.setSelectedIndex(i);
-					++i;
-				}
+				cColorName = new JComboBox<String>();
+				// Separate reloader function (so the list is updated when locales change)
+				loadColorNames();
+				setSelectedColorName();
 				cColorName.addActionListener(new ActionListener() {				
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						int selectedIndex = cColorName.getSelectedIndex();
-						if(selectedIndex < ColorController.ShownName.values().length-1)
-							cc.setShownName(ColorController.ShownName.values()[selectedIndex]);
+						if(selectedIndex < 0)
+							return; // Rebuilding.
+						if(selectedIndex < ColorController.ShownName.values().length-1) {
+							cc.setShownName(ColorController.ShownName.values()[selectedIndex]);							
+						}
 						else {
 							cc.setShownName(ShownName.LOCALIZED);
 							cc.setLocalizedFileNameNoTXT((String)cColorName.getSelectedItem(), PrintDialog.this);						
@@ -236,6 +269,7 @@ public class PrintDialog extends JDialog implements ChangeListener {
 		// Magnifier size:
 		{
 			JPanel pMagnifierSize = new JPanel(new FlowLayout());
+			pMagnifierSize.setAlignmentX(Component.LEFT_ALIGNMENT);
 			pMagnifierSize.setAlignmentX(Component.LEFT_ALIGNMENT);
 			pMagnifierSize.add(new JLabel("Size of the magnifier: "));
 			tfMagnifierSizeWidth = new LividTextField(3);		
@@ -403,6 +437,11 @@ public class PrintDialog extends JDialog implements ChangeListener {
 		cbShowPageNumber.setSelected(pc.getShowPageNumber());
 		rbShowPosition[pc.getShowPosition().ordinal()].setSelected(true);
 
+		if(cColorNumber.getSelectedIndex() != cc.getShownID().ordinal())
+			cColorNumber.setSelectedItem(cc.getShownID());
+		loadColorNames();
+		setSelectedColorName();
+		
 		boolean cps = pc.getCoverPageShow();
 		cbCoverPageShow.setSelected(cps);
 
@@ -425,10 +464,7 @@ public class PrintDialog extends JDialog implements ChangeListener {
 	public void stateChanged(ChangeEvent e) {
 		if(!isVisible())
 			return;
-		//if(e != null && e.getSource() != this)
-			update();
-		//else
-			//updateEnabledFields();
+		update();
 	}
 	
 	@Override

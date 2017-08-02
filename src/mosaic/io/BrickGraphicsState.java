@@ -44,7 +44,7 @@ public enum BrickGraphicsState implements ModelState {
 	PrintFontSize(14f),
 	
 	// Magnifier:
-	MagnifierShowLegend(true),
+	MagnifierShowLegend(false),
 	MagnifierShowColors(true),
 	MagnifierShowTotals(true),
 	MagnifierShow(false),
@@ -62,8 +62,8 @@ public enum BrickGraphicsState implements ModelState {
 	PrepareBrightness(new float[]{1.0f, 1.0f, 1.0f}),
 	PrepareContrast(new float[]{1.0f, 1.0f, 1.0f}),
 	PrepareSaturation(1.0f),
-	PrepareCropEnabled(false),
-	PrepareCrop(new Rectangle2D.Double(0.25, 0.25, 0.5, 0.5)),
+	PrepareCropEnabled(true),
+	PrepareCrop(new Rectangle2D.Double(0.217, 0.042, 0.5, 0.5)),
 	PrepareFiltersEnabled(false),
 
 	// Options dialog:
@@ -72,11 +72,11 @@ public enum BrickGraphicsState implements ModelState {
 	PrepareScaleBeforePreparing(false),
 	
 	// ToBrick:
-	ToBricksWidth(480),
-	ToBricksHeight(160),
+	ToBricksWidth(240),
+	ToBricksHeight(240),
 	ToBricksSizeRatioLocked(true),
 	ToBricksPropagationPercentage(50),
-	SelectedColors(new int[]{0, 1, 2, 14, 15, 19, 70, 71, 72, 320}),
+	SelectedColors(new int[]{0, /*4,*/ 15, 19, 28, 70, 71, 72, 84, 308, 320, 484}),
 	ToBricksFiltered(ToBricksType.getDefaultTypes()),
 	ToBricksTypeIndex(0),
 	

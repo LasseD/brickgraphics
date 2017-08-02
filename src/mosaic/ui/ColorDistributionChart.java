@@ -4,29 +4,29 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 
 import javax.swing.JPanel;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import colors.LEGOColor;
 
 import mosaic.controllers.MainController;
 import mosaic.controllers.UIController;
+import mosaic.rendering.Pipeline;
+import mosaic.rendering.PipelineListener;
 
-public class ColorDistributionChart extends JPanel implements ChangeListener {
+public class ColorDistributionChart extends JPanel implements PipelineListener {
 	public static final int PREFERRED_SIZE = 128;
 	
 	private BrickedView bw;
 	private LEGOColor.CountingLEGOColor[] colors;
 	private UIController uiController;	
 	
-	public ColorDistributionChart(MainController mc, MainWindow mw) {
+	public ColorDistributionChart(MainController mc, MainWindow mw, Pipeline pipeline) {
 		uiController = mc.getUIController();
 		bw = mw.getBrickedView();
 		
-		uiController.addChangeListener(this);
-		mc.getMagnifierController().addChangeListener(this); // when everything changes!
+		pipeline.addMosaicImageListener(this);
 	}
 	
 	@Override
@@ -60,7 +60,7 @@ public class ColorDistributionChart extends JPanel implements ChangeListener {
 	}
 
 	@Override
-	public void stateChanged(ChangeEvent e) {
+	public void imageChanged(BufferedImage image) {
 		boolean visible = uiController.showColorDistributionChart();
 		setVisible(visible);
 		setPreferredSize(visible ? new Dimension(PREFERRED_SIZE, PREFERRED_SIZE) : new Dimension(0, 0));		
