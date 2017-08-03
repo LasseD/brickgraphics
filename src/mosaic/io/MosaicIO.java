@@ -25,8 +25,8 @@ public class MosaicIO {
 	public static final String[] HTML_SUFFIXES = {"htm", "html", "xhtml"};
 	private static String[] IMG_SUFFIXES = null;
 
-	private static void saveMosaic(MainController mc, Model<BrickGraphicsState> model, File file) throws IOException {
-		model.saveToFile(file);
+	private static void saveMosaic(MainController mc, File file) throws IOException {
+		mc.getModel().saveToFile(file);
 		mc.setMosaicFile(file);
 	}
 
@@ -44,7 +44,7 @@ public class MosaicIO {
 		return copy;
 	}
 
-	public static void load(MainController mc, Model<BrickGraphicsState> changingModel, File file) throws IOException {
+	public static void load(MainController mc, File file) throws IOException {
 		FileType fileType = FileType.get(file);
 		switch(fileType) {
 		case mosaic:
@@ -57,7 +57,6 @@ public class MosaicIO {
 			break;
 		case img:
 			BufferedImage read = removeAlpha(ImageIO.read(file));
-			//System.out.println(read);
 			if(read.getType() != BufferedImage.TYPE_INT_RGB) {
 				int w = read.getWidth();
 				int h = read.getHeight();
@@ -78,7 +77,7 @@ public class MosaicIO {
 			IMG_SUFFIXES = ImageIO.getReaderFileSuffixes();		
 	}
 
-	public static Action createOpenAction(final Model<BrickGraphicsState> currentModel, final MainController mc, final MainWindow mw) {
+	public static Action createOpenAction(final MainController mc, final MainWindow mw) {
 		final JFileChooser fileChooser = new JFileChooser();
 		Action open = new AbstractAction() {
 			@Override
@@ -99,7 +98,7 @@ public class MosaicIO {
 				if(retVal == JFileChooser.APPROVE_OPTION) {
 					File file = fileChooser.getSelectedFile();
 					try {
-						load(mc, currentModel, file);
+						load(mc, file);
 					} catch (Exception e1) {
 						String message = "An error ocurred while opening file " + file.getName() + "\n" + e1.getMessage();
 						JOptionPane.showMessageDialog(mw, message, "Error when opening file", JOptionPane.ERROR_MESSAGE);
@@ -158,17 +157,17 @@ public class MosaicIO {
 		return a;
 	}
 
-	public static Action createSaveAction(final Model<BrickGraphicsState> currentModel, final MainController mc, final MainWindow mw) {
+	public static Action createSaveAction(final MainController mc, final MainWindow mw) {
 		Action save = new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				File file = mc.getMosaicFile();
 				if(file == null) {
-					createSaveAsAction(currentModel, mc, mw).actionPerformed(null);
+					createSaveAsAction(mc, mw).actionPerformed(null);
 					return;
 				}
 				try {
-					saveMosaic(mc, currentModel, file);
+					saveMosaic(mc, file);
 				}
 				catch(IOException ex) {
 					String message = "An error ocurred while saving file " + file.getName() + "\n" + ex.getMessage();
@@ -195,7 +194,7 @@ public class MosaicIO {
 		return new File(file.getParent(), file.getName() + "." + suffix);
 	}
 
-	public static Action createSaveAsAction(final Model<BrickGraphicsState> currentModel, final MainController mc, final MainWindow mw) {
+	public static Action createSaveAsAction(final MainController mc, final MainWindow mw) {
 		final FileFilter ff = new FileNameExtensionFilter("." + MOSAIC_SUFFIX, MOSAIC_SUFFIX);
 
 		Action saveAs = new AbstractAction() {
@@ -207,7 +206,7 @@ public class MosaicIO {
 					file = ensureSuffix(file, MOSAIC_SUFFIX);
 					
 					try {
-						saveMosaic(mc, currentModel, file);
+						saveMosaic(mc, file);
 						JOptionPane.showMessageDialog(mw,  "Mosaic file saved sucessfully!", "File saved",JOptionPane.INFORMATION_MESSAGE);
 					} catch (Exception e1) {
 						String message = "An error ocurred while saving file " + file.getName() + "\n" + e1.getMessage();

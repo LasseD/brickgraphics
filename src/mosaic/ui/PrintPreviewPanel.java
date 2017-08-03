@@ -21,7 +21,7 @@ import mosaic.rendering.PipelineListener;
  * @author LD
  */
 public class PrintPreviewPanel extends JPanel implements ChangeListener, PipelineListener {
-	public static final int PADDING_PIXELS = 20;
+	public static final int PADDING_PIXELS = 8;
 	
 	private boolean isCoverPage;
 	private PrintController pc;
@@ -37,7 +37,7 @@ public class PrintPreviewPanel extends JPanel implements ChangeListener, Pipelin
 		setBorder(BorderFactory.createTitledBorder("Preview"));
 		setLayout(new BorderLayout());
 		PicturePanel picturePanel = new PicturePanel();
-		picturePanel.setPreferredSize(new Dimension(200, 200));
+		picturePanel.setPreferredSize(new Dimension(250, 250));
 		add(picturePanel, BorderLayout.CENTER);
 		if(!isCoverPage) {
 			shownPage = 1;

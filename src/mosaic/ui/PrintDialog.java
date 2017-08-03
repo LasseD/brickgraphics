@@ -21,15 +21,6 @@ import mosaic.controllers.PrintController.ShowPosition;
 import mosaic.rendering.Pipeline;
 
 /**
- * Construction:
- * 
- * 1: Common settings:
- *  - Button for page layout.
- *  - Common settings
- * 3: Settings for cover page on left, preview on right.
- * 4: Settings for normal pages: COntrols on left, preview on right. 
- * 5: OK/Cancel buttons. OK => Call to controller.
- * 
  * @author LD
  */
 public class PrintDialog extends JDialog implements ChangeListener {
@@ -71,14 +62,16 @@ public class PrintDialog extends JDialog implements ChangeListener {
 		if(shownName != ShownName.LOCALIZED) {
 			cColorName.setSelectedIndex(shownName.ordinal());
 		}
-		int i = ColorController.ShownName.values().length-1;
-		for(final String localizationName : cc.getLocalizedFileNamesNoTXT()) {
-			if(cc.getLocalizedFileNameNoTXT().equals(localizationName)) {
-				cColorName.setSelectedIndex(i);
-				break;
-			}
-			++i;
-		}		
+		else {
+			int i = ColorController.ShownName.values().length-1;
+			for(final String localizationName : cc.getLocalizedFileNamesNoTXT()) {
+				if(cc.getLocalizedFileNameNoTXT().equals(localizationName)) {
+					cColorName.setSelectedIndex(i);
+					break;
+				}
+				++i;
+			}			
+		}
 	}
 	
 	private void loadColorNames() {
@@ -205,7 +198,7 @@ public class PrintDialog extends JDialog implements ChangeListener {
 		midTopPanel.setBorder(BorderFactory.createTitledBorder("Cover page"));
 		PrintPreviewPanel previewCover = new PrintPreviewPanel(true, pc, cc, pipeline);
 		pc.addChangeListener(previewCover);
-		midTopPanel.add(previewCover, BorderLayout.EAST);
+		midTopPanel.add(previewCover, BorderLayout.CENTER);
 		JPanel midTopLeftPanel = new JPanel();
 		midTopLeftPanel.setLayout(new BoxLayout(midTopLeftPanel, BoxLayout.Y_AXIS));
 		// Settings for cover page:
@@ -262,15 +255,14 @@ public class PrintDialog extends JDialog implements ChangeListener {
 		midBottomPanel.setBorder(BorderFactory.createTitledBorder("Page setup"));
 		PrintPreviewPanel previewPage = new PrintPreviewPanel(false, pc, cc, pipeline);
 		pc.addChangeListener(previewPage);
-		midBottomPanel.add(previewPage, BorderLayout.EAST);			
+		midBottomPanel.add(previewPage, BorderLayout.CENTER);			
 		JPanel midBottomLeftPanel = new JPanel();	
 		midBottomLeftPanel.setLayout(new BoxLayout(midBottomLeftPanel, BoxLayout.Y_AXIS));
 
 		// Magnifier size:
 		{
-			JPanel pMagnifierSize = new JPanel(new FlowLayout());
-			pMagnifierSize.setAlignmentX(Component.LEFT_ALIGNMENT);
-			pMagnifierSize.setAlignmentX(Component.LEFT_ALIGNMENT);
+			JPanel pMagnifierSize = new JPanel(new FlowLayout(FlowLayout.LEFT));
+			//pMagnifierSize.setAlignmentX(Component.LEFT_ALIGNMENT);
 			pMagnifierSize.add(new JLabel("Size of the magnifier: "));
 			tfMagnifierSizeWidth = new LividTextField(3);		
 			pMagnifierSize.add(tfMagnifierSizeWidth);
@@ -308,8 +300,8 @@ public class PrintDialog extends JDialog implements ChangeListener {
 		
 		// Magnifiers per page:
 		{
-			JPanel pMagnifiersPerPage = new JPanel(new FlowLayout());
-			pMagnifiersPerPage.setAlignmentX(Component.LEFT_ALIGNMENT);
+			JPanel pMagnifiersPerPage = new JPanel(new FlowLayout(FlowLayout.LEFT));
+			//pMagnifiersPerPage.setAlignmentX(Component.LEFT_ALIGNMENT);
 			pMagnifiersPerPage.add(new JLabel("Number of magnifiers per page: "));
 			tfMagnifiersPerPageWidth = new LividTextField(3);		
 			pMagnifiersPerPage.add(tfMagnifiersPerPageWidth);
@@ -344,7 +336,9 @@ public class PrintDialog extends JDialog implements ChangeListener {
 				pc.setShowColors(cbShowColors.isSelected(), PrintDialog.this);
 			}
 		});
-		midBottomLeftPanel.add(cbShowColors);
+		JPanel pShowColors = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		pShowColors.add(cbShowColors);
+		midBottomLeftPanel.add(pShowColors);
 		
 		cbShowLegend = new JCheckBox("Show parts callout for each page");
 		cbShowLegend.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -354,7 +348,9 @@ public class PrintDialog extends JDialog implements ChangeListener {
 				pc.setShowLegend(cbShowLegend.isSelected(), PrintDialog.this);
 			}
 		});
-		midBottomLeftPanel.add(cbShowLegend);
+		JPanel pShowLegend = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		pShowLegend.add(cbShowLegend);
+		midBottomLeftPanel.add(pShowLegend);
 		cbShowPageNumber = new JCheckBox("Show page numbers");
 		cbShowPageNumber.setAlignmentX(Component.LEFT_ALIGNMENT);
 		cbShowPageNumber.addActionListener(new ActionListener() {			
@@ -363,7 +359,9 @@ public class PrintDialog extends JDialog implements ChangeListener {
 				pc.setShowPageNumber(cbShowPageNumber.isSelected(), PrintDialog.this);
 			}
 		});
-		midBottomLeftPanel.add(cbShowPageNumber);
+		JPanel pShowPageNumber = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		pShowPageNumber.add(cbShowPageNumber);
+		midBottomLeftPanel.add(pShowPageNumber);
 		
 		JPanel bottomButtonGroupPanel = new JPanel();
 		bottomButtonGroupPanel.setLayout(new BoxLayout(bottomButtonGroupPanel, BoxLayout.Y_AXIS));
@@ -383,7 +381,9 @@ public class PrintDialog extends JDialog implements ChangeListener {
 			bottomButtonGroupPanel.add(rbShowPosition[i]);
 			++i;
 		}
-		midBottomLeftPanel.add(bottomButtonGroupPanel);
+		JPanel pBottomButtonGroupPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		pBottomButtonGroupPanel.add(bottomButtonGroupPanel);
+		midBottomLeftPanel.add(pBottomButtonGroupPanel);
 		midBottomPanel.add(midBottomLeftPanel, BorderLayout.WEST);		
 		
 		midPanel.add(midTopPanel);

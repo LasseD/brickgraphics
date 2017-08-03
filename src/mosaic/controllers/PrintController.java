@@ -5,7 +5,6 @@ import io.*;
 import java.awt.*;
 import java.awt.print.*;
 import java.awt.event.*;
-import java.awt.font.FontRenderContext;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.util.*;
@@ -229,8 +228,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		int columns = Math.max(1, (bom.length+rows-1)/rows);
 		int columnWidth = (xMax-xMin)/columns;
 		int i = 0;
-		int maxWidth = columnWidth - rowHeight;
-		int textHeight = reduceFontSize(bom, g2, maxWidth);
+		int textHeight = fontSizeIn1_72inches;
 
 		for(LEGOColor.CountingLEGOColor c : bom) {
 			int x = i%columns;
@@ -252,39 +250,6 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 			++i;
 		}
 		return yMax;
-	}
-
-	// Return final height.
-	private int reduceFontSize(LEGOColor.CountingLEGOColor[] colors, Graphics2D g2, int maxWidth) {
-		String widestText = "";
-		for(LEGOColor.CountingLEGOColor color : colors) {
-			String s = color.cnt + "x " + colorController.getNormalIdentifier(color.c);
-			if(s.length() > widestText.length())
-				widestText = s;
-		}
-		return reduceFontSize(widestText, g2, maxWidth);
-	}
-	private int reduceFontSize(Set<LEGOColor> colors, Graphics2D g2, int maxWidth) {
-		String widestText = "";
-		for(LEGOColor color : colors) {
-			String s = colorController.getNormalIdentifier(color);
-			if(s != null && s.length() > widestText.length())
-				widestText = s;
-		}
-		return reduceFontSize(widestText, g2, maxWidth);
-	}	
-	private static int reduceFontSize(String widestText, Graphics2D g2, int maxWidth) {
-		Font originalFont = g2.getFont();
-		float size = originalFont.getSize2D();
-		Font font = originalFont;
-		FontRenderContext context = g2.getFontRenderContext();
-		while(font.getStringBounds(widestText, context).getWidth() > maxWidth && size >= 2) {
-			--size;
-			font = originalFont.deriveFont(size);
-			g2.setFont(font);
-			context = g2.getFontRenderContext();
-		}
-		return (int)size;
 	}
 		
 	private static void drawImage(Graphics2D g2, int xMin, int xMax, int yMin, int yMax, BufferedImage image) {
@@ -343,9 +308,6 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		
 		// Cover picture:
 		drawCoverPicture(g2, xMin, xMax, yMin, yMax);
-		
-		//g2.setColor(Color.GREEN);
-		//g2.drawRect(xMin,  yMin, xMax-xMin, yMax-yMin);
 	}
 	
 	private int getFontSizeIn1_72inches(PageFormat pf) {
@@ -413,8 +375,6 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		int fromTop = (page / numPagesWidth)+1;
 		if(showPosition == ShowPosition.Written) {
 			String pageNumberString = "" + fromLeft + " \u2192, " + fromTop + " \u2193.";
-			//String pageNumberString = "" + fromLeft + " mod højre, " + fromTop + " ned.";
-			//String pageNumberString = fromLeft + ". from left, " + fromTop + ". from top.";
 			Rectangle2D pageNumberStringBounds = fm.getStringBounds(pageNumberString, g2);
 			float x = xMin + (float)((xMax-xMin)-pageNumberStringBounds.getWidth())/2;
 			float y = yMin + unit;
@@ -555,7 +515,6 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 			int yIndent = y*shownMagnifierSize.height/magnifiersPerPage.height;
 			g2.drawLine(0, yIndent, shownMagnifierSize.width, yIndent);
 		}
-		//g2.setColor(Color.BLACK);
 		
 		g2.translate(-indentX, -indentY);		
 		return indentY;
@@ -570,8 +529,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		int columnWidth = Math.max(1, (xMax-xMin)/columns);
 		int i = 0;
 		
-		int maxWidth = columnWidth-rowHeight;
-		int textHeight = reduceFontSize(used, g2, maxWidth);
+		int textHeight = fontSizeIn1_72inches;
 
 		for(LEGOColor c : used) {
 			int x = i%columns;
@@ -665,9 +623,6 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		g2.setFont(font);
 		drawLegend(g2, xMin, xMax, yMin, yMax, fontSizeIn1_72inches, used);
 				
-		//g2.setColor(Color.GREEN);
-		//g2.drawRect(xMin,  yMin, xMax-xMin, yMax-yMin);
-		
 	    return PAGE_EXISTS;
 	}
 	

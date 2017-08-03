@@ -8,8 +8,6 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import icon.*;
 import io.Log;
-import io.Model;
-import mosaic.io.BrickGraphicsState;
 import mosaic.io.LDRPrinter;
 import mosaic.ui.BrickedView;
 import mosaic.ui.MainWindow;
@@ -21,7 +19,7 @@ public class ExportLDR extends AbstractAction {
 	private MainController mc;
 	private MainWindow mw;
 	
-	public ExportLDR(final Model<BrickGraphicsState> model, final MainController mc, MainWindow mw) {
+	public ExportLDR(final MainController mc, MainWindow mw) {
 		this.mc = mc;
 		this.mw = mw;
 

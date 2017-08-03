@@ -8,8 +8,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import mosaic.controllers.*;
 import icon.*;
 import io.Log;
-import io.Model;
-import mosaic.io.BrickGraphicsState;
 import mosaic.io.LXFPrinter;
 import mosaic.ui.MainWindow;
 
@@ -19,7 +17,7 @@ public class ExportLXF extends AbstractAction {
 	private MainController mc;
 	private MainWindow mw;
 	
-	public ExportLXF(final Model<BrickGraphicsState> currentModel, final MainController mc, MainWindow mw) {
+	public ExportLXF(final MainController mc, MainWindow mw) {
 		this.mc = mc;
 		this.mw = mw;
 

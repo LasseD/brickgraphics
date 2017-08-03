@@ -1,6 +1,5 @@
 package mosaic.ui.menu;
 
-import io.Model;
 import javax.swing.*;
 import icon.*;
 import ui.AboutDialog;
@@ -13,19 +12,19 @@ import mosaic.ui.actions.*;
 public class MainMenu extends JMenuBar {
 	private static final long serialVersionUID = 3921145264492575680L;
 
-	public MainMenu(MainController mc, MainWindow mw, Model<BrickGraphicsState> model, ColorSettingsDialog csd) {
+	public MainMenu(MainController mc, MainWindow mw, ColorSettingsDialog csd) {
 		// File menu:
 		JMenu fileMenu = new JMenu("File");
 		fileMenu.setDisplayedMnemonicIndex(0);
 		fileMenu.setMnemonic('F');
-		fileMenu.add(MosaicIO.createOpenAction(model, mc, mw));
-		fileMenu.add(MosaicIO.createSaveAction(model, mc, mw));
-		fileMenu.add(MosaicIO.createSaveAsAction(model, mc, mw));
-		fileMenu.add(new ExportLDR(model, mc, mw));
-		fileMenu.add(new ExportLXF(model, mc, mw));
+		fileMenu.add(MosaicIO.createOpenAction(mc, mw));
+		fileMenu.add(MosaicIO.createSaveAction(mc, mw));
+		fileMenu.add(MosaicIO.createSaveAsAction(mc, mw));
+		fileMenu.add(new ExportLDR(mc, mw));
+		fileMenu.add(new ExportLXF(mc, mw));
 		fileMenu.add(mc.getPrintController().createPrintAction());
 		fileMenu.addSeparator();
-		fileMenu.add(new ExitAction(model));
+		fileMenu.add(new ExitAction(mc.getModel()));
 
 		// Edit menu:
 		JMenu editMenu = new JMenu("Edit");

@@ -89,11 +89,11 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 		
 		if(!imageDataFile.isValid()) {
 			try {
-				MosaicIO.load(this, model, new File(imageFileName));
+				MosaicIO.load(this, new File(imageFileName));
 			}
 			catch (Exception e) {
 				Log.log(e);
-				Action openAction = MosaicIO.createOpenAction(model, MainController.this, mw);
+				Action openAction = MosaicIO.createOpenAction(this, mw);
 				openAction.actionPerformed(null);
 			}				
 		}
