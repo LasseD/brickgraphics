@@ -16,8 +16,10 @@ import bricks.ToBricksType;
 import colors.LEGOColor;
 import mosaic.controllers.MagnifierController;
 import mosaic.io.BrickGraphicsState;
+import mosaic.rendering.GrayScaleGraphics2D;
 import mosaic.rendering.Pipeline;
-import mosaic.rendering.PipelineListener;
+import mosaic.rendering.PipelineImageListener;
+import mosaic.rendering.PipelineMosaicListener;
 import mosaic.ui.*;
 import transforms.ToBricksTransform;
 import icon.*;
@@ -26,7 +28,7 @@ import icon.*;
  * This class takes care of the printing mechanism
  * @author LD
  */
-public class PrintController implements Printable, ModelHandler<BrickGraphicsState>, PipelineListener {
+public class PrintController implements Printable, ModelHandler<BrickGraphicsState>, PipelineImageListener, PipelineMosaicListener {
 	private MainController mc;
 	private List<ChangeListener> listeners;
 	private PrintDialog printDialog;
@@ -35,6 +37,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 	private UIController uiController;
 	private ColorController colorController;
 	private BufferedImage lastPreparedImage;
+	private Dimension lastMosaicSize;
 	// Model state:
 	private boolean coverPageShow, coverPageShowFileName, coverPageShowLegend, showLegend, showPageNumber;
 	private float fontSizeMM;
@@ -63,6 +66,8 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		});
 
 		printDialog = new PrintDialog(mw, this, colorController, magnifierController, pipeline);
+		pipeline.addPreparedImageListener(this);
+		pipeline.addMosaicListener(this);
 	}
 	
 	public void print() {
@@ -252,6 +257,15 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		return yMax;
 	}
 		
+	private static Rectangle getSizeOfDrawnImage(int xMin, int xMax, int yMin, int yMax, Dimension imageSize) {
+		double scale = (xMax-xMin)/imageSize.getWidth();
+		if(scale*imageSize.getHeight() > (yMax-yMin)) {
+			scale = (yMax-yMin)/imageSize.getHeight();			
+		}
+		int x = (int)(xMin + ((xMax-xMin)-imageSize.width*scale));
+		return new Rectangle(x, yMin, (int)(scale*imageSize.width), (int)(scale*imageSize.height));
+	}
+
 	private static void drawImage(Graphics2D g2, int xMin, int xMax, int yMin, int yMax, BufferedImage image) {
 		double scale = (xMax-xMin)/(double)image.getWidth();
 		if(scale*image.getHeight() > (yMax-yMin)) {
@@ -271,19 +285,26 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 			BufferedImage left = lastPreparedImage;
 			drawImage(g2, xMin, xMin + (xMax-xMin)*9/20, yMin, yMax, left);
 			
-			BufferedImage right = mw.getFinalImage();
-			drawImage(g2, xMin + (xMax-xMin)*11/20, xMax, yMin, yMax, right);
+			int startX = xMin + (xMax-xMin)*11/20;
+			Rectangle drawRect = getSizeOfDrawnImage(startX, xMax, yMin, yMax, lastMosaicSize);
+			g2.translate(drawRect.x, drawRect.y);
+			mw.getBrickedView().getToBricksTransform().drawAll(g2, new Dimension(drawRect.width, drawRect.height));
+			g2.translate(-drawRect.x, -drawRect.y);
+			//Dimension right = mw.getFinalImageSize();
+			//drawImage(g2, , xMax, , yMax, right);
 			return;
 		}
 		
-		BufferedImage image;
 		if(coverPagePictureType == CoverPagePictureType.Original) {
-			image = lastPreparedImage;
+			drawImage(g2, xMin, xMax, yMin, yMax, lastPreparedImage);
 		}
 		else {
-			image = mw.getFinalImage();
+			Rectangle drawRect = getSizeOfDrawnImage(xMin, xMax, yMin, yMax, lastMosaicSize);
+			g2.translate(xMin, yMin);
+			mw.getBrickedView().getToBricksTransform().drawAll(g2, new Dimension(drawRect.width, drawRect.height));
+			g2.translate(-xMin, -yMin);
+			//image = mw.getFinalImageSize();
 		}
-		drawImage(g2, xMin, xMax, yMin, yMax, image);
 	}
 	
 	private void printCoverPage(Graphics2D g2, PageFormat pf) {
@@ -345,23 +366,6 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		g2.drawLine(x, topY, x-arrowSize, topY+arrowSize);
 		g2.drawLine(x, bottomY, x+arrowSize, bottomY-arrowSize);
 		g2.drawLine(x, bottomY, x-arrowSize, bottomY-arrowSize);
-	}
-	
-	private BufferedImage grayImage;
-	private BufferedImage grayImageIn;
-	private BufferedImage getGrayImage(BufferedImage orig, int width, int height) {
-		if(grayImageIn == orig && grayImage != null && grayImage.getWidth() == width && grayImage.getHeight() == height) {
-			return grayImage;
-		}
-		// Build and return gray Image:
-		grayImageIn = orig;
-		grayImage = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_GRAY);				
-		AffineTransform at = AffineTransform.getScaleInstance(width/(double)orig.getWidth(), height/(double)orig.getHeight());
-
-		Graphics2D g2 = grayImage.createGraphics();
-	    g2.drawImage(orig, at, null);
-		
-		return grayImage;
 	}
 	
 	private double drawShowPosition(int page, int numPagesWidth, int numPagesHeight, FontMetrics fm, int xMin, int xMax, int yMin, int yMax, 
@@ -426,10 +430,13 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 			int outerBoxX = xMid - outerBoxWidth/2;
 			
 			// Draw gray picture:
-			BufferedImage finalImage = mw.getFinalImage();
+			//BufferedImage finalImage = mw.getFinalImageSize();
 			int grayWidth = (int)Math.round(outerBoxWidth * coreImageInCoreUnits.width/((double)pageSizeInCoreUnits.width*numPagesWidth));
 			int grayHeight = (int)Math.round(outerBoxHeight * coreImageInCoreUnits.height/((double)pageSizeInCoreUnits.height*numPagesHeight));
-			g2.drawImage(getGrayImage(finalImage, grayWidth, grayHeight), null, outerBoxX, yMin);			
+			g2.translate(outerBoxX, yMin);
+			mw.getBrickedView().getToBricksTransform().drawAll(new GrayScaleGraphics2D(g2), 
+					new Dimension(grayWidth, grayHeight));
+			g2.translate(-outerBoxX, -yMin);
 			
 			g2.drawRect(outerBoxX, yMin, outerBoxWidth, outerBoxHeight);
 			int xLeft = outerBoxX + (int)((fromLeft-1)*innerBoxWidth);
@@ -483,14 +490,16 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		g2.setColor(Color.BLACK);
 		g2.translate(indentX, indentY);
 		ToBricksTransform tbTransform = magnifierController.getTBTransform();
-		int basicUnitWidth = tbTransform.getToBricksType().getUnitWidth();
-		int basicUnitHeight = tbTransform.getToBricksType().getUnitHeight();
+		//int basicUnitWidth = tbTransform.getToBricksType().getUnitWidth();
+		//int basicUnitHeight = tbTransform.getToBricksType().getUnitHeight();
 		Rectangle basicUnitRect = magnifierController.getCoreRect();
 		basicUnitRect.width *= magnifiersPerPage.width;
 		basicUnitRect.height *= magnifiersPerPage.height;
 		basicUnitRect.x = (page % numPagesWidth)*basicUnitRect.width;
 		basicUnitRect.y = (page / numPagesWidth)*basicUnitRect.height;
 		
+		used.addAll(tbTransform.draw(g2, basicUnitRect, shownMagnifierSize, uiController.showColors(), true));
+		/*
 		if(tbTransform.getToBricksType() == ToBricksType.SNOT_IN_2_BY_2) {
 			if(uiController.showColors())
 				used.addAll(tbTransform.drawLastColors(g2, basicUnitRect, basicUnitWidth, basicUnitHeight, shownMagnifierSize, 0, 0));
@@ -504,7 +513,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 			}
 			else
 				used.addAll(tbTransform.getMainTransform().drawLastInstructions(g2, basicUnitRect, basicUnitWidth, basicUnitHeight, shownMagnifierSize));
-		}
+		}*/
 		
 		g2.setColor(Color.RED);
 		for(int x = 1; x < magnifiersPerPage.width; ++x) {
@@ -554,11 +563,11 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 	
 	public int getNumberOfPages() {
 		// Find out how big the magnifier is:
-		BufferedImage coreImage = magnifierController.getCoreImageInCoreUnits();
+		Dimension coreImage = magnifierController.getCoreImageSizeInCoreUnits();
 		if(coreImage == null)
 			return 0; // Not ready.
-		final int coreImageInCoreUnitsW = coreImage.getWidth();
-		final int coreImageInCoreUnitsH = coreImage.getHeight();
+		final int coreImageInCoreUnitsW = coreImage.width;
+		final int coreImageInCoreUnitsH = coreImage.height;
 		final Dimension magnifierSizeInCoreUnits = magnifierController.getSizeInUnits();
 		final int pageSizeInCoreUnitsW = magnifierSizeInCoreUnits.width * magnifiersPerPage.width;
 		final int pageSizeInCoreUnitsH = magnifierSizeInCoreUnits.height * magnifiersPerPage.height;
@@ -581,8 +590,8 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 			--page;
 		
 		// Find out how big the magnifier is:
-		final int coreImageInCoreUnitsW = magnifierController.getCoreImageInCoreUnits().getWidth();
-		final int coreImageInCoreUnitsH = magnifierController.getCoreImageInCoreUnits().getHeight();
+		final int coreImageInCoreUnitsW = magnifierController.getCoreImageSizeInCoreUnits().width;
+		final int coreImageInCoreUnitsH = magnifierController.getCoreImageSizeInCoreUnits().height;
 		final Dimension coreImageInCoreUnits = new Dimension(coreImageInCoreUnitsW, coreImageInCoreUnitsH);
 		final Dimension magnifierSizeInCoreUnits = magnifierController.getSizeInUnits();
 		final int pageSizeInCoreUnitsW = magnifierSizeInCoreUnits.width * magnifiersPerPage.width;
@@ -653,5 +662,10 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 	@Override
 	public void imageChanged(BufferedImage image) {
 		lastPreparedImage = image;
+	}
+
+	@Override
+	public void mosaicChanged(Dimension mosaicImageSize) {
+		lastMosaicSize = mosaicImageSize;
 	}
 }

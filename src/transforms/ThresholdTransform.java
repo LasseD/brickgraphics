@@ -41,10 +41,8 @@ public class ThresholdTransform extends BufferedLEGOColorTransform {
 	}
 
 	@Override
-	public Dimension getTransformedSize(BufferedImage in) {
-		int w = in.getWidth();
-		int h = in.getHeight();
-		return new Dimension(w, h);
+	public Dimension getTransformedSize(Dimension in) {
+		return in;
 	}
 
 	@Override

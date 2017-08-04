@@ -38,8 +38,8 @@ public class SharpnessTransform extends StateTransform<Float> {
 	}
 
 	@Override
-	public Dimension getTransformedSize(BufferedImage in) {
-		return new Dimension(in.getWidth(), in.getHeight());
+	public Dimension getTransformedSize(Dimension in) {
+		return in;
 	}
 
 	@Override

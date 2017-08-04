@@ -27,13 +27,12 @@ public class CropTransform extends BufferedTransform {
 	}
 
 	@Override
-	public Dimension getTransformedSize(BufferedImage in) {
-		int w = in.getWidth();
-		int h = in.getHeight();
-
+	public Dimension getTransformedSize(Dimension in) {
 		if(!cropper.isEnabled())
-			return new Dimension(w, h);
+			return in;
 		
+		int w = in.width;
+		int h = in.height;
 		Rectangle r = cropper.getCrop(0, 0, w, h);
 		return new Dimension(r.width, r.height);
 	}

@@ -64,8 +64,8 @@ public class ContrastTransform extends RGBTransform {
 	}
 
 	@Override
-	public Dimension getTransformedSize(BufferedImage in) {
-		return new Dimension(in.getWidth(), in.getHeight());
+	public Dimension getTransformedSize(Dimension in) {
+		return in;
 	}
 
 	@Override

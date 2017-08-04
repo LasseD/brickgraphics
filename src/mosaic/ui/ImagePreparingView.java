@@ -5,7 +5,7 @@ import mosaic.controllers.OptionsController;
 import mosaic.controllers.ToBricksController;
 import mosaic.io.BrickGraphicsState;
 import mosaic.rendering.Pipeline;
-import mosaic.rendering.PipelineListener;
+import mosaic.rendering.PipelineImageListener;
 import mosaic.rendering.ProgressCallback;
 import mosaic.ui.menu.ImagePreparingToolBar;
 import java.awt.image.*;
@@ -117,7 +117,7 @@ public class ImagePreparingView extends JComponent implements ModelHandler<Brick
 				return shouldScaleBeforePreparing(in) ? toBrickedPixelsSizeScaler.transform(in) : in;
 			}
 			@Override
-			public Dimension getTransformedSize(BufferedImage in) {
+			public Dimension getTransformedSize(Dimension in) {
 				throw new UnsupportedOperationException();
 			}
 			@Override
@@ -140,7 +140,7 @@ public class ImagePreparingView extends JComponent implements ModelHandler<Brick
 					return t.transform(in); // t reports progress.
 				}
 				@Override
-				public Dimension getTransformedSize(BufferedImage in) {
+				public Dimension getTransformedSize(Dimension in) {
 					throw new UnsupportedOperationException();
 				}
 				@Override
@@ -177,7 +177,7 @@ public class ImagePreparingView extends JComponent implements ModelHandler<Brick
 				return in;
 			}
 			@Override
-			public Dimension getTransformedSize(BufferedImage in) {
+			public Dimension getTransformedSize(Dimension in) {
 				throw new UnsupportedOperationException();
 			}
 			@Override
@@ -192,13 +192,13 @@ public class ImagePreparingView extends JComponent implements ModelHandler<Brick
 				progressCallbackForLastTransformUsedAsSource = p; // Save this callback to be used in the other transforms.				
 			}});
 		
-		pipeline.addInImageListener(new PipelineListener() {
+		pipeline.addInImageListener(new PipelineImageListener() {
 			@Override
 			public void imageChanged(BufferedImage image) {
 				inImage = image;
 			}
 		});
-		pipeline.addPreparedImageListener(new PipelineListener() {			
+		pipeline.addPreparedImageListener(new PipelineImageListener() {			
 			@Override
 			public void imageChanged(BufferedImage image) {
 				preparedImage = image;

@@ -2,17 +2,16 @@ package mosaic.ui;
 
 import icon.*;
 import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.util.*;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import mosaic.controllers.*;
 import mosaic.rendering.Pipeline;
-import mosaic.rendering.PipelineListener;
+import mosaic.rendering.PipelineMosaicListener;
 import colors.LEGOColor;
 
-public class ColorLegend extends JToolBar implements ChangeListener, PipelineListener {
+public class ColorLegend extends JToolBar implements ChangeListener, PipelineMosaicListener {
 	private BrickedView brickedView;
 	private LEGOColor.CountingLEGOColor[] colors;
 	private ColorController cc;
@@ -26,7 +25,7 @@ public class ColorLegend extends JToolBar implements ChangeListener, PipelineLis
 		uc = mc.getUIController();
 		uc.addChangeListener(this);
 		brickedView = mw.getBrickedView();
-		pipeline.addMosaicImageListener(this);
+		pipeline.addMosaicListener(this);
 		
 		list = new JList<LEGOColor.CountingLEGOColor>();
 		list.setAutoscrolls(true);
@@ -117,7 +116,7 @@ public class ColorLegend extends JToolBar implements ChangeListener, PipelineLis
 	}
 
 	@Override
-	public void imageChanged(BufferedImage image) {
+	public void mosaicChanged(Dimension ignore) {
 		colors = brickedView.getLegendColors();
 		list.setListData(colors);
 	}

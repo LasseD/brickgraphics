@@ -6,7 +6,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
 import java.awt.print.*;
 import javax.swing.*;
 import javax.swing.event.*;
@@ -15,12 +14,12 @@ import ui.LividTextField;
 import mosaic.controllers.ColorController;
 import mosaic.controllers.PrintController;
 import mosaic.rendering.Pipeline;
-import mosaic.rendering.PipelineListener;
+import mosaic.rendering.PipelineMosaicListener;
 
 /**
  * @author LD
  */
-public class PrintPreviewPanel extends JPanel implements ChangeListener, PipelineListener {
+public class PrintPreviewPanel extends JPanel implements ChangeListener, PipelineMosaicListener {
 	public static final int PADDING_PIXELS = 8;
 	
 	private boolean isCoverPage;
@@ -33,7 +32,7 @@ public class PrintPreviewPanel extends JPanel implements ChangeListener, Pipelin
 		this.pc = pc;
 		pc.addChangeListener(this);
 		cc.addChangeListener(this);
-		pipeline.addMosaicImageListener(this);
+		pipeline.addMosaicListener(this);
 		setBorder(BorderFactory.createTitledBorder("Preview"));
 		setLayout(new BorderLayout());
 		PicturePanel picturePanel = new PicturePanel();
@@ -181,7 +180,7 @@ public class PrintPreviewPanel extends JPanel implements ChangeListener, Pipelin
 	}
 
 	@Override
-	public void imageChanged(BufferedImage image) {
+	public void mosaicChanged(Dimension ignore) {
 		update();
 	}
 }

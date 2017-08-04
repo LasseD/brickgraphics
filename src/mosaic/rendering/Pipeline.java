@@ -2,6 +2,7 @@ package mosaic.rendering;
 
 import io.Log;
 
+import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
@@ -14,7 +15,8 @@ public class Pipeline extends Thread {
 	private ArrayList<Transform> transforms;
 	private ToBricksTransform toBricksTransform;
 
-	private ArrayList<PipelineListener> inImageListeners, preparedImageListeners, mosaicImageListeners;
+	private ArrayList<PipelineImageListener> inImageListeners, preparedImageListeners;
+	private ArrayList<PipelineMosaicListener> mosaicListeners;
 	private Object token = new Object(); // For locking.
 	private BufferedImage startImage;
 	private long lastInvalidated; // Synchronized. May only be accessed when token is held!
@@ -22,9 +24,9 @@ public class Pipeline extends Thread {
 
 	public Pipeline(RenderingProgressBar renderingProgressBar) {
 		transforms = new ArrayList<Transform>();
-		inImageListeners = new ArrayList<PipelineListener>();
-		preparedImageListeners = new ArrayList<PipelineListener>();
-		mosaicImageListeners = new ArrayList<PipelineListener>();
+		inImageListeners = new ArrayList<PipelineImageListener>();
+		preparedImageListeners = new ArrayList<PipelineImageListener>();
+		mosaicListeners = new ArrayList<PipelineMosaicListener>();
 		this.renderingProgressBar = renderingProgressBar;
 	}
 	
@@ -36,16 +38,16 @@ public class Pipeline extends Thread {
 		this.toBricksTransform = toBricksTransform;
 		renderingProgressBar.registerTransform(toBricksTransform);
 	}
-	public void addInImageListener(PipelineListener l) {
+	public void addInImageListener(PipelineImageListener l) {
 		inImageListeners.add(l);
 		if(startImage != null)
 			l.imageChanged(startImage);
 	}
-	public void addPreparedImageListener(PipelineListener l) {
+	public void addPreparedImageListener(PipelineImageListener l) {
 		preparedImageListeners.add(l);
 	}
-	public void addMosaicImageListener(PipelineListener l) {
-		mosaicImageListeners.add(l);
+	public void addMosaicListener(PipelineMosaicListener l) {
+		mosaicListeners.add(l);
 	}
 	
 	public void invalidate() {
@@ -58,7 +60,7 @@ public class Pipeline extends Thread {
 		if(image == null || startImage == image || image.getWidth() == 0 || image.getHeight() == 0)
 			return;
 		startImage = image;
-		for(PipelineListener l : inImageListeners)
+		for(PipelineImageListener l : inImageListeners)
 			l.imageChanged(image);
 		invalidate();
 	}
@@ -99,14 +101,16 @@ public class Pipeline extends Thread {
 			}
 			image = t.transform(image);
 		}
-		for(PipelineListener l : preparedImageListeners) {
+		for(PipelineImageListener l : preparedImageListeners) {
 			l.imageChanged(image);			
 		}
 		// Run toBrickStep:
 		if(toBricksTransform != null) {
-			image = toBricksTransform.transform(image);
-			for(PipelineListener l : mosaicImageListeners) {
-				l.imageChanged(image);			
+			Dimension imageSize = new Dimension(image.getWidth(), image.getHeight());
+			toBricksTransform.transform(image); // Returns null.
+			imageSize = toBricksTransform.getTransformedSize(imageSize);
+			for(PipelineMosaicListener l : mosaicListeners) {
+				l.mosaicChanged(imageSize);
 			}			
 		}
 		renderingProgressBar.resetProgress();

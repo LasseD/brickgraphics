@@ -2,7 +2,6 @@ package mosaic.ui;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.image.BufferedImage;
 import java.beans.*;
 import java.io.File;
 import java.io.IOException;
@@ -158,8 +157,8 @@ public class MainWindow extends JFrame implements ChangeListener, ModelHandler<B
 		return splitPane;
 	}
 	
-	public BufferedImage getFinalImage() {
-		return mc.getMagnifierController().getCoreImageInCoreUnits();
+	public Dimension getFinalImageSize() {
+		return mc.getMagnifierController().getCoreImageSizeInCoreUnits();
 	}
 	
 	@Override

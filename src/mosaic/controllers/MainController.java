@@ -4,6 +4,7 @@ import io.*;
 
 import java.awt.image.*;
 import java.io.*;
+import javax.swing.filechooser.FileFilter;
 import java.util.*;
 import javax.imageio.*;
 import javax.swing.*;
@@ -101,7 +102,6 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 			notifyListeners(model);
 		
 		printController = new PrintController(model, this, mw, pipeline);
-		pipeline.addPreparedImageListener(printController);
 		saveDialog = new SaveDialog(mw);
 		toBricksTypeFilterDialog = new ToBricksTypeFilterDialog(toBricksController, mw);
 		
@@ -157,12 +157,13 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 		this.mosaicFile = file;
 	}
 	
-	public SaveDialog getSaveDialog() {
-		return saveDialog;
+	public File showSaveDialog(String saveMessage, FileFilter filter) {		
+		return saveDialog.showSaveDialog(saveMessage, filter);
 	}
 	
-	public ToBricksTypeFilterDialog getToBricksTypeFilterDialog() {
-		return toBricksTypeFilterDialog;
+	public void showToBricksTypeFilterDialog() {
+		toBricksTypeFilterDialog.pack();
+		toBricksTypeFilterDialog.setVisible(true);
 	}
 	
 	public String getFileName() {

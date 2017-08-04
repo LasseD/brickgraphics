@@ -18,6 +18,6 @@ public interface InstructionsTransform extends Transform {
 	 * @return a set with the colors used.
 	 */
 	public Set<LEGOColor> drawLastInstructions(Graphics2D g2, Rectangle unitBounds, int blockWidth, int blockHeight, Dimension toSize);
-	public Set<LEGOColor> drawLastColors(Graphics2D g2, Rectangle unitBounds, int blockWidth, int blockHeight, Dimension toSize, int numStudsWide, int numStudsTall);
+	public Set<LEGOColor> drawLastColors(Graphics2D g2, Rectangle unitBounds, int blockWidth, int blockHeight, Dimension toSize, int numStudsWide, int numStudsTall, boolean drawOutlines);
 	public LEGOColor.CountingLEGOColor[] lastUsedColorCounts();
 }

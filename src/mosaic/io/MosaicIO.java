@@ -200,7 +200,7 @@ public class MosaicIO {
 		Action saveAs = new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				File file = mc.getSaveDialog().showSaveDialog("Save the mosaic file", ff);
+				File file = mc.showSaveDialog("Save the mosaic file", ff);
 				
 				if(file != null) {
 					file = ensureSuffix(file, MOSAIC_SUFFIX);

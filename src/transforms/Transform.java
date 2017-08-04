@@ -8,7 +8,7 @@ import mosaic.rendering.ProgressCallback;
 
 public interface Transform {
 	BufferedImage transform(BufferedImage in);
-	Dimension getTransformedSize(BufferedImage in);
+	Dimension getTransformedSize(Dimension in);
 	void paintIcon(Graphics2D g, int size);
 	void setProgressCallback(ProgressCallback p);
 }

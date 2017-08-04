@@ -24,7 +24,7 @@ public class ShowOptionsAction extends AbstractAction {
 		putValue(Action.LARGE_ICON_KEY, Icons.get(Icons.SIZE_LARGE, "preferences"));
 		putValue(Action.MNEMONIC_KEY, KeyEvent.VK_F2);
 		putValue(Action.DISPLAYED_MNEMONIC_INDEX_KEY, NAME_STR.indexOf('S'));
-		putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F2, 0));
+		putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F4, 0));
 	}
 
 	@Override

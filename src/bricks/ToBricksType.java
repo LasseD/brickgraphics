@@ -8,7 +8,7 @@ import colors.*;
 import transforms.*;
 
 /**
- * @author ld
+ * @author LD
  */
 public enum ToBricksType {
 	STUD_FROM_TOP(Icons.studsFromTop(1, 1), "1 x 1 plates seen from the top.", SizeInfo.BRICK_WIDTH, SizeInfo.BRICK_WIDTH, 1, 1) {
@@ -35,7 +35,7 @@ public enum ToBricksType {
 			throw new UnsupportedOperationException();
 		}
 		@Override
-		public Dimension getTransformedSize(BufferedImage in, ToBricksTransform tbt) {
+		public Dimension getTransformedSize(Dimension in, ToBricksTransform tbt) {
 			Dimension normal = tbt.getPlateFromSideTransform(1).getTransformedSize(in);
 			Dimension sideways = tbt.getVerticalPlateFromSideTransform().getTransformedSize(in);
 
@@ -212,7 +212,10 @@ public enum ToBricksType {
 		in = tbt.getRTransform().transform(in);
 		return in;
 	}
-	public Dimension getTransformedSize(BufferedImage in, ToBricksTransform tbt) {
-		return getPreparationTransform(tbt).getTransformedSize(in);
+	public Dimension getTransformedSize(Dimension in, ToBricksTransform tbt) {
+		in = getPreparationTransform(tbt).getTransformedSize(in);
+		in = tbt.getMainTransform().getTransformedSize(in);
+		in = tbt.getRTransform().getTransformedSize(in);
+		return in;
 	}		
 }

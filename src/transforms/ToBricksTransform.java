@@ -237,7 +237,7 @@ public class ToBricksTransform implements InstructionsTransform {
 	}
 
 	@Override
-	public Dimension getTransformedSize(BufferedImage in) {
+	public Dimension getTransformedSize(Dimension in) {
 		return toBricksType.getTransformedSize(in, this);
 	}
 
@@ -250,21 +250,48 @@ public class ToBricksTransform implements InstructionsTransform {
 		if(blockWidth != 10 || blockHeight != 10)
 			throw new IllegalArgumentException("Block 10x10");
 			
-		return drawLastInstructions(g2, basicUnitRect, toSize, false);
+		return drawSnot(g2, basicUnitRect, toSize, false, true);
+	}
+	
+	public Set<LEGOColor> drawAll(Graphics2D g2, Dimension toSize) {
+		Rectangle basicUnitRect = new Rectangle(0, 0, width, height);
+		return draw(g2, basicUnitRect, toSize, true, false);
+	}
+	
+	public Set<LEGOColor> draw(Graphics2D g2, Rectangle basicUnitRect, Dimension toSize, boolean showColors, boolean showOutlines) {
+		int basicUnitWidth = getToBricksType().getUnitWidth();
+		int basicUnitHeight = getToBricksType().getUnitHeight();
+		Set<LEGOColor> used;
+		if(getToBricksType() == ToBricksType.SNOT_IN_2_BY_2) {
+			if(showColors)
+				used = drawLastColors(g2, basicUnitRect, basicUnitWidth, basicUnitHeight, toSize, 0, 0, showOutlines);
+			else
+				used = drawLastInstructions(g2, basicUnitRect, basicUnitWidth, basicUnitHeight, toSize);
+		}
+		else {
+			if(showColors) {
+				ToBricksType tbt = getToBricksType();
+				used = getMainTransform().drawLastColors(g2, basicUnitRect, basicUnitWidth, basicUnitHeight, toSize, tbt.getStudsShownWide(), tbt.getStudsShownTall(), showOutlines);
+			}
+			else
+				used = getMainTransform().drawLastInstructions(g2, basicUnitRect, basicUnitWidth, basicUnitHeight, toSize);
+		}
+		return used;
 	}
 
 	/*
 	 * Only for SNOT
 	 */
 	@Override
-	public Set<LEGOColor> drawLastColors(Graphics2D g2, Rectangle basicUnitRect, int blockWidth, int blockHeight, Dimension toSize, int numStudsWide, int numStudsTall) {
+	public Set<LEGOColor> drawLastColors(Graphics2D g2, Rectangle basicUnitRect, int blockWidth, int blockHeight, Dimension toSize, int numStudsWide, int numStudsTall, boolean showOutlines) {
 		if(blockWidth != 10 || blockHeight != 10)
 			throw new IllegalArgumentException("Block 10x10");
 			
-		return drawLastInstructions(g2, basicUnitRect, toSize, true);
+		return drawSnot(g2, basicUnitRect, toSize, true, showOutlines);
 	}
 	
-	private Set<LEGOColor> drawLastInstructions(Graphics2D g2, Rectangle basicUnitRect, Dimension toSize, boolean drawColors) {
+	private Set<LEGOColor> drawSnot(Graphics2D g2, Rectangle basicUnitRect, 
+			Dimension toSize, boolean drawColors, boolean showOutlines) {
 		if(!drawColors) {
 			g2.setColor(Color.WHITE);
 			g2.fillRect(0, 0, toSize.width, toSize.height);			
@@ -276,13 +303,18 @@ public class ToBricksTransform implements InstructionsTransform {
 		double scaleW = (double)toSize.width / w;
 		double scaleH = (double)toSize.height / h;
 
-		Font font = LEGOColor.makeFont(g2, (int)(scaleW/5), (int)(scaleH/5), cc, lastUsedColorCounts());
-		g2.setFont(font);
-		FontMetrics fm = g2.getFontMetrics(font);
-		int fontHeight = (fm.getDescent()+fm.getAscent())/2;
+		int fontHeight = 0;
+		if(!drawColors) {
+			Font font = LEGOColor.makeFont(g2, (int)(scaleW/5), (int)(scaleH/5), cc, lastUsedColorCounts());
+			g2.setFont(font);
+			FontMetrics fm = g2.getFontMetrics(font);
+			fontHeight = (fm.getDescent()+fm.getAscent())/2;			
+		}
 		
-		g2.setColor(Color.BLACK);
-		g2.drawRect(0, 0, toSize.width, toSize.height);
+		if(showOutlines) {
+			g2.setColor(Color.BLACK);
+			g2.drawRect(0, 0, toSize.width, toSize.height);			
+		}
 		Set<LEGOColor> used = new TreeSet<LEGOColor>();
 		for(int x = 0; x < w; x++) {
 			for(int y = 0; y < h; y++) {
@@ -291,10 +323,10 @@ public class ToBricksTransform implements InstructionsTransform {
 				
 				if(normalColorsChoosen.length > ix && normalColorsChoosen[ix].length > iy) {
 					if(normalColorsChoosen[ix][iy]) {
-						used.addAll(snot(g2, basicUnitRect, true, drawColors, scaleW, scaleH, fontHeight, x, y));
+						used.addAll(snot(g2, basicUnitRect, true, drawColors, scaleW, scaleH, fontHeight, x, y, showOutlines));
 					}
 					else {
-						used.addAll(snot(g2, basicUnitRect, false, drawColors, scaleW, scaleH, fontHeight, x, y));
+						used.addAll(snot(g2, basicUnitRect, false, drawColors, scaleW, scaleH, fontHeight, x, y, showOutlines));
 					}		
 				}
 			}
@@ -306,7 +338,7 @@ public class ToBricksTransform implements InstructionsTransform {
 	 * For Instructions
 	 */
 	private List<LEGOColor> snot(Graphics2D g2, Rectangle basicUnitRect, boolean normal, boolean drawColors, 
-			          			 double scaleW, double scaleH, int fontSize, int x, int y) {
+			          			 double scaleW, double scaleH, int fontSize, int x, int y, boolean showOutlines) {
 		int n2 = 2;
 		int n5 = 5;
 		if(!normal) {
@@ -330,8 +362,11 @@ public class ToBricksTransform implements InstructionsTransform {
 
 				if(drawColors) {
 					g2.setColor(color.getRGB());
-					g2.fill(r);					
-					g2.setColor(color.getRGB() == Color.BLACK ? Color.WHITE : Color.BLACK);
+					g2.fill(r);
+					if(showOutlines) {
+						g2.setColor(color.getRGB() == Color.BLACK ? Color.WHITE : Color.BLACK);
+						g2.draw(r);						
+					}
 				}
 				else {
 					String id = cc.getShortIdentifier(color); // ix + "x" + iy;//
@@ -339,8 +374,8 @@ public class ToBricksTransform implements InstructionsTransform {
 					int originX = (int)(r.getCenterX() - width/2);
 					int originY = (int)(r.getCenterY() + fontSize/2);
 					g2.drawString(id, originX, originY);											
+					g2.draw(r);					
 				}
-				g2.draw(r);					
 			}			
 		}
 		return used;

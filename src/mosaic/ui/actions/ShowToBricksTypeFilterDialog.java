@@ -8,7 +8,7 @@ import icon.*;
 import mosaic.controllers.MainController;
 
 /**
- * @author ld
+ * @author LD
  */
 public class ShowToBricksTypeFilterDialog extends AbstractAction {
 	public static final String NAME_STR = "Construction techniques";
@@ -27,7 +27,6 @@ public class ShowToBricksTypeFilterDialog extends AbstractAction {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		controller.getToBricksTypeFilterDialog().pack();
-		controller.getToBricksTypeFilterDialog().setVisible(true);
+		controller.showToBricksTypeFilterDialog();
 	}
 }

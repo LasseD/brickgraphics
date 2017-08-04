@@ -4,8 +4,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
-
 import javax.swing.JPanel;
 
 import colors.LEGOColor;
@@ -13,9 +11,9 @@ import colors.LEGOColor;
 import mosaic.controllers.MainController;
 import mosaic.controllers.UIController;
 import mosaic.rendering.Pipeline;
-import mosaic.rendering.PipelineListener;
+import mosaic.rendering.PipelineMosaicListener;
 
-public class ColorDistributionChart extends JPanel implements PipelineListener {
+public class ColorDistributionChart extends JPanel implements PipelineMosaicListener {
 	public static final int PREFERRED_SIZE = 128;
 	
 	private BrickedView bw;
@@ -26,7 +24,7 @@ public class ColorDistributionChart extends JPanel implements PipelineListener {
 		uiController = mc.getUIController();
 		bw = mw.getBrickedView();
 		
-		pipeline.addMosaicImageListener(this);
+		pipeline.addMosaicListener(this);
 	}
 	
 	@Override
@@ -60,7 +58,7 @@ public class ColorDistributionChart extends JPanel implements PipelineListener {
 	}
 
 	@Override
-	public void imageChanged(BufferedImage image) {
+	public void mosaicChanged(Dimension ignore) {
 		boolean visible = uiController.showColorDistributionChart();
 		setVisible(visible);
 		setPreferredSize(visible ? new Dimension(PREFERRED_SIZE, PREFERRED_SIZE) : new Dimension(0, 0));		

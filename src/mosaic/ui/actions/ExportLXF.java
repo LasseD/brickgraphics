@@ -33,7 +33,7 @@ public class ExportLXF extends AbstractAction {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		final FileFilter ff = new FileNameExtensionFilter("LDD model, ." + LXF_SUFFIX, LXF_SUFFIX);
-		File file = mc.getSaveDialog().showSaveDialog("Export mosaic to LDD", ff);
+		File file = mc.showSaveDialog("Export mosaic to LDD", ff);
 		
 		if(file != null) {			
 			try {

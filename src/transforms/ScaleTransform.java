@@ -104,21 +104,22 @@ public class ScaleTransform extends BufferedTransform {
         Object renderingHint = quality.renderingHint;
         if(renderingHint == null) {
         	// Fill arrays:
-        	int fromPixels[] = new int[in.getWidth() * in.getHeight()];
-        	fromPixels = in.getRGB(0, 0, in.getWidth(), in.getHeight(), fromPixels, 0, in.getWidth());
+        	int inWidth = in.getWidth();
+        	int fromPixels[] = new int[inWidth * in.getHeight()];
+        	fromPixels = in.getRGB(0, 0, inWidth, in.getHeight(), fromPixels, 0, inWidth);
         	int rgbArray[] = new int[w*h];
 
         	// First the dimensional arrays:
         	int xArray[] = new int[w];
         	for(int x = 0; x < w; ++x)
-        		xArray[x] = (int)(x*in.getWidth()/(double)w);
+        		xArray[x] = (int)(x*inWidth/(double)w);
         	
         	// Fill the output array:
         	for(int y = 0; y < h; ++y) {
         		progressCallback.reportProgress(1000*y/h);
         		int fromY = (int)(y*in.getHeight()/(double)h);
             	for(int x = 0; x < w; ++x) {
-            		rgbArray[y*w + x] = fromPixels[fromY*in.getWidth() + xArray[x]];
+            		rgbArray[y*w + x] = fromPixels[fromY*inWidth + xArray[x]];
             	}        		
         	}        	        	
         	resized.setRGB(0, 0, w, h, rgbArray, 0, w);
@@ -134,7 +135,6 @@ public class ScaleTransform extends BufferedTransform {
         	progressCallback.reportProgress(1000);
         }
 		
-        //System.out.print(usage + ": " + in.getWidth() + "x" + in.getHeight() + "->" + resized.getWidth() + "x" + resized.getHeight() + ". ");
 		return resized;
 	}
 	
@@ -162,16 +162,17 @@ public class ScaleTransform extends BufferedTransform {
 	}
 
 	@Override
-	public Dimension getTransformedSize(BufferedImage in) {
-		int w = in.getWidth();
-		int h = in.getHeight();
+	public Dimension getTransformedSize(Dimension in) {
+		int w = in.width;
+		int h = in.height;
 		if(w <= 0 || h <= 0 || width <= 0 || height <= 0)
-			return new Dimension(0,0);
+			return in;
 				
 		Scale scale = getScale(w, h);
 		
 		w = (int)Math.round(scale.w*w);
 		h = (int)Math.round(scale.h*h);
+		
 		return new Dimension(w, h);
 	}
 

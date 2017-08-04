@@ -1,6 +1,7 @@
 package mosaic.io;
 
 import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -9,11 +10,9 @@ import java.util.zip.ZipOutputStream;
 import javax.imageio.ImageIO;
 import bricks.*;
 import mosaic.controllers.*;
-import mosaic.rendering.ProgressCallback;
 import mosaic.ui.*;
 import colors.*;
 import transforms.*;
-import transforms.ScaleTransform.ScaleQuality;
 
 /**
  * Class responsible for outputting to LXF file. 
@@ -76,11 +75,15 @@ public class LXFPrinter {
 		{
 			ZipEntry ze = new ZipEntry("IMAGE100.PNG");
 			zos.putNextEntry(ze);
-			BufferedImage image = mw.getFinalImage();
-			ScaleTransform t = new ScaleTransform("Thumbnail for LXF file", true, ScaleQuality.BiLinear, 0);
-			t.setHeight(128);
-			t.setWidth(128);
-			ImageIO.write(t.transformUnbuffered(image, ProgressCallback.NOP), "png", zos);
+			BufferedImage image = new BufferedImage(128, 128, BufferedImage.TYPE_INT_RGB);
+			Graphics2D g2 = (Graphics2D)image.getGraphics();
+			mw.getBrickedView().getToBricksTransform().drawAll(g2, new Dimension(128, 128));
+			//BufferedImage image = mw.getFinalImageSize();
+			//ScaleTransform t = new ScaleTransform("Thumbnail for LXF file", true, ScaleQuality.BiLinear, 0);
+			//t.setHeight(128);
+			//t.setWidth(128);
+			//ImageIO.write(t.transformUnbuffered(image, ProgressCallback.NOP), "png", zos);
+			ImageIO.write(image, "png", zos);
 			zos.flush();			
 		}
 		

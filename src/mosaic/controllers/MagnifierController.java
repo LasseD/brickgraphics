@@ -5,12 +5,12 @@ import io.*;
 import java.util.*;
 import java.util.List;
 import java.awt.event.*;
-import java.awt.image.*;
 import java.awt.*;
+
 import javax.swing.event.*;
 import transforms.ToBricksTransform;
 import mosaic.io.BrickGraphicsState;
-import mosaic.rendering.PipelineListener;
+import mosaic.rendering.PipelineMosaicListener;
 import mosaic.ui.*;
 
 /**
@@ -21,14 +21,14 @@ import mosaic.ui.*;
  *  - switch view of symbols/colors (matching legend)
  * @author LD
  */
-public class MagnifierController implements ChangeListener, MouseListener, MouseMotionListener, KeyListener, ModelHandler<BrickGraphicsState>, PipelineListener {
+public class MagnifierController implements ChangeListener, MouseListener, MouseMotionListener, KeyListener, ModelHandler<BrickGraphicsState>, PipelineMosaicListener {
 	private List<ChangeListener> listeners; // such as GUI components (actual magnifier) and bricked view with rectangle.
 	private UIController uiController;
 
 	private Dimension sizeInMosaicBlocks; // with block size of core image as unit
 	
 	private Point corePositionInCoreUnits; // on core image - moved by core image block size.
-	private BufferedImage coreImageInCoreUnits; // to move mouse on
+	private Dimension coreImageSizeInCoreUnits; // to move mouse on
 	private ToBricksTransform tbTransform; // with info for core image
 	private Dimension shownImageSizeInPixels;
 	private Point mouseOffset;
@@ -115,22 +115,22 @@ public class MagnifierController implements ChangeListener, MouseListener, Mouse
 	 * Sanifies the following parameters:
 	 */
 	private void sanify() {
-		if(coreImageInCoreUnits == null || tbTransform == null || sizeInMosaicBlocks == null)
+		if(coreImageSizeInCoreUnits == null || tbTransform == null || sizeInMosaicBlocks == null)
 			return;
 		
 		// sizeInMosaicBlocks:
-		int maxBlockSizeWidth = coreImageInCoreUnits.getWidth()/tbTransform.getToBricksType().getUnitWidth();
+		int maxBlockSizeWidth = coreImageSizeInCoreUnits.width/tbTransform.getToBricksType().getUnitWidth();
 		sizeInMosaicBlocks.width = bound(sizeInMosaicBlocks.width, 1, maxBlockSizeWidth);
-		int maxBlockSizeHeight = coreImageInCoreUnits.getHeight()/tbTransform.getToBricksType().getUnitHeight();
+		int maxBlockSizeHeight = coreImageSizeInCoreUnits.height/tbTransform.getToBricksType().getUnitHeight();
 		sizeInMosaicBlocks.height = bound(sizeInMosaicBlocks.height, 1, maxBlockSizeHeight);
 		
 		// corePosition:
 		int bw = getMagnifierWidthInCoreUnits();
 		int bh = getMagnifierHeightInCoreUnits();
-		corePositionInCoreUnits.x = bound(corePositionInCoreUnits.x, 0, coreImageInCoreUnits.getWidth()-1);
+		corePositionInCoreUnits.x = bound(corePositionInCoreUnits.x, 0, coreImageSizeInCoreUnits.width-1);
 		if(corePositionInCoreUnits.x % bw != 0)
 			corePositionInCoreUnits.x = 0;
-		corePositionInCoreUnits.y = bound(corePositionInCoreUnits.y, 0, coreImageInCoreUnits.getHeight()-1);
+		corePositionInCoreUnits.y = bound(corePositionInCoreUnits.y, 0, coreImageSizeInCoreUnits.height-1);
 		if(corePositionInCoreUnits.y % bh != 0)
 			corePositionInCoreUnits.y = 0;		
 	}
@@ -168,8 +168,8 @@ public class MagnifierController implements ChangeListener, MouseListener, Mouse
 		return new Rectangle(corePositionInCoreUnits.x, corePositionInCoreUnits.y, getMagnifierWidthInCoreUnits(), getMagnifierHeightInCoreUnits());
 	}
 
-	public BufferedImage getCoreImageInCoreUnits() {
-		return coreImageInCoreUnits;
+	public Dimension getCoreImageSizeInCoreUnits() {
+		return coreImageSizeInCoreUnits;
 	}
 	
 	public void setMouseOffset(int x, int y) {
@@ -186,10 +186,10 @@ public class MagnifierController implements ChangeListener, MouseListener, Mouse
 	}
 
 	private void snapCoreToGrid(Point mouseOnShown) {
-		if(coreImageInCoreUnits == null || sizeInMosaicBlocks == null || shownImageSizeInPixels == null)
+		if(coreImageSizeInCoreUnits == null || sizeInMosaicBlocks == null || shownImageSizeInPixels == null)
 			return;
-		int mouseOnCoreXInCoreUnits = (int)(mouseOnShown.x / (double)shownImageSizeInPixels.width * coreImageInCoreUnits.getWidth());
-		int mouseOnCoreYInCoreUnits = (int)(mouseOnShown.y / (double)shownImageSizeInPixels.height * coreImageInCoreUnits.getHeight());
+		int mouseOnCoreXInCoreUnits = (int)(mouseOnShown.x / (double)shownImageSizeInPixels.width * coreImageSizeInCoreUnits.getWidth());
+		int mouseOnCoreYInCoreUnits = (int)(mouseOnShown.y / (double)shownImageSizeInPixels.height * coreImageSizeInCoreUnits.getHeight());
 
 		corePositionInCoreUnits = new Point(mouseOnCoreXInCoreUnits, mouseOnCoreYInCoreUnits);
 
@@ -200,8 +200,8 @@ public class MagnifierController implements ChangeListener, MouseListener, Mouse
 		int unitW = getMagnifierWidthInCoreUnits();
 		int unitH = getMagnifierHeightInCoreUnits();
 
-		corePositionInCoreUnits.x = bound(corePositionInCoreUnits.x, 0, coreImageInCoreUnits.getWidth()-1);
-		corePositionInCoreUnits.y = bound(corePositionInCoreUnits.y, 0, coreImageInCoreUnits.getHeight()-1);
+		corePositionInCoreUnits.x = bound(corePositionInCoreUnits.x, 0, coreImageSizeInCoreUnits.width-1);
+		corePositionInCoreUnits.y = bound(corePositionInCoreUnits.y, 0, coreImageSizeInCoreUnits.height-1);
 		
 		corePositionInCoreUnits.x = (int)(corePositionInCoreUnits.x/(double)unitW)*unitW;
 		corePositionInCoreUnits.y = (int)(corePositionInCoreUnits.y/(double)unitH)*unitH;		
@@ -212,11 +212,11 @@ public class MagnifierController implements ChangeListener, MouseListener, Mouse
 	 * @param canvas
 	 */
 	public void drawHighlightRect(Graphics2D g2) {
-		if(!uiController.showMagnifier() || coreImageInCoreUnits == null || shownImageSizeInPixels == null)
+		if(!uiController.showMagnifier() || coreImageSizeInCoreUnits == null || shownImageSizeInPixels == null)
 			return;
 		// draw highlighting rectangle:
-		double scaleX = shownImageSizeInPixels.width / (double)coreImageInCoreUnits.getWidth();
-		double scaleY = shownImageSizeInPixels.height / (double)coreImageInCoreUnits.getHeight();
+		double scaleX = shownImageSizeInPixels.width / coreImageSizeInCoreUnits.getWidth();
+		double scaleY = shownImageSizeInPixels.height / coreImageSizeInCoreUnits.getHeight();
 		int x = (int)Math.round(corePositionInCoreUnits.x * scaleX);
 		int y = (int)Math.round(corePositionInCoreUnits.y * scaleY);
 		int w = (int)Math.round(getMagnifierWidthInCoreUnits() * scaleX)-2; 
@@ -243,12 +243,15 @@ public class MagnifierController implements ChangeListener, MouseListener, Mouse
 	 */
 	@Override
 	public void keyPressed(KeyEvent e) {
+		if(!uiController.showMagnifier())
+			return;
+		
 		int key = e.getKeyCode();
 		int incX = getMagnifierWidthInCoreUnits();
 		int incY = getMagnifierHeightInCoreUnits();
 		
-		int w = coreImageInCoreUnits.getWidth();
-		int h = coreImageInCoreUnits.getHeight();
+		int w = coreImageSizeInCoreUnits.width;
+		int h = coreImageSizeInCoreUnits.height;
 		
 		switch(key) {
 		case KeyEvent.VK_LEFT:
@@ -291,6 +294,8 @@ public class MagnifierController implements ChangeListener, MouseListener, Mouse
 	public void mouseExited(MouseEvent e) {}
 	@Override
 	public void mouseDragged(MouseEvent e) {
+		if(!uiController.showMagnifier())
+			return;
 		Point p = e.getPoint();
 		moveMouseToShownImage(p);
 		snapCoreToGrid(p);
@@ -302,6 +307,8 @@ public class MagnifierController implements ChangeListener, MouseListener, Mouse
 	public void keyTyped(KeyEvent e) {}
 	@Override
 	public void mousePressed(MouseEvent e) {
+		if(!uiController.showMagnifier())
+			return;
 		Point p = e.getPoint();
 		moveMouseToShownImage(p);
 		snapCoreToGrid(p);
@@ -309,6 +316,8 @@ public class MagnifierController implements ChangeListener, MouseListener, Mouse
 	}
 	@Override
 	public void mouseReleased(MouseEvent e) {
+		if(!uiController.showMagnifier())
+			return;
 		Point p = e.getPoint();
 		moveMouseToShownImage(p);
 		snapCoreToGrid(p);
@@ -323,8 +332,8 @@ public class MagnifierController implements ChangeListener, MouseListener, Mouse
 	}
 
 	@Override
-	public void imageChanged(BufferedImage image) {
-		this.coreImageInCoreUnits = image;
+	public void mosaicChanged(Dimension mosaicImageSize) {
+		this.coreImageSizeInCoreUnits = mosaicImageSize;
 		sanify();
 	}
 }

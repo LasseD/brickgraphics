@@ -43,7 +43,9 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform,
 
 	@Override
 	public BufferedImage transform(BufferedImage in) {
-		return transformSet(in).out;
+		transformSet(in);
+		return null;
+		//return transformSet(in).out;
 	}
 
 	private TransformationSet transformSet(BufferedImage in) {
@@ -57,7 +59,7 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform,
 		TransformationSet s = new TransformationSet();
 		s.in = in;
 		s.colors = lcTransformUnbuffered(in);
-		s.out = toBufferedImage(s.colors);
+		//s.out = toBufferedImage(s.colors);
 
 		if (sets.length == 0)
 			return s;
@@ -71,11 +73,11 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform,
 	}
 
 	private static class TransformationSet {
-		public BufferedImage in, out;
+		public BufferedImage in;//, out;
 		public LEGOColorGrid colors;
 	}
 
-	private static BufferedImage toBufferedImage(LEGOColorGrid lcs) {
+	/*private static BufferedImage toBufferedImage(LEGOColorGrid lcs) {
 		int h = lcs.getHeight();
 		int w = lcs.getWidth();
 		BufferedImage out = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
@@ -90,7 +92,7 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform,
 		}
 		out.setRGB(0, 0, w, h, pixels, 0, w);
 		return out;
-	}
+	}*/
 
 	@Override
 	public Set<LEGOColor> drawLastInstructions(Graphics2D g2,
@@ -149,12 +151,12 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform,
 	@Override
 	public Set<LEGOColor> drawLastColors(Graphics2D g2, Rectangle unitBounds,
 			int blockWidth, int blockHeight, Dimension toSize,
-			int numStudsWide, int numStudsTall) {
+			int numStudsWide, int numStudsTall, boolean drawOutlines) {
 		// Find scaling parameters:
 		int w = unitBounds.width / blockWidth;
 		int h = unitBounds.height / blockHeight;
-		double scaleW = toSize.width / (double) w;
-		double scaleH = toSize.height / (double) h;
+		double scaleW = toSize.width / (double)w;
+		double scaleH = toSize.height / (double)h;
 		int cellW = (int) Math.ceil(scaleW);
 		int cellH = (int) Math.ceil(scaleH);
 
@@ -182,7 +184,7 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform,
 					g2.setColor(color.getRGB());
 					g2.fill(r);
 
-					if (numStudsWide > 0) {
+					if (numStudsWide > 0 && drawOutlines) {
 						g2.setColor(color.getRGB() == Color.BLACK ? Color.WHITE
 								: Color.BLACK);
 						// Draw studs:s
@@ -199,6 +201,9 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform,
 				}
 			}
 		}
+		
+		if(!drawOutlines)
+			return used;
 
 		// Draw lines:
 		// Draw upper and left lines as the others will be drawn brick by brick:

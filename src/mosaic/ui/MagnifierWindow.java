@@ -3,25 +3,22 @@ package mosaic.ui;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.image.BufferedImage;
 import java.util.Set;
 import javax.swing.*;
 import javax.swing.event.*;
 import transforms.ToBricksTransform;
-import bricks.ToBricksType;
 import colors.LEGOColor;
 import mosaic.controllers.*;
 import mosaic.rendering.Pipeline;
-import mosaic.rendering.PipelineListener;
+import mosaic.rendering.PipelineMosaicListener;
 import mosaic.ui.menu.*;
 
-public class MagnifierWindow extends JDialog implements ChangeListener, PipelineListener {
+public class MagnifierWindow extends JDialog implements ChangeListener, PipelineMosaicListener {
 	private MagnifierController magnifierController;
 	private UIController uiController;
 	private MagnifierCanvas canvas;
 	private boolean everShown;
 	private ColorLegend legend;
-	//private JSplitPane splitPane;
 
 	public MagnifierWindow(final MainController mc, MainWindow mw, Pipeline pipeline) {
 		super(mw, "Magnifier", false);
@@ -41,7 +38,7 @@ public class MagnifierWindow extends JDialog implements ChangeListener, Pipeline
 		add(new MagnifierToolBar(magnifierController, uiController), BorderLayout.NORTH);
 
 		legend = new ColorLegend(mc, mw, pipeline);
-		pipeline.addMosaicImageListener(this);
+		pipeline.addMosaicListener(this);
 		add(canvas, BorderLayout.CENTER);
 				
 		// listener for key presses:
@@ -53,7 +50,7 @@ public class MagnifierWindow extends JDialog implements ChangeListener, Pipeline
 				uiController.flipShowMagnifier();
 			}
 		});
-		//setDefaultCloseOperation(DISPOSE_ON_CLOSE); NO!
+		setDefaultCloseOperation(DISPOSE_ON_CLOSE); // So the listener above is called.
 	}
 	
 	public ColorLegend getLegend() {
@@ -92,11 +89,11 @@ public class MagnifierWindow extends JDialog implements ChangeListener, Pipeline
 			// draw magnified:
 			g2.setColor(Color.BLACK);
 			ToBricksTransform tbTransform = magnifierController.getTBTransform();
-			int basicUnitWidth = tbTransform.getToBricksType().getUnitWidth();
-			int basicUnitHeight = tbTransform.getToBricksType().getUnitHeight();
+			//int basicUnitWidth = tbTransform.getToBricksType().getUnitWidth();
+			//int basicUnitHeight = tbTransform.getToBricksType().getUnitHeight();
 			Rectangle basicUnitRect = magnifierController.getCoreRect();
-			Set<LEGOColor> used;
-			if(tbTransform.getToBricksType() == ToBricksType.SNOT_IN_2_BY_2) {
+			Set<LEGOColor> used = tbTransform.draw(g2, basicUnitRect, shownMagnifierSize, uiController.showColors(), true);
+			/*if(tbTransform.getToBricksType() == ToBricksType.SNOT_IN_2_BY_2) {
 				if(uiController.showColors())
 					used = tbTransform.drawLastColors(g2, basicUnitRect, basicUnitWidth, basicUnitHeight, shownMagnifierSize, 0, 0);
 				else
@@ -109,7 +106,7 @@ public class MagnifierWindow extends JDialog implements ChangeListener, Pipeline
 				}
 				else
 					used = tbTransform.getMainTransform().drawLastInstructions(g2, basicUnitRect, basicUnitWidth, basicUnitHeight, shownMagnifierSize);
-			}
+			}*/
 			legend.setHighlightedColors(used);
 		}
 	}
@@ -134,7 +131,7 @@ public class MagnifierWindow extends JDialog implements ChangeListener, Pipeline
 	}
 
 	@Override
-	public void imageChanged(BufferedImage image) {
+	public void mosaicChanged(Dimension ignore) {
 		stateChanged(null);
 	}
 }

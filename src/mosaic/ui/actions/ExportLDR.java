@@ -39,7 +39,7 @@ public class ExportLDR extends AbstractAction {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		final FileFilter ff = new FileNameExtensionFilter("LDraw model, ." + LDR_SUFFIX, LDR_SUFFIX);
-		File file = mc.getSaveDialog().showSaveDialog("Export mosaic to LDraw", ff);
+		File file = mc.showSaveDialog("Export mosaic to LDraw", ff);
 		
 		if(file != null) {			
 			try {
