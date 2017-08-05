@@ -8,6 +8,7 @@ import mosaic.controllers.*;
 import mosaic.io.*;
 import mosaic.ui.*;
 import mosaic.ui.actions.*;
+import mosaic.ui.dialogs.ColorSettingsDialog;
 
 public class MainMenu extends JMenuBar {
 	private static final long serialVersionUID = 3921145264492575680L;

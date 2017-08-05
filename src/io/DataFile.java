@@ -1,7 +1,11 @@
 package io;
 
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.file.*;
+
+import javax.imageio.ImageIO;
+
 import sun.misc.*;
 
 public class DataFile {
@@ -13,6 +17,12 @@ public class DataFile {
 	
 	public DataFile(String base64) throws IOException {
 		data = new BASE64Decoder().decodeBuffer(base64);
+	}
+	
+	public DataFile(BufferedImage image) throws IOException {
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		ImageIO.write(image, "png", os);
+		data = os.toByteArray();
 	}
 	
 	public DataFile() {

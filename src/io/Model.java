@@ -68,6 +68,11 @@ public class Model<S extends ModelState> {
 	}
 	
 	public void set(S state, Object value) {
+		if(value == null) {
+			if(savedValues != null)
+				savedValues.add(state);
+			return;
+		}
 		if(!aExtendsB(value.getClass(), state.getType()))
 			if(value.getClass() != state.getType())
 				throw new IllegalArgumentException("Wrong type: " + state.getType() + "!=" + value.getClass());

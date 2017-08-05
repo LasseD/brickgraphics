@@ -14,6 +14,7 @@ import mosaic.io.*;
 import mosaic.rendering.Pipeline;
 import mosaic.rendering.RenderingProgressBar;
 import mosaic.ui.*;
+import mosaic.ui.dialogs.ToBricksTypeFilterDialog;
 
 /**
  * @author LD
@@ -45,7 +46,6 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 	private ToBricksTypeFilterDialog toBricksTypeFilterDialog;
 	
 	// Image (for model state):
-	private BufferedImage inImage;
 	private String imageFileName;
 	private DataFile imageDataFile;
 	private File mosaicFile;
@@ -67,7 +67,7 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 		pipeline = new Pipeline(renderingProgressBar);
 		Log.log("Model file loaded");
 		handleModelChange(model);
-		model.addModelHandler(this);
+		//model.addModelHandler(this);
 		
 		// Set up controllers:
 		optionsController = new OptionsController(model);
@@ -82,6 +82,7 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 		listeners.add(mw);
 		toBricksController.initiateUI(mw);
 		optionsController.initiateOptionsDialog(mw);
+		model.addModelHandler(this); // Make sure the load of image file is late in the process when loading a model.
 		Log.log("LDDMC main window operational after " + (System.currentTimeMillis()-startTime) + "ms.");
 
 		if(colorController.usesBackupColors()) {
@@ -130,9 +131,14 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 	}
 	
 	public void setImage(BufferedImage image, File imageFile) throws IOException {
-		inImage = image;
-		imageDataFile = new DataFile(imageFile);
-		imageFileName = imageFile.getCanonicalPath();
+		if(imageFile == null) {
+			imageDataFile = new DataFile(image);
+			imageFileName = null;
+		}
+		else {
+			imageDataFile = new DataFile(imageFile);		
+			imageFileName = imageFile.getCanonicalPath();			
+		}
 		mosaicFile = null;
 		pipeline.setStartImage(image);
 		notifyListeners(this);
@@ -171,15 +177,13 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 	}
 
 	public File getFile() {
+		if(imageFileName == null)
+			return null;
 		return new File(imageFileName);
 	}
 	
 	public Model<BrickGraphicsState> getModel() {
 		return model;
-	}
-
-	public BufferedImage getInImage() {
-		return inImage;
 	}
 	
 	public ColorController getColorController() {
@@ -213,11 +217,14 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 		if(imageDataFile.isValid()) {
 			try {
 				BufferedImage image = MosaicIO.removeAlpha(ImageIO.read(imageDataFile.fakeStream()));
+				Log.log("Setting start image!");
 				pipeline.setStartImage(image);
 			} catch (IOException e) {
 				Log.log(e);
 			}			
 		}
+		else
+			Log.log("INVALID Image data file!");
 	}
 
 	@Override

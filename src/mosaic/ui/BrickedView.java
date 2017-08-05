@@ -70,7 +70,7 @@ public class BrickedView extends JComponent implements ChangeListener, PipelineM
 		magnifierController.setShownImageSize(shownImageSize);
 			
 		Graphics2D g2 = (Graphics2D)g;
-		g2.translate(1, 1); // make space for highlight rect
+		g2.translate(1, 1); // make space for highlight rectangle:
 
 		// Perform actual drawing:
 		if(getWidth() > shownImageSize.width) {

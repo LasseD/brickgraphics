@@ -10,7 +10,7 @@ import javax.swing.event.ChangeListener;
 import transforms.ScaleTransform.ScaleQuality;
 import mosaic.io.BrickGraphicsState;
 import mosaic.ui.MainWindow;
-import mosaic.ui.OptionsDialog;
+import mosaic.ui.dialogs.OptionsDialog;
 
 /**
  * Class for handling the options in the options dialog

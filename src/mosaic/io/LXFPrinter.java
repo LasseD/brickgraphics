@@ -84,7 +84,7 @@ public class LXFPrinter {
 			//t.setWidth(128);
 			//ImageIO.write(t.transformUnbuffered(image, ProgressCallback.NOP), "png", zos);
 			ImageIO.write(image, "png", zos);
-			zos.flush();			
+			zos.flush();
 		}
 		
 		// Close down:

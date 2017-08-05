@@ -1,7 +1,10 @@
 package mosaic.ui;
 
 import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 import java.beans.*;
 import java.io.File;
 import java.io.IOException;
@@ -11,8 +14,11 @@ import javax.swing.*;
 import javax.swing.event.*;
 import mosaic.controllers.*;
 import mosaic.io.BrickGraphicsState;
+import mosaic.io.MosaicIO;
 import mosaic.rendering.Pipeline;
 import mosaic.rendering.RenderingProgressBar;
+import mosaic.ui.dialogs.ColorChooserDialog;
+import mosaic.ui.dialogs.ColorSettingsDialog;
 import mosaic.ui.menu.*;
 
 public class MainWindow extends JFrame implements ChangeListener, ModelHandler<BrickGraphicsState> {
@@ -32,13 +38,12 @@ public class MainWindow extends JFrame implements ChangeListener, ModelHandler<B
 		this.pipeline = pipeline;
 		model.addModelHandler(this);
 		long startTime = System.currentTimeMillis();
-		
+
 		setVisible(true);
 
 		imagePreparingView = new ImagePreparingView(model, mc.getOptionsController(), mc.getToBricksController(), pipeline);
-		//imagePreparingView.addChangeListener(this);
 		Log.log("Created left view after " + (System.currentTimeMillis()-startTime) + "ms.");
-		
+
 		brickedView = new BrickedView(mc, model, pipeline);
 		Log.log("Created right view after " + (System.currentTimeMillis()-startTime) + "ms.");
 		magnifierWindow = new MagnifierWindow(mc, this, pipeline);
@@ -105,13 +110,52 @@ public class MainWindow extends JFrame implements ChangeListener, ModelHandler<B
 			cp.add(pLegend, BorderLayout.EAST);
 		}
 
+		{
+			// Add drag'n'drop to the panel where it makes sense to drop stuff::
+			imagePreparingView.setTransferHandler(new TransferHandler() {
+				@Override
+				public boolean canImport(TransferHandler.TransferSupport info) {
+					return info.isDataFlavorSupported(DataFlavor.imageFlavor) ||
+							info.isDataFlavorSupported(DataFlavor.javaFileListFlavor);
+				}
+
+				@Override
+				public boolean importData(TransferHandler.TransferSupport info) {
+					System.out.println("Attempting drop");
+					if (!info.isDrop() || !canImport(info))
+						return false;
+
+					// Get the image that is being dropped.
+					Transferable t = info.getTransferable();
+					try {
+						if(info.isDataFlavorSupported(DataFlavor.imageFlavor)) {
+							BufferedImage data = (BufferedImage)t.getTransferData(DataFlavor.imageFlavor);
+							MosaicIO.load(mc, data);							
+						}
+						else { // File to load
+							@SuppressWarnings("rawtypes")
+							java.util.List files = (java.util.List)t.getTransferData(DataFlavor.javaFileListFlavor);
+							if(files.isEmpty())
+								return false;
+							File file = (File)files.get(0);
+							MosaicIO.load(mc, file);
+						}
+						return true;
+					} 
+					catch (Exception e) { 
+						return false; 
+					}
+				}
+			});
+		}
+
 		cp.add(splitPane, BorderLayout.CENTER);
 		cp.add(renderingProgressBar, BorderLayout.SOUTH);
 
 		handleModelChange(model);
 		Log.log("LDDMC main window operational after " + (System.currentTimeMillis()-startTime) + "ms.");
 	}
-	
+
 	public void finishUpRibbonMenuAndIcon() {
 		colorChooserDialog = new ColorChooserDialog(mc, MainWindow.this, pipeline); // Must be made before ribbon!
 		Ribbon ribbon = new Ribbon(mc, MainWindow.this);
@@ -120,7 +164,7 @@ public class MainWindow extends JFrame implements ChangeListener, ModelHandler<B
 		ColorSettingsDialog csd = new ColorSettingsDialog(MainWindow.this, mc.getColorController());
 		setJMenuBar(new MainMenu(mc, MainWindow.this, csd));
 		setIconImage(Icons.get(32, "icon").getImage());		
-		
+
 		ribbon.setVisible(false);
 		ribbon.setVisible(true);		
 	}
@@ -128,57 +172,56 @@ public class MainWindow extends JFrame implements ChangeListener, ModelHandler<B
 	private int getMinDividerLocation() {
 		return Math.max(32, imagePreparingView.getPreferredSize().width);
 	}
-	
+
 	private int getMaxDividerLocation() {
 		return splitPane.getSize().width - splitPane.getDividerSize() - Math.max(32, brickedView.getPreferredSize().width) - 2;
 	}
-	
+
 	public ColorChooserDialog getColorChooser() {
 		if(colorChooserDialog == null)
 			throw new IllegalStateException();
 		return colorChooserDialog;
 	}
-	
+
 	public BrickedView getBrickedView() {
 		if(brickedView == null)
 			throw new IllegalStateException();		
 		return brickedView;
 	}
-	
+
 	public ImagePreparingView getImagePreparingView() {
 		if(imagePreparingView == null)
 			throw new IllegalStateException();
 		return imagePreparingView;
 	}
-	
+
 	public JSplitPane getSplitPane() {
 		if(splitPane == null)
 			throw new IllegalStateException();
 		return splitPane;
 	}
-	
+
 	public Dimension getFinalImageSize() {
 		return mc.getMagnifierController().getCoreImageSizeInCoreUnits();
 	}
-	
+
 	@Override
 	public void stateChanged(ChangeEvent e) {
-		if(mc.getInImage() == null || e == null || e.getSource() == this)
+		if(e == null || e.getSource() == this)
 			return;
-		
+
 		File file = mc.getFile();
 		if(file == null)
 			setTitle(MainController.APP_NAME);
 		else
 			setTitle(MainController.APP_NAME + " - " + file.getName());
 
-		pipeline.setStartImage(mc.getInImage());						
-		//brickedView.setImage(imagePreparingView.getPreparredImage());
+		//pipeline.setStartImage(mc.getInImage());
 
 		if(splitPane != null)
 			repaint();
 	}
-	
+
 	private void setBoundsSafe(Rectangle r) {
 		if(r.x < 0)
 			r.x = 0;
@@ -194,17 +237,17 @@ public class MainWindow extends JFrame implements ChangeListener, ModelHandler<B
 			r.y = 0;
 			r.height = Math.min(screenSize.height, defaultSize.height);
 		}
-			
+
 		setBounds(r);		
 	}
-	
+
 	@Override
 	public void handleModelChange(Model<BrickGraphicsState> model) {
 		Rectangle placement = (Rectangle)model.get(BrickGraphicsState.MainWindowPlacement);		
 		setBoundsSafe(placement);
 		splitPane.setDividerLocation((Integer)model.get(BrickGraphicsState.MainWindowDividerLocation));
 	}
-	
+
 	@Override
 	public void save(Model<BrickGraphicsState> model) {
 		model.set(BrickGraphicsState.MainWindowDividerLocation, splitPane.getDividerLocation());

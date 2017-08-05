@@ -1,4 +1,4 @@
-package mosaic.ui;
+package mosaic.ui.dialogs;
 
 import icon.Icons;
 
@@ -13,6 +13,8 @@ import java.util.List;
 import javax.swing.event.*;
 import mosaic.controllers.*;
 import mosaic.rendering.Pipeline;
+import mosaic.ui.ColorDistributionChart;
+import mosaic.ui.MainWindow;
 import mosaic.ui.menu.ColorChooserToolBar;
 
 public class ColorChooserDialog extends JDialog implements ChangeListener {

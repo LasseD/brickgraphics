@@ -48,9 +48,7 @@ public class ImagePreparingView extends JComponent implements ModelHandler<Brick
 		this.pipeline = pipeline;
 		optionsController.addChangeListener(this); // getScaleQuality and allowFiltersReordering
 		toBricksController.addChangeListener(this); // getMinimalInputImageSize
-		model.addModelHandler(this);
 		setLayout(new BorderLayout());
-		//listeners = new LinkedList<ChangeListener>();
 
 		ScaleQuality quality = optionsController.getScaleQuality();		
 		allowFilterReordering = optionsController.getAllowFilterReordering();
@@ -61,6 +59,7 @@ public class ImagePreparingView extends JComponent implements ModelHandler<Brick
 		toBrickedPixelsSizeScaler = new ScaleTransform("Construction minimal size", false, quality);
 		
 		cropper = new Cropper(model);		
+		model.addModelHandler(this); // Ensure cropper is updated before this - so the crop doesn't lag.
 		cropper.addPointerIconListener(new ChangeListener() {			
 			@Override
 			public void stateChanged(ChangeEvent e) {
@@ -323,6 +322,7 @@ public class ImagePreparingView extends JComponent implements ModelHandler<Brick
 		Graphics2D g2 = (Graphics2D)g;
 
 		Dimension size = getSize();
+		// Reduce with 4 pixels to allow crop marked around image:
 		size.height-=4;
 		size.width-=4;
 		if(size.width <= 4 || size.height <= 4)
@@ -332,6 +332,7 @@ public class ImagePreparingView extends JComponent implements ModelHandler<Brick
 		fullScaler.setHeight(size.height);
 		
 		if(cropper.isEnabled()) {
+			System.out.println("REDRAWING IPV");
 			BufferedImage full = inImage;
 			full = fullScaler.transform(full);
 			int x = 0;
@@ -341,8 +342,8 @@ public class ImagePreparingView extends JComponent implements ModelHandler<Brick
 			if(w < size.width) {
 				x = (size.width-w)/2;
 			}
-			cropper.setMouseImageRect(new Rectangle(x, y, w, h));
-			g2.drawImage(cropper.pollute(full), null, x, 0);
+			cropper.setMouseImageRect(new Rectangle(x, y, w, h)); // Where the mouse is in the image.
+			g2.drawImage(cropper.drawImageWithCropRectAndRedLines(full), null, x, 0);
 
 			Rectangle r = cropper.getCrop(x, y, w, h);
 			cropScaler.setWidth(r.width);
@@ -372,6 +373,7 @@ public class ImagePreparingView extends JComponent implements ModelHandler<Brick
 
 	@Override
 	public void handleModelChange(Model<BrickGraphicsState> model) {
+		System.out.println("IPV MODEL UPDATE");
 		sharpness.set((Float)model.get(BrickGraphicsState.PrepareSharpness));
 		gamma.set((float[])model.get(BrickGraphicsState.PrepareGamma));
 		brightness.set((float[])model.get(BrickGraphicsState.PrepareBrightness));

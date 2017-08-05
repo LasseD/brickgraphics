@@ -12,8 +12,8 @@ import javax.swing.event.ChangeListener;
 
 import mosaic.controllers.ColorController;
 import mosaic.controllers.ColorController.ShownName;
-import mosaic.ui.ColorSettingsDialog;
 import mosaic.ui.actions.ShowColorOptionsAction;
+import mosaic.ui.dialogs.ColorSettingsDialog;
 
 public class ColorMenu extends JMenu implements ChangeListener {
 	private JMenu colorTextMenu;

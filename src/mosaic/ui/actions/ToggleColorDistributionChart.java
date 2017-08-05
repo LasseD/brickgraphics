@@ -4,7 +4,7 @@ import icon.*;
 import java.awt.event.*;
 import javax.swing.*;
 import mosaic.controllers.*;
-import mosaic.ui.ColorChooserDialog;
+import mosaic.ui.dialogs.ColorChooserDialog;
 
 public class ToggleColorDistributionChart extends AbstractAction {
 	public static final String NAME = "Color chart";

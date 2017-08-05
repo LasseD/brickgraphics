@@ -7,12 +7,11 @@ import java.awt.print.*;
 import java.awt.event.*;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.*;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.event.*;
-
-import bricks.ToBricksType;
 import colors.LEGOColor;
 import mosaic.controllers.MagnifierController;
 import mosaic.io.BrickGraphicsState;
@@ -21,6 +20,7 @@ import mosaic.rendering.Pipeline;
 import mosaic.rendering.PipelineImageListener;
 import mosaic.rendering.PipelineMosaicListener;
 import mosaic.ui.*;
+import mosaic.ui.dialogs.PrintDialog;
 import transforms.ToBricksTransform;
 import icon.*;
 
@@ -211,8 +211,9 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 	private double writeFileName(FontMetrics fm, int xMin, int xMax, int yMin, Graphics2D g2, int fontSizeIn1_72inches) {
 		if(!coverPageShowFileName) 
 			return 0;
-						
-		String s = mc.getFile().getName();
+
+		File f = mc.getFile();
+		String s = f == null ? "-" : f.getName();
 		Rectangle2D bounds = fm.getStringBounds(s, g2);
 		float x = xMin + (float)((xMax-xMin)-bounds.getWidth())/2;
 		float y = yMin + fontSizeIn1_72inches*8/10;
@@ -290,8 +291,6 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 			g2.translate(drawRect.x, drawRect.y);
 			mw.getBrickedView().getToBricksTransform().drawAll(g2, new Dimension(drawRect.width, drawRect.height));
 			g2.translate(-drawRect.x, -drawRect.y);
-			//Dimension right = mw.getFinalImageSize();
-			//drawImage(g2, , xMax, , yMax, right);
 			return;
 		}
 		
@@ -303,7 +302,6 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 			g2.translate(xMin, yMin);
 			mw.getBrickedView().getToBricksTransform().drawAll(g2, new Dimension(drawRect.width, drawRect.height));
 			g2.translate(-xMin, -yMin);
-			//image = mw.getFinalImageSize();
 		}
 	}
 	
@@ -430,7 +428,6 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 			int outerBoxX = xMid - outerBoxWidth/2;
 			
 			// Draw gray picture:
-			//BufferedImage finalImage = mw.getFinalImageSize();
 			int grayWidth = (int)Math.round(outerBoxWidth * coreImageInCoreUnits.width/((double)pageSizeInCoreUnits.width*numPagesWidth));
 			int grayHeight = (int)Math.round(outerBoxHeight * coreImageInCoreUnits.height/((double)pageSizeInCoreUnits.height*numPagesHeight));
 			g2.translate(outerBoxX, yMin);
@@ -490,8 +487,6 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		g2.setColor(Color.BLACK);
 		g2.translate(indentX, indentY);
 		ToBricksTransform tbTransform = magnifierController.getTBTransform();
-		//int basicUnitWidth = tbTransform.getToBricksType().getUnitWidth();
-		//int basicUnitHeight = tbTransform.getToBricksType().getUnitHeight();
 		Rectangle basicUnitRect = magnifierController.getCoreRect();
 		basicUnitRect.width *= magnifiersPerPage.width;
 		basicUnitRect.height *= magnifiersPerPage.height;
@@ -499,21 +494,6 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		basicUnitRect.y = (page / numPagesWidth)*basicUnitRect.height;
 		
 		used.addAll(tbTransform.draw(g2, basicUnitRect, shownMagnifierSize, uiController.showColors(), true));
-		/*
-		if(tbTransform.getToBricksType() == ToBricksType.SNOT_IN_2_BY_2) {
-			if(uiController.showColors())
-				used.addAll(tbTransform.drawLastColors(g2, basicUnitRect, basicUnitWidth, basicUnitHeight, shownMagnifierSize, 0, 0));
-			else
-				used.addAll(tbTransform.drawLastInstructions(g2, basicUnitRect, basicUnitWidth, basicUnitHeight, shownMagnifierSize));
-		}
-		else {
-			if(uiController.showColors()) {
-				ToBricksType tbt = tbTransform.getToBricksType();
-				used.addAll(tbTransform.getMainTransform().drawLastColors(g2, basicUnitRect, basicUnitWidth, basicUnitHeight, shownMagnifierSize, tbt.getStudsShownWide(), tbt.getStudsShownTall()));
-			}
-			else
-				used.addAll(tbTransform.getMainTransform().drawLastInstructions(g2, basicUnitRect, basicUnitWidth, basicUnitHeight, shownMagnifierSize));
-		}*/
 		
 		g2.setColor(Color.RED);
 		for(int x = 1; x < magnifiersPerPage.width; ++x) {

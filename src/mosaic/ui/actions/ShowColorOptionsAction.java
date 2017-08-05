@@ -7,7 +7,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
 import icon.*;
-import mosaic.ui.ColorSettingsDialog;
+import mosaic.ui.dialogs.ColorSettingsDialog;
 
 /**
  * @author ld

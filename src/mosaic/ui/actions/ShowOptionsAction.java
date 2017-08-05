@@ -7,7 +7,7 @@ import javax.swing.Action;
 import javax.swing.KeyStroke;
 import icon.*;
 import mosaic.controllers.OptionsController;
-import mosaic.ui.OptionsDialog;
+import mosaic.ui.dialogs.OptionsDialog;
 
 /**
  * @author LD

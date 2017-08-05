@@ -72,6 +72,19 @@ public class MosaicIO {
 		}
 	}
 	
+	public static void load(MainController mc, BufferedImage image) throws IOException {
+		BufferedImage read = removeAlpha(image);
+		if(read.getType() != BufferedImage.TYPE_INT_RGB) {
+			int w = read.getWidth();
+			int h = read.getHeight();
+			BufferedImage copy = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+			int[] rgb = read.getRGB(0, 0, w, h, null, 0, w);
+			copy.setRGB(0, 0, w, h, rgb, 0, w);
+			read = copy;
+		}
+		mc.setImage(read, null);		
+	}
+	
 	private static void ensureIMG_SUFFIXES() {
 		if(IMG_SUFFIXES == null) 
 			IMG_SUFFIXES = ImageIO.getReaderFileSuffixes();		
@@ -83,7 +96,8 @@ public class MosaicIO {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				File currentImage = mc.getFile();
-				fileChooser.setCurrentDirectory(currentImage.getParentFile());
+				if(currentImage != null)
+					fileChooser.setCurrentDirectory(currentImage.getParentFile());
 				List<String> suffixes = new LinkedList<String>();
 				ensureIMG_SUFFIXES();
 				for(String s : IMG_SUFFIXES)
