@@ -365,7 +365,6 @@ public class Cropper implements MouseListener, MouseMotionListener, ModelHandler
 
 	@Override
 	public void handleModelChange(Model<BrickGraphicsState> model) {
-		System.out.println("CROPPER MODEL UPDATE");
 		cropRect = (Rectangle2D.Double)model.get(BrickGraphicsState.PrepareCrop);		
 		enabled = (Boolean)model.get(BrickGraphicsState.PrepareCropEnabled);
 	}

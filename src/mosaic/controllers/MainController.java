@@ -133,7 +133,7 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 	public void setImage(BufferedImage image, File imageFile) throws IOException {
 		if(imageFile == null) {
 			imageDataFile = new DataFile(image);
-			imageFileName = null;
+			imageFileName = "New Image";
 		}
 		else {
 			imageDataFile = new DataFile(imageFile);		
@@ -217,7 +217,6 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 		if(imageDataFile.isValid()) {
 			try {
 				BufferedImage image = MosaicIO.removeAlpha(ImageIO.read(imageDataFile.fakeStream()));
-				Log.log("Setting start image!");
 				pipeline.setStartImage(image);
 			} catch (IOException e) {
 				Log.log(e);

@@ -112,7 +112,7 @@ public class MainWindow extends JFrame implements ChangeListener, ModelHandler<B
 
 		{
 			// Add drag'n'drop to the panel where it makes sense to drop stuff::
-			imagePreparingView.setTransferHandler(new TransferHandler() {
+			splitPane.setTransferHandler(new TransferHandler() {
 				@Override
 				public boolean canImport(TransferHandler.TransferSupport info) {
 					return info.isDataFlavorSupported(DataFlavor.imageFlavor) ||
@@ -121,7 +121,6 @@ public class MainWindow extends JFrame implements ChangeListener, ModelHandler<B
 
 				@Override
 				public boolean importData(TransferHandler.TransferSupport info) {
-					System.out.println("Attempting drop");
 					if (!info.isDrop() || !canImport(info))
 						return false;
 
@@ -129,10 +128,12 @@ public class MainWindow extends JFrame implements ChangeListener, ModelHandler<B
 					Transferable t = info.getTransferable();
 					try {
 						if(info.isDataFlavorSupported(DataFlavor.imageFlavor)) {
+							Log.log("Image is being dropped.");
 							BufferedImage data = (BufferedImage)t.getTransferData(DataFlavor.imageFlavor);
 							MosaicIO.load(mc, data);							
 						}
 						else { // File to load
+							Log.log("File is being dropped.");
 							@SuppressWarnings("rawtypes")
 							java.util.List files = (java.util.List)t.getTransferData(DataFlavor.javaFileListFlavor);
 							if(files.isEmpty())

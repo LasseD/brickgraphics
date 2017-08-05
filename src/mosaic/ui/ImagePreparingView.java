@@ -69,15 +69,7 @@ public class ImagePreparingView extends JComponent implements ModelHandler<Brick
 		cropper.addChangeListener(new ChangeListener() {			
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				if(cropper.isEnabled()) {
-					float cropperWidthToHeight = cropper.getWidthToHeight();
-					float w2h = cropperWidthToHeight * inImage.getWidth() / inImage.getHeight();
-					toBricksController.setOriginalWidthToHeight(w2h);
-				}
-				else {
-					float originalWidthToHeight = inImage.getWidth()/(float)inImage.getHeight();			
-					toBricksController.setOriginalWidthToHeight(originalWidthToHeight);
-				}
+				updateWidthToHeight();
 				pipeline.invalidate();
 			}
 		}); // For cursor style.
@@ -95,6 +87,18 @@ public class ImagePreparingView extends JComponent implements ModelHandler<Brick
 		toolBar = new ImagePreparingToolBar(ImagePreparingView.this, model);
 		toolBar.setVisible((Boolean)model.get(BrickGraphicsState.PrepareFiltersEnabled));
 		populatePipeline();
+	}
+	
+	private void updateWidthToHeight() {
+		if(cropper.isEnabled()) {
+			float cropperWidthToHeight = cropper.getWidthToHeight();
+			float w2h = cropperWidthToHeight * inImage.getWidth() / inImage.getHeight();
+			toBricksController.setOriginalWidthToHeight(w2h);
+		}
+		else {
+			float originalWidthToHeight = inImage.getWidth()/(float)inImage.getHeight();			
+			toBricksController.setOriginalWidthToHeight(originalWidthToHeight);
+		}
 	}
 	
 	public ImagePreparingToolBar getToolBar() {
@@ -195,13 +199,14 @@ public class ImagePreparingView extends JComponent implements ModelHandler<Brick
 			@Override
 			public void imageChanged(BufferedImage image) {
 				inImage = image;
+				updateWidthToHeight();
 			}
 		});
 		pipeline.addPreparedImageListener(new PipelineImageListener() {			
 			@Override
 			public void imageChanged(BufferedImage image) {
 				preparedImage = image;
-				repaint();				
+				repaint();		
 			}
 		}); // Update prepared image.
 	}
@@ -332,7 +337,6 @@ public class ImagePreparingView extends JComponent implements ModelHandler<Brick
 		fullScaler.setHeight(size.height);
 		
 		if(cropper.isEnabled()) {
-			System.out.println("REDRAWING IPV");
 			BufferedImage full = inImage;
 			full = fullScaler.transform(full);
 			int x = 0;
@@ -373,13 +377,13 @@ public class ImagePreparingView extends JComponent implements ModelHandler<Brick
 
 	@Override
 	public void handleModelChange(Model<BrickGraphicsState> model) {
-		System.out.println("IPV MODEL UPDATE");
 		sharpness.set((Float)model.get(BrickGraphicsState.PrepareSharpness));
 		gamma.set((float[])model.get(BrickGraphicsState.PrepareGamma));
 		brightness.set((float[])model.get(BrickGraphicsState.PrepareBrightness));
 		contrast.set((float[])model.get(BrickGraphicsState.PrepareContrast));
 		saturation.set((Float)model.get(BrickGraphicsState.PrepareSaturation));
 
+		// TODO: ToolBar should just do this itself...
 		toolBar.setVisible((Boolean)model.get(BrickGraphicsState.PrepareFiltersEnabled));
 		toolBar.reloadModel(model);
 		//updateBaseImages();

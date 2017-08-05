@@ -59,7 +59,6 @@ public class Pipeline extends Thread {
 	public void setStartImage(BufferedImage image) {
 		if(image == null || startImage == image || image.getWidth() == 0 || image.getHeight() == 0)
 			return;
-		System.out.println("PIPELINE START IMAGE");
 		startImage = image;
 		for(PipelineImageListener l : inImageListeners)
 			l.imageChanged(image);
