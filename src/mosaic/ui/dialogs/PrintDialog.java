@@ -36,6 +36,7 @@ public class PrintDialog extends JDialog implements ChangeListener {
 	private JComboBox<String> cColorName;
 	private JComboBox<ColorController.ShownID> cColorNumber;
 	private String[] lastSeenLocalizedNames;
+	private JButton bOK; // With initial focus.
 	
 	public PrintDialog(MainWindow mw, PrintController pc, ColorController cc, MagnifierController mc, Pipeline pipeline) {
 		super(mw, "Print Setup");
@@ -53,8 +54,9 @@ public class PrintDialog extends JDialog implements ChangeListener {
 	
 	@Override
 	public void setVisible(boolean v) {
-		if(v)
-			update();
+		if(v) {
+			update();			
+		}
 		super.setVisible(v);
 	}
 	
@@ -265,7 +267,7 @@ public class PrintDialog extends JDialog implements ChangeListener {
 		{
 			JPanel pMagnifierSize = new JPanel(new FlowLayout(FlowLayout.LEFT));
 			//pMagnifierSize.setAlignmentX(Component.LEFT_ALIGNMENT);
-			pMagnifierSize.add(new JLabel("Size of the magnifier: "));
+			pMagnifierSize.add(new JLabel("Block size: "));
 			tfMagnifierSizeWidth = new LividTextField(3);		
 			pMagnifierSize.add(tfMagnifierSizeWidth);
 			pMagnifierSize.add(new JLabel("X"));
@@ -304,7 +306,7 @@ public class PrintDialog extends JDialog implements ChangeListener {
 		{
 			JPanel pMagnifiersPerPage = new JPanel(new FlowLayout(FlowLayout.LEFT));
 			//pMagnifiersPerPage.setAlignmentX(Component.LEFT_ALIGNMENT);
-			pMagnifiersPerPage.add(new JLabel("Number of magnifiers per page: "));
+			pMagnifiersPerPage.add(new JLabel("Blocks per page: "));
 			tfMagnifiersPerPageWidth = new LividTextField(3);		
 			pMagnifiersPerPage.add(tfMagnifiersPerPageWidth);
 			pMagnifiersPerPage.add(new JLabel("X"));
@@ -394,7 +396,7 @@ public class PrintDialog extends JDialog implements ChangeListener {
 		
 		// Bottom: OK/Cancel
 		JPanel bottomPanel = new JPanel(new FlowLayout());
-		JButton bOK = new JButton("OK");
+		bOK = new JButton("OK");
 		bOK.addActionListener(new ActionListener() {			
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -474,5 +476,6 @@ public class PrintDialog extends JDialog implements ChangeListener {
 		super.pack();
 		int middle = getOwner().getX() + (getOwner().getWidth()-getWidth())/2;
 		setLocation(Math.max(0, middle), Math.max(0,  getOwner().getY()));
+		bOK.requestFocusInWindow();
 	}
 }

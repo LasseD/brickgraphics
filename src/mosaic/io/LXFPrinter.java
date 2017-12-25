@@ -5,10 +5,13 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import javax.imageio.ImageIO;
 import bricks.*;
+import building.Optimizer;
+import building.Part;
 import mosaic.controllers.*;
 import mosaic.ui.*;
 import colors.*;
@@ -27,19 +30,23 @@ public class LXFPrinter {
 	public static final String BRICK_1_X_1 = "3005";
 	public static final String TILE_1_X_1 = "3070";
 	public static final String PLATE_2_X_2 = "3022";
-	public static final double PLATE_HALF_WIDTH = 0.40000000596046448;
-	public static final double PLATE_HEIGHT = 0.31999999284744263;
-	public static final String UP_ORIENTATION = "1,0,0,0,1,0,0,0,1";
-	public static final String SIDEWAYS_ORIENTATION = "0,0.99999994039535522,0,0.99999994039535522,0,0,0,0,-0.99999982118606567";
+
+	public static final double PLATE_HALF_WIDTH = 0.4;//0000000596046448;
+	public static final double PLATE_HEIGHT = 0.32;//1999999284744263;
+	//public static final String UP_ORIENTATION = "1,0,0,0,1,0,0,0,1";
+	//public static final String SIDEWAYS_ORIENTATION = "0,0.99999994039535522,0,0.99999994039535522,0,0,0,0,-0.99999982118606567";
+	public static final String SIDEWAYS_ORIENTATION = "0,1,0,1,0,0,0,0,-1";
 	
 	private ToBricksTransform tbt;
 	private ToBricksType type;
 	private Dimension size;
+	private boolean optimize;
 	
 	private LXFPrinter(MainController mc, BrickedView brickedView) {
 		tbt = brickedView.getToBricksTransform();
 		type = mc.getToBricksController().getToBricksType();
 		size = brickedView.getBrickedSize();
+		optimize = mc.getOptionsController().getOptimizeUseOfBricksBeforeExporting();
 	}
 	
 	public static void printTo(MainController mc, MainWindow mw, File file) throws IOException {
@@ -63,9 +70,9 @@ public class LXFPrinter {
 			ZipEntry ze = new ZipEntry("IMAGE100.LXFML");
 			zos.putNextEntry(ze);
 			writeHeaderBlock(pw,  modelName);
-			printer.writeDynanmicSection(pw, true);		
+			printer.writeDynamicSection(pw, true);		
 			writeCenterBlock(pw);
-			printer.writeDynanmicSection(pw, false);		
+			printer.writeDynamicSection(pw, false);		
 			writeFooterBlock(pw);		
 			pw.flush();
 			zos.flush();
@@ -78,11 +85,6 @@ public class LXFPrinter {
 			BufferedImage image = new BufferedImage(128, 128, BufferedImage.TYPE_INT_RGB);
 			Graphics2D g2 = (Graphics2D)image.getGraphics();
 			mw.getBrickedView().getToBricksTransform().drawAll(g2, new Dimension(128, 128));
-			//BufferedImage image = mw.getFinalImageSize();
-			//ScaleTransform t = new ScaleTransform("Thumbnail for LXF file", true, ScaleQuality.BiLinear, 0);
-			//t.setHeight(128);
-			//t.setWidth(128);
-			//ImageIO.write(t.transformUnbuffered(image, ProgressCallback.NOP), "png", zos);
 			ImageIO.write(image, "png", zos);
 			zos.flush();
 		}
@@ -92,7 +94,7 @@ public class LXFPrinter {
 		zos.close();
 	}
 	
-	private void writeDynanmicSection(PrintWriter out, boolean brickSection) {
+	private void writeDynamicSection(PrintWriter out, boolean brickSection) {
 		switch(type) {
 		case STUD_FROM_TOP:
 			buildWith1xXPlatesFromTop(out, brickSection, 1, PLATE_1_X_1);
@@ -142,7 +144,7 @@ public class LXFPrinter {
 			@Override
 			public void add(int id, int x, int y, LEGOColor color) {
 				String part = y%5==0 ? TILE_1_X_1 : PLATE_1_X_1;
-				printElement(out, id, part, UP_ORIENTATION, color.getIDLEGO(), PLATE_HALF_WIDTH+2*PLATE_HALF_WIDTH*x-HALF_WIDTH, PLATE_HALF_WIDTH, -PLATE_HEIGHT*y + PLATE_HALF_WIDTH, y%5==0);
+				printElement(out, id, part, Part.STUDS_UP_TURN_LDRAW_0, color.getIDLEGO(), PLATE_HALF_WIDTH+2*PLATE_HALF_WIDTH*x-HALF_WIDTH, PLATE_HALF_WIDTH, -PLATE_HEIGHT*y + PLATE_HALF_WIDTH, y%5==0);
 			}
 
 			@Override
@@ -155,49 +157,93 @@ public class LXFPrinter {
 		tbt.buildLastInstructions(builder, new Rectangle(0, 0, size.width, size.height));
 	}
 	
-	private void buildWith1xXPlatesFromTop(PrintWriter out, boolean isElementSection, int width, String partNumber) {
-		buildFromTop(out, width*PLATE_HALF_WIDTH, width*2*PLATE_HALF_WIDTH, PLATE_HALF_WIDTH, 2*PLATE_HALF_WIDTH, UP_ORIENTATION, partNumber, isElementSection, false); 
-	}
-
 	private void buildWith1xXPlatesFromSide(PrintWriter out, boolean isElementSection, int width, String partNumber) {
-		buildFromSide(out, width*PLATE_HALF_WIDTH, width*2*PLATE_HALF_WIDTH, PLATE_HALF_WIDTH, PLATE_HEIGHT, UP_ORIENTATION, partNumber, isElementSection); 
+		buildFromSide(out, width*PLATE_HALF_WIDTH, width*2*PLATE_HALF_WIDTH, PLATE_HALF_WIDTH, PLATE_HEIGHT, partNumber, isElementSection); 
 	}
 
 	private void buildWith1x1BricksFromSide(PrintWriter out, boolean isElementSection) {
-		buildFromSide(out, PLATE_HALF_WIDTH, 2*PLATE_HALF_WIDTH, PLATE_HALF_WIDTH, 3*PLATE_HEIGHT, UP_ORIENTATION, BRICK_1_X_1, isElementSection); 
+		buildFromSide(out, PLATE_HALF_WIDTH, 2*PLATE_HALF_WIDTH, PLATE_HALF_WIDTH, 3*PLATE_HEIGHT, BRICK_1_X_1, isElementSection); 
+	}
+
+	private void buildWith1xXPlatesFromTop(PrintWriter out, boolean isElementSection, int width, String partNumber) {
+		buildFromTop(out, width, 1, partNumber, isElementSection, false); 
 	}
 
 	private void buildWith2x2PlatesFromTop(PrintWriter out, boolean isElementSection) {
-		buildFromTop(out, PLATE_HALF_WIDTH, 4*PLATE_HALF_WIDTH, PLATE_HALF_WIDTH, 4*PLATE_HALF_WIDTH, UP_ORIENTATION, PLATE_2_X_2, isElementSection, false); 
+		buildFromTop(out, 2, 2, PLATE_2_X_2, isElementSection, false); 
 	}
 
 	private void buildWith1x1TilesFromTop(PrintWriter out, boolean isElementSection) {
-		buildFromTop(out, PLATE_HALF_WIDTH, 2*PLATE_HALF_WIDTH, PLATE_HALF_WIDTH, 2*PLATE_HALF_WIDTH, UP_ORIENTATION, TILE_1_X_1, isElementSection, true); 
+		buildFromTop(out, 1, 1, TILE_1_X_1, isElementSection, true); 
 	}
 
-	private void buildFromTop(PrintWriter out, double startX, double multX, double startY, double multY, String orient, String element, 
+	private void buildFromTop(PrintWriter out, int elementWidth, int elementDepth, String element, 
 			boolean isElementSection, boolean decorationSection) {
-		LEGOColorGrid instructions = tbt.getMainTransform().lastInstructions();
-		int w = instructions.getWidth();
-		int h = instructions.getHeight();
-		int i = 0;
+		if(!optimize) {
+			int elementIndex = 0;
+			LEGOColorGrid instructions = tbt.getMainTransform().lastInstructions();
+			int w = instructions.getWidth();
+			int h = instructions.getHeight();
+			double multX = elementWidth*2*PLATE_HALF_WIDTH;
+			double multY = elementDepth*2*PLATE_HALF_WIDTH;			
 
-		for(int y = 0; y < h; y++) {
-			LEGOColor[] row = instructions.getRow(y);
-			double yy = startY - (h/2)*multY + y*multY;
-			for(int x = 0; x < w; x++) {
-			double xx = startX - (w/2*multX) + x*multX;
-				int color = row[x].getIDLEGO();
-				if(isElementSection)
-					printElement(out, i++, element, orient, color, xx, yy, 0, decorationSection);
-				else
-					printRigidSystem(out, i++, orient, xx, yy, 0);
-			}
+			for(int y = 0; y < h; y++) {
+				LEGOColor[] row = instructions.getRow(y);
+				double yy = PLATE_HALF_WIDTH - h/2*multY + y*multY;
+				for(int x = 0; x < w; x++) {
+					double xx = PLATE_HALF_WIDTH - w/2*multX + x*multX;
+					int color = row[x].getIDLEGO();
+					if(isElementSection)
+						printElement(out, elementIndex++, element, Part.STUDS_UP_TURN_LDRAW_0, color, xx, yy, 0, decorationSection);
+					else
+						printRigidSystem(out, elementIndex++, Part.STUDS_UP_TURN_LDRAW_0, xx, yy, 0);
+				}
+			}			
 		}
-	}	
+		else {
+			LEGOColorGrid unoptimized = tbt.getMainTransform().lastInstructions();
+			int unoptimizedWidth = unoptimized.getWidth(); 
+			int width = unoptimizedWidth * elementWidth; 
+			int unoptimizedDepth = unoptimized.getHeight();
+			int depth = unoptimizedDepth * elementDepth;
+			LEGOColor[][][] optimizationGrid = new LEGOColor[1][depth][width];
+			for(int y = 0; y < unoptimizedDepth; ++y) {				
+				LEGOColor[] row = unoptimized.getRow(y);
+				for(int x = 0; x < unoptimizedWidth; ++x) {
+					for(int yy = 0; yy < elementDepth; ++yy) {
+						for(int xx = 0; xx < elementWidth; ++xx) {
+							optimizationGrid[0][y*elementDepth + yy][x*elementWidth + xx] = row[x];
+						}
+					}
+				}
+			}
+			printOptimized(out, elementWidth, elementDepth, optimizationGrid, isElementSection, decorationSection);
+		}
+	}
+
+	private static void printOptimized(PrintWriter out, int elementWidth, int elementDepth, LEGOColor[][][] optimizationGrid, boolean isElementSection, boolean decorationSection) {
+		int elementIndex = 0;
+		double multX = elementWidth*2*PLATE_HALF_WIDTH;
+		double multY = elementDepth*2*PLATE_HALF_WIDTH;	
+		int depth = optimizationGrid[0].length;
+		int width = optimizationGrid[0][0].length;
+
+		List<Part> optimized = new Optimizer(optimizationGrid).placedParts;
+		for(Part p : optimized) {
+			// ldraw 20 = LDD 0.4:
+			double yy = PLATE_HALF_WIDTH- depth/2.0*multY + p.y*multY;// + p.type.getLDrawCenterY()/20.0*0.4;
+			double xx = PLATE_HALF_WIDTH- width/2.0*multX + p.x*multX;// + p.type.getLDrawCenterX()/20.0*0.4;
+			int color = p.color.getIDLEGO();
+			String orient = Part.LDD_STUDS_UP_TURNS[p.type.getTimesTurned90Degrees()];
+			if(isElementSection)
+				printElement(out, elementIndex++, p.type.getID()+"", orient, color, xx, yy, 0, decorationSection);
+			else
+				printRigidSystem(out, elementIndex++, orient, xx, yy, 0);				
+		}		
+	}
 	
 	private void buildFromSide(PrintWriter out, double startX, double multX, double startY, double multZ, 
-			String orient, String element, boolean isElementSection) {
+			String element, boolean isElementSection) {
 		LEGOColorGrid instructions = tbt.getMainTransform().lastInstructions();
 		int w = instructions.getWidth();
 		int h = instructions.getHeight();
@@ -210,11 +256,12 @@ public class LXFPrinter {
 			double xx = startX - (w/2*multX) + x*multX;
 				int color = row[x].getIDLEGO();
 				if(isElementSection)
-					printElement(out, i++, element, orient, color, xx, startY, zz, false);
+					printElement(out, i++, element, Part.STUDS_UP_TURN_LDRAW_0, color, xx, startY, zz, false);
 				else
-					printRigidSystem(out, i++, orient, xx, startY, zz);
+					printRigidSystem(out, i++, Part.STUDS_UP_TURN_LDRAW_0, xx, startY, zz);
 			}
 		}
+		// TODO: Handle optimized version.
 	}	
 	
 	private static void printElement(PrintWriter out, int id, String element, String orient, int color, double x, double y, double z, boolean decorationSection) {

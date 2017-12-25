@@ -2,20 +2,30 @@ package building;
 
 import java.io.*;
 
+import building.PartType.Category;
+
 import colors.LEGOColor;
 
 public class Part implements Comparable<Part> {
-	public static final String STUDS_UP_TURN_0 = " 0 0 -1 0 1 0  1 0  0";
-	public static final String STUDS_UP_TURN_1 = " 1 0  0 0 1 0  0 0  1";
-	public static final String STUDS_UP_TURN_2 = " 0 0  1 0 1 0 -1 0  0";
-	public static final String STUDS_UP_TURN_3 = "-1 0  0 0 1 0  0 0 -1";
-	public static final String[] STUDS_UP_TURNS = {STUDS_UP_TURN_0, STUDS_UP_TURN_1, STUDS_UP_TURN_2, STUDS_UP_TURN_3};
+	public static final String STUDS_UP_TURN_LDRAW_0 = " 1 0  0 0 1 0  0 0  1"; 
+	public static final String STUDS_UP_TURN_LDRAW_1 = " 0 0  1 0 1 0 -1 0  0";
+	public static final String STUDS_UP_TURN_LDRAW_2 = "-1 0  0 0 1 0  0 0 -1";
+	public static final String STUDS_UP_TURN_LDRAW_3 = " 0 0 -1 0 1 0  1 0  0";
+	public static final String STUDS_UP_TURN_LDD_0 = "1,0,0,0,1,0,0,0,1"; 
+	public static final String STUDS_UP_TURN_LDD_1 = "0,0,1,0,1,0,-1,0,0";
+	public static final String STUDS_UP_TURN_LDD_2 = "-1,0,0,0,1,0,0,0,-1";
+	public static final String STUDS_UP_TURN_LDD_3 = "0,0,-1,0,1,0,1,0,0";
+	public static final String[] LDraw_STUDS_UP_TURNS = {STUDS_UP_TURN_LDRAW_0, STUDS_UP_TURN_LDRAW_1, STUDS_UP_TURN_LDRAW_2, STUDS_UP_TURN_LDRAW_3};
+	public static final String[] LDD_STUDS_UP_TURNS = {STUDS_UP_TURN_LDD_3, STUDS_UP_TURN_LDD_2, STUDS_UP_TURN_LDD_1, STUDS_UP_TURN_LDD_0};
 	
 	public int x, y, z, step; // Position in [0,...] for studXstudXplate position
 	public LEGOColor color;
 	public PartType type;
 	
 	public Part(int x, int y, int z, LEGOColor color, PartType type) {
+		if(type == null)
+			throw new NullPointerException("Type is null!");
+		
 		this.color = color;
 		this.x = x;
 		this.y = y;
@@ -29,8 +39,8 @@ public class Part implements Comparable<Part> {
 			return step - other.step;
 		if(z != other.z)
 			return z - other.z;
-		if(type.isBrick() != other.type.isBrick()) {
-			return type.isBrick() ? 1 : -1;
+		if(type.getCategory() != other.type.getCategory()) {
+			return type.getCategory().compareTo(other.type.getCategory());
 		}
 		if(y != other.y)
 			return y - other.y;
@@ -44,15 +54,15 @@ public class Part implements Comparable<Part> {
 	}
 	
 	public void printLDR(PrintWriter out, int xMult, int yMult, int zMult) {
-		int overwriteY = (int)Math.round(yMult*(y + 0.5*type.getDepth()));
-		int overwriteX = (int)Math.round(xMult*(x + 0.5*type.getWidth()));
+		int overwriteY = yMult*y+type.getLDrawCenterY();
+		int overwriteX = xMult*x+type.getLDrawCenterX();
 		int overwriteZ = z*zMult;
-		if(type.isBrick())
+		if(type.getCategory() == Category.Brick)
 			overwriteZ += 2*zMult;
 
 		int overwriteColor = color.getFirstIDLDraw();
-		out.printf("1 %d %d %d %d %s %s.dat", overwriteColor, overwriteY, overwriteZ, overwriteX, 
-				STUDS_UP_TURNS[type.getTimesTurned90Degrees()], type.getID());
+		out.printf("1 %d %d %d %d %s %s.dat", overwriteColor, overwriteX, overwriteZ, overwriteY, 
+				LDraw_STUDS_UP_TURNS[type.getTimesTurned90Degrees()], type.getID());
 		out.println(); // Because \n apparently is a different character...
 	}
 }

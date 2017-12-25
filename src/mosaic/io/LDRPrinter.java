@@ -16,7 +16,7 @@ import transforms.*;
 /**
  * Class responsible for outputting to LDR file. 
  * This is a very simple LDR "printer".
- * @author ld
+ * @author LD
  */
 public class LDRPrinter {
 	private ToBricksTransform tbt;
@@ -135,8 +135,8 @@ public class LDRPrinter {
 			int unoptimizedDepth = unoptimized.getHeight();
 			int depth = unoptimizedDepth * elementDepth;
 			LEGOColor[][][] optimizationGrid = new LEGOColor[1][depth][width];
-			for(int y = 0; y < unoptimizedDepth; ++y) {
-				LEGOColor[] row = unoptimized.getRow(y);
+			for(int y = 0; y < unoptimizedDepth; ++y) {				
+				LEGOColor[] row = unoptimized.getRow(unoptimizedDepth-y-1); // Flip!
 				for(int x = 0; x < unoptimizedWidth; ++x) {
 					for(int yy = 0; yy < elementDepth; ++yy) {
 						for(int xx = 0; xx < elementWidth; ++xx) {
@@ -186,7 +186,7 @@ public class LDRPrinter {
 		// Print:
 		int lastStep = 0;
 		for(Part p : optimized) {
-			p.printLDR(out, 20, 20, -8);
+			p.printLDR(out, PartType.LDRAW_STUD_WIDTH, PartType.LDRAW_STUD_WIDTH, -PartType.LDRAW_PLATE_HEIGHT);
 			if(p.step != lastStep) {
 				out.println("0 STEP");
 				lastStep = p.step;
@@ -216,7 +216,6 @@ public class LDRPrinter {
 			buildOptimizedPicture(out, optimized, blockSize.width * elementWidth, 1, blockSize.height * elementHeight);
 		}
 		else {
-			//buildUnoptimized(out, width*20, platesTall*8, "0 0 -1 0 1 0 1 0 0 " + partNumber + ".DAT");
 			buildUnoptimized(out, elementWidth*20, elementHeight*8, "0 -1 0 0 0 -1 1 0 0 " + partNumber + ".DAT");
 		}
 	}

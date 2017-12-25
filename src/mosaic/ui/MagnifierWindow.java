@@ -58,8 +58,6 @@ public class MagnifierWindow extends JDialog implements ChangeListener, Pipeline
 	}
 	
 	private class MagnifierCanvas extends JPanel {
-		private static final long serialVersionUID = 585625214128821252L;
-
 		public Rectangle computeShownRect(final Dimension componentSize) {
 			double componentW2H = componentSize.width / (double)componentSize.height;		
 			Dimension magnifierSizeInUnits = magnifierController.getSizeInUnits();
@@ -89,24 +87,8 @@ public class MagnifierWindow extends JDialog implements ChangeListener, Pipeline
 			// draw magnified:
 			g2.setColor(Color.BLACK);
 			ToBricksTransform tbTransform = magnifierController.getTBTransform();
-			//int basicUnitWidth = tbTransform.getToBricksType().getUnitWidth();
-			//int basicUnitHeight = tbTransform.getToBricksType().getUnitHeight();
 			Rectangle basicUnitRect = magnifierController.getCoreRect();
 			Set<LEGOColor> used = tbTransform.draw(g2, basicUnitRect, shownMagnifierSize, uiController.showColors(), true);
-			/*if(tbTransform.getToBricksType() == ToBricksType.SNOT_IN_2_BY_2) {
-				if(uiController.showColors())
-					used = tbTransform.drawLastColors(g2, basicUnitRect, basicUnitWidth, basicUnitHeight, shownMagnifierSize, 0, 0);
-				else
-					used = tbTransform.drawLastInstructions(g2, basicUnitRect, basicUnitWidth, basicUnitHeight, shownMagnifierSize);
-			}
-			else {
-				if(uiController.showColors()) {
-					ToBricksType tbt = tbTransform.getToBricksType();
-					used = tbTransform.getMainTransform().drawLastColors(g2, basicUnitRect, basicUnitWidth, basicUnitHeight, shownMagnifierSize, tbt.getStudsShownWide(), tbt.getStudsShownTall());
-				}
-				else
-					used = tbTransform.getMainTransform().drawLastInstructions(g2, basicUnitRect, basicUnitWidth, basicUnitHeight, shownMagnifierSize);
-			}*/
 			legend.setHighlightedColors(used);
 		}
 	}

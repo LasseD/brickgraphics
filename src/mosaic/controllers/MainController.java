@@ -67,7 +67,6 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 		pipeline = new Pipeline(renderingProgressBar);
 		Log.log("Model file loaded");
 		handleModelChange(model);
-		//model.addModelHandler(this);
 		
 		// Set up controllers:
 		optionsController = new OptionsController(model);
@@ -172,10 +171,6 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 		toBricksTypeFilterDialog.setVisible(true);
 	}
 	
-	public String getFileName() {
-		return imageFileName;
-	}
-
 	public File getFile() {
 		if(imageFileName == null)
 			return null;

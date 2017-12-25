@@ -22,6 +22,7 @@ import mosaic.rendering.PipelineMosaicListener;
 import mosaic.ui.*;
 import mosaic.ui.dialogs.PrintDialog;
 import transforms.ToBricksTransform;
+import ui.ProgressDialog;
 import icon.*;
 
 /**
@@ -46,6 +47,8 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 	private Dimension magnifiersPerPage;
 	private PrinterJob printerJob;
 	private MainWindow mw;
+	private ProgressDialog progressDialog;
+	private ProgressDialog.ProgressWorker printWorker;
 	
 	public PrintController(Model<BrickGraphicsState> model, MainController mc, MainWindow mw, Pipeline pipeline) {
 		this.mc = mc;
@@ -73,14 +76,24 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 	public void print() {
         printerJob.setPrintable(PrintController.this, pageFormat);				
 		if(printerJob.printDialog()) {
-		    try {
-		    	printerJob.print();
-		    } 
-		    catch (PrinterException e2) {
-				String message = "An error ocurred while printing: " + e2.getMessage();
-				JOptionPane.showMessageDialog(mw, message, "Error when printing", JOptionPane.ERROR_MESSAGE);
-				Log.log(e2);
-		    }
+	    	progressDialog = new ProgressDialog(mw, "Printing");
+	    	printWorker = progressDialog.createWorker(new Runnable() {				
+				@Override
+				public void run() {
+			    	try {
+				    	printerJob.print();				    		
+			    	}
+				    catch(PrinterAbortException e1) {
+				    	Log.log("Printing aborted.");
+				    }
+				    catch (PrinterException e2) {
+						String message = "An error ocurred while printing: " + e2.getMessage();
+						JOptionPane.showMessageDialog(mw, message, "Error when printing", JOptionPane.ERROR_MESSAGE);
+						Log.log(e2);
+				    }
+				}
+			});
+			printWorker.execute();
 		}
 	}
 	
@@ -561,14 +574,6 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 	public int print(Graphics g, PageFormat pf, int page) throws PrinterException {
 		Graphics2D g2 = (Graphics2D)g;		
 		
-		// Special case: Cover page:
-		if(page == 0 && coverPageShow) {
-			printCoverPage(g2, pf);
-			return PAGE_EXISTS;
-		}
-		if(coverPageShow)
-			--page;
-		
 		// Find out how big the magnifier is:
 		final int coreImageInCoreUnitsW = magnifierController.getCoreImageSizeInCoreUnits().width;
 		final int coreImageInCoreUnitsH = magnifierController.getCoreImageSizeInCoreUnits().height;
@@ -581,6 +586,24 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		final int numPagesWidth = (coreImageInCoreUnitsW+pageSizeInCoreUnitsW-1) / pageSizeInCoreUnitsW;
 		final int numPagesHeight = (coreImageInCoreUnitsH+pageSizeInCoreUnitsH-1) / pageSizeInCoreUnitsH;		
 		final int numberOfPages = numPagesWidth*numPagesHeight; 
+
+		
+		if(printWorker != null) {
+			int numPages = getNumberOfPages() + (getCoverPageShow() ? 1 : 0);
+			String text = "Rendering page " + page + " of " + (numberOfPages + (coverPageShow ? 1 : 0)) + ".";
+			if(numPages == page)
+				text = "Saving file. Please wait...";
+			printWorker.setProgressAndText(page*100/numPages, text);
+		}
+		
+		// Special case: Cover page:
+		if(page == 0 && coverPageShow) {
+			printCoverPage(g2, pf);
+			return PAGE_EXISTS;
+		}
+		if(coverPageShow)
+			--page;
+		
 	    if (page >= numberOfPages) {
 	    	return NO_SUCH_PAGE;
 	    }

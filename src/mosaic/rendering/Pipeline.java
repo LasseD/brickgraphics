@@ -17,7 +17,7 @@ public class Pipeline extends Thread {
 
 	private ArrayList<PipelineImageListener> inImageListeners, preparedImageListeners;
 	private ArrayList<PipelineMosaicListener> mosaicListeners;
-	private Object token = new Object(); // For locking.
+	private Object token = new Object(); // For locking (lastInvalidated, transforms, preparedImageListeners and mosaicListeners).
 	private BufferedImage startImage;
 	private long lastInvalidated; // Synchronized. May only be accessed when token is held!
 	private RenderingProgressBar renderingProgressBar;
@@ -31,7 +31,9 @@ public class Pipeline extends Thread {
 	}
 	
 	public void addTransform(Transform t) {
-		transforms.add(t);
+		synchronized(token) {
+			transforms.add(t);
+		}
 		renderingProgressBar.registerTransform(t);
 	}
 	public void setToBricksTransform(ToBricksTransform toBricksTransform) {
@@ -44,10 +46,14 @@ public class Pipeline extends Thread {
 			l.imageChanged(startImage);
 	}
 	public void addPreparedImageListener(PipelineImageListener l) {
-		preparedImageListeners.add(l);
+		synchronized(token) {
+			preparedImageListeners.add(l);
+		}
 	}
 	public void addMosaicListener(PipelineMosaicListener l) {
-		mosaicListeners.add(l);
+		synchronized(token) {
+			mosaicListeners.add(l);
+		}
 	}
 	
 	public void invalidate() {
@@ -79,8 +85,8 @@ public class Pipeline extends Thread {
 			synchronized(token) {
 				if(lastInvalidated <= lastRunFor)
 					continue;
-				lastRunFor = lastInvalidated;
 			}
+			lastRunFor = lastInvalidated;
 			runRound();
 		}
 	}
@@ -94,24 +100,31 @@ public class Pipeline extends Thread {
 		}
 		// Run pipeline:
 		BufferedImage image = startImage;
-		for(Transform t : transforms) {
+		Transform[] copyTransforms;
+		synchronized(token) {
+			copyTransforms = new Transform[transforms.size()];
+			copyTransforms = transforms.toArray(copyTransforms);
+		}		
+		for(Transform t : copyTransforms) {
 			synchronized(token) {
 				if(timeThatThisRoundRunsFor != lastInvalidated)
 					return; // Start new round.
 			}
 			image = t.transform(image);
 		}
-		for(PipelineImageListener l : preparedImageListeners) {
-			l.imageChanged(image);			
-		}
-		// Run toBrickStep:
-		if(toBricksTransform != null) {
-			Dimension imageSize = new Dimension(image.getWidth(), image.getHeight());
-			toBricksTransform.transform(image); // Returns null.
-			imageSize = toBricksTransform.getTransformedSize(imageSize);
-			for(PipelineMosaicListener l : mosaicListeners) {
-				l.mosaicChanged(imageSize);
-			}			
+		// Notify listeners:
+		synchronized(token) {
+			for(PipelineImageListener l : preparedImageListeners) {
+				l.imageChanged(image);			
+			}	
+			if(toBricksTransform != null) {
+				Dimension imageSize = new Dimension(image.getWidth(), image.getHeight());
+				toBricksTransform.transform(image); // Returns null.
+				imageSize = toBricksTransform.getTransformedSize(imageSize);
+				for(PipelineMosaicListener l : mosaicListeners) {
+					l.mosaicChanged(imageSize);
+				}			
+			}
 		}
 		renderingProgressBar.resetProgress();
 	}

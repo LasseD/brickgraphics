@@ -115,13 +115,13 @@ public class MainWindow extends JFrame implements ChangeListener, ModelHandler<B
 			splitPane.setTransferHandler(new TransferHandler() {
 				@Override
 				public boolean canImport(TransferHandler.TransferSupport info) {
-					return info.isDataFlavorSupported(DataFlavor.imageFlavor) ||
-							info.isDataFlavorSupported(DataFlavor.javaFileListFlavor);
+					return info.isDrop() && (info.isDataFlavorSupported(DataFlavor.imageFlavor) ||
+							info.isDataFlavorSupported(DataFlavor.javaFileListFlavor));
 				}
 
 				@Override
 				public boolean importData(TransferHandler.TransferSupport info) {
-					if (!info.isDrop() || !canImport(info))
+					if (!canImport(info))
 						return false;
 
 					// Get the image that is being dropped.
@@ -210,17 +210,19 @@ public class MainWindow extends JFrame implements ChangeListener, ModelHandler<B
 	public void stateChanged(ChangeEvent e) {
 		if(e == null || e.getSource() == this)
 			return;
-
+		
+		updateTitle();
+		
+		if(splitPane != null)
+			repaint();
+	}
+	
+	private void updateTitle() {
 		File file = mc.getFile();
 		if(file == null)
 			setTitle(MainController.APP_NAME);
 		else
-			setTitle(MainController.APP_NAME + " - " + file.getName());
-
-		//pipeline.setStartImage(mc.getInImage());
-
-		if(splitPane != null)
-			repaint();
+			setTitle(MainController.APP_NAME + " - " + file.getName());		
 	}
 
 	private void setBoundsSafe(Rectangle r) {
