@@ -18,9 +18,11 @@ public class RenderingProgressBar extends JPanel {
 	public static final int HEIGHT = 24;
 	public static final Color PROGRESS_BAR_COLOR = new Color(0, 0, 255, OPACITY);
 	public static final int NUM_TRANSFORMS = 9; // For easy concurrency.
+	public static final int WAIT_MS_UNTIL_SHOW = 300;
 	
 	private Transform[] transforms;
 	private int currentSection, currentSectionProgressInPromilles, numTranforms;
+	private long currentStartTime;
 	
 	public RenderingProgressBar() {
 		numTranforms = 0;
@@ -54,8 +56,14 @@ public class RenderingProgressBar extends JPanel {
 	@Override
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
-		if(currentSection == 0 && currentSectionProgressInPromilles <= 300)
+		if(currentSection == 0 && currentSectionProgressInPromilles == 0) {
+			currentStartTime = -1;
 			return; // Clear!
+		}			
+		if(currentStartTime == -1)
+			currentStartTime = System.currentTimeMillis();
+		if(System.currentTimeMillis() - currentStartTime < WAIT_MS_UNTIL_SHOW)
+			return;
 		Graphics2D g2 = (Graphics2D)g;
 		g2.setStroke(new BasicStroke(2));
 		int width = getWidth();

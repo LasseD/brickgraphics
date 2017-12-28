@@ -22,6 +22,8 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 	private IconizedTextfield sizeFieldWidth, sizeFieldHeight; 
 	private JButton buttonLessPP, buttonMorePP, buttonToggleLockSizeRatio, buttonToggleDividerLocation;
 	private List<ChangeListener> listeners;
+	private UIController uiController;
+	private JLabel labelPercent, labelX;
 	
 	private int constructionWidthInBasicUnits, constructionHeightInBasicUnits; // in basicUnits
 	private float originalWidthToHeight;
@@ -36,6 +38,7 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 		model.addModelHandler(this);
 		controller.getColorController().addChangeListener(this);
 		controller.getUIController().addChangeListener(this);
+		uiController = controller.getUIController();
 
 		listeners = new LinkedList<ChangeListener>();
 		toBricksTypeButtons = new JButton[ToBricksType.values().length];
@@ -63,19 +66,19 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 		
 		toolBar.add(buttonToggleDividerLocation);	
 		
-		toolBar.add(Box.createHorizontalStrut(10));
+		//toolBar.add(Box.createHorizontalStrut(10));
 		
 		for(JButton b : toBricksTypeButtons)
 			toolBar.add(b);
 		//toolBar.add(new ShowToBricksTypeFilterDialog(mc));
-		toolBar.add(Box.createHorizontalStrut(10));
+		//toolBar.add(Box.createHorizontalStrut(10));
 		toolBar.add(buttonLessPP);
 		toolBar.add(propagationPercentageField);
-		toolBar.add(new JLabel("%"));
+		toolBar.add(labelPercent);
 		toolBar.add(buttonMorePP);		
-		toolBar.add(Box.createHorizontalStrut(10));
+		//toolBar.add(Box.createHorizontalStrut(10));
 		toolBar.add(sizeFieldWidth);
-		toolBar.add(new JLabel(" X "));
+		toolBar.add(labelX);
 		toolBar.add(sizeFieldHeight);
 		toolBar.add(buttonToggleLockSizeRatio);
 	}
@@ -188,6 +191,9 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 		});
 		buttonToggleLockSizeRatio.setToolTipText("Lock or unlock the width/height ratio.");
 				
+		labelPercent = new JLabel("%");
+		labelX = new JLabel(" X ");
+		
 		// finish:
 		uiReady = true;
 		
@@ -256,17 +262,20 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 			ToBricksType[] tbtValues = ToBricksType.values();
 			for(int i = 0; i < availableToBricksTypes.length; ++i) {
 				ToBricksType type = tbtValues[i];
-				toBricksTypeButtons[i].setVisible(availableToBricksTypes[i]);
+				toBricksTypeButtons[i].setVisible(!uiController.showMagnifier() && availableToBricksTypes[i]);
 				toBricksTypeButtons[i].setIcon(toBricksType == type ? 
 						type.getIcon().get(ToBricksIconType.Enabled, Icons.SIZE_LARGE) : 
 						type.getIcon().get(ToBricksIconType.Disabled, Icons.SIZE_LARGE));					
 			}
 		}
 		sizeFieldWidth.setIcon(toBricksType.getIcon().get(ToBricksIconType.MeasureWidth, Icons.SIZE_SMALL));
+		sizeFieldWidth.setVisible(!uiController.showMagnifier());
 		sizeFieldHeight.setIcon(toBricksType.getIcon().get(ToBricksIconType.MeasureHeight, Icons.SIZE_SMALL));
+		sizeFieldHeight.setVisible(!uiController.showMagnifier());
 		buttonToggleLockSizeRatio.setIcon(sizeRatioLocked ? 
 				Icons.dimensionLockClosed(Icons.SIZE_LARGE) : 
 				Icons.dimensionLockOpen(Icons.SIZE_LARGE));
+		buttonToggleLockSizeRatio.setVisible(!uiController.showMagnifier());
 		buttonToggleDividerLocation.setVisible(showDividerLocationButton);
 		
 		if(propagationPercentage < 0)
@@ -275,6 +284,12 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 			propagationPercentage = 100;
 		if(!propagationPercentageField.getText().trim().equals(propagationPercentage+""))
 			propagationPercentageField.setText(propagationPercentage+"");
+		propagationPercentageField.setVisible(!uiController.showMagnifier());
+		
+		labelX.setVisible(!uiController.showMagnifier());
+		labelPercent.setVisible(!uiController.showMagnifier());
+		buttonMorePP.setVisible(!uiController.showMagnifier());
+		buttonLessPP.setVisible(!uiController.showMagnifier());
 		
 		if(sizeChoiceFromWidth) {
 			constructionWidthInBasicUnits = toBricksType.closestCompatibleWidth(

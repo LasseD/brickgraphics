@@ -12,6 +12,8 @@ import java.util.*;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.event.*;
+import javax.swing.plaf.basic.BasicFormattedTextFieldUI;
+
 import colors.LEGOColor;
 import mosaic.controllers.MagnifierController;
 import mosaic.io.BrickGraphicsState;
@@ -32,7 +34,6 @@ import icon.*;
 public class PrintController implements Printable, ModelHandler<BrickGraphicsState>, PipelineImageListener, PipelineMosaicListener {
 	private MainController mc;
 	private List<ChangeListener> listeners;
-	private PrintDialog printDialog;
 	private PageFormat pageFormat;
 	private MagnifierController magnifierController;
 	private UIController uiController;
@@ -50,9 +51,8 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 	private ProgressDialog progressDialog;
 	private ProgressDialog.ProgressWorker printWorker;
 	
-	public PrintController(Model<BrickGraphicsState> model, MainController mc, MainWindow mw, Pipeline pipeline) {
+	public PrintController(Model<BrickGraphicsState> model, MainController mc, Pipeline pipeline) {
 		this.mc = mc;
-		this.mw = mw;
 		magnifierController = mc.getMagnifierController();
 		colorController = mc.getColorController();
 		uiController = mc.getUIController();
@@ -68,12 +68,17 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 			}
 		});
 
-		printDialog = new PrintDialog(mw, this, colorController, magnifierController, pipeline);
 		pipeline.addPreparedImageListener(this);
 		pipeline.addMosaicListener(this);
 	}
 	
+	public void setMainWindow(MainWindow mw) {
+		this.mw = mw;
+	}
+	
 	public void print() {
+		if(mw == null)
+			throw new IllegalStateException();
         printerJob.setPrintable(PrintController.this, pageFormat);				
 		if(printerJob.printDialog()) {
 	    	progressDialog = new ProgressDialog(mw, "Printing");
@@ -201,7 +206,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		return printerJob;
 	}
 	
-	public Action createPrintAction() {
+	public Action createPrintAction(final PrintDialog printDialog) {
 		Action printAction = new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -235,6 +240,8 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 	}
 	
 	private int drawbom(Graphics2D g2, int xMin, int xMax, int yMin, int yMax, int fontSizeIn1_72inches) {
+		if(mw == null)
+			return yMin;
 		if(!coverPageShowLegend)
 			return yMin;
 		if(coverPagePictureType != CoverPagePictureType.None) {
@@ -379,7 +386,37 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		g2.drawLine(x, bottomY, x-arrowSize, bottomY-arrowSize);
 	}
 	
-	private double drawShowPosition(int page, int numPagesWidth, int numPagesHeight, FontMetrics fm, int xMin, int xMax, int yMin, int yMax, 
+	public double drawShownPositionForMagnifier(Graphics2D g2, int page, int xMax, int yMax) {
+		int unit = 20;
+		int yMin = 6;
+
+		if(showPosition == ShowPosition.Written) {
+			g2.setFont(new Font("Arial", Font.BOLD, 40));
+			unit = 45;
+			yMin = 10;
+		}
+		FontMetrics fm = g2.getFontMetrics();
+
+		Dimension coreImage = magnifierController.getCoreImageSizeInCoreUnits();
+		if(coreImage == null)
+			return 0; // Not ready.
+		final int coreImageInCoreUnitsW = coreImage.width;
+		final int coreImageInCoreUnitsH = coreImage.height;
+		final Dimension magnifierSizeInCoreUnits = magnifierController.getSizeInUnits();
+		final int pageSizeInCoreUnitsW = magnifierSizeInCoreUnits.width;
+		final int pageSizeInCoreUnitsH = magnifierSizeInCoreUnits.height;
+
+		final int numPagesWidth = (coreImageInCoreUnitsW+pageSizeInCoreUnitsW-1) / pageSizeInCoreUnitsW;
+		final int numPagesHeight = (coreImageInCoreUnitsH+pageSizeInCoreUnitsH-1) / pageSizeInCoreUnitsH;		
+				
+		final Dimension pageSizeInCoreUnits = magnifierController.getSizeInUnits();
+		
+		return drawShowPosition(page, numPagesWidth, numPagesHeight, fm, 
+				0, xMax, yMin, yMax, g2, unit, coreImage, pageSizeInCoreUnits);
+	}
+	
+	private double drawShowPosition(int page, int numPagesWidth, int numPagesHeight, FontMetrics fm, 
+			int xMin, int xMax, int yMin, int yMax, 
 			Graphics2D g2, int unit, Dimension coreImageInCoreUnits, Dimension pageSizeInCoreUnits) {
 		// Nothing:
 		if(showPosition == ShowPosition.None)
@@ -388,8 +425,11 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		// Written:
 		int fromLeft = (page % numPagesWidth)+1;
 		int fromTop = (page / numPagesWidth)+1;
+		Log.log("From left: " + fromLeft);
+		Log.log("From Top: " + fromTop);
+		Log.log("Num pages width: " + numPagesWidth);
 		if(showPosition == ShowPosition.Written) {
-			String pageNumberString = "" + fromLeft + " \u2192, " + fromTop + " \u2193.";
+			String pageNumberString = "" + fromLeft + " \u2192     " + fromTop + " \u2193";
 			Rectangle2D pageNumberStringBounds = fm.getStringBounds(pageNumberString, g2);
 			float x = xMin + (float)((xMax-xMin)-pageNumberStringBounds.getWidth())/2;
 			float y = yMin + unit;
@@ -408,7 +448,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		String topText = ""+(fromTop-1);
 		String bottomText = ""+(numPagesHeight-fromTop);
 		
-		if(showPosition == ShowPosition.MiddleBox) { // Show box in middle: 3x1, 2 on top/bottom, 3 on left/right. Unit is fontSizeIn1_72inches			
+		if(showPosition == ShowPosition.MiddleBox) { // Show box in middle: 3x1, 2 on top/bottom, 3 on left/right. Unit is fontSizeIn1_72inches
 			int outerWidth = 9*unit;
 			int outerHeight = 5*unit;
 			int leftX = xMid-outerWidth/2;
@@ -427,7 +467,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 			return outerHeight + unit/5;
 		}
 		else { // "Smart" box
-			int outerHeight = (yMax-yMin)/5;
+			int outerHeight = Math.max(5*unit, (yMax-yMin)/5);
 			int outerBoxHeight = outerHeight - unit - 2*arrowSize;
 			int outerBoxWidth = (outerBoxHeight * coreImageInCoreUnits.width) / coreImageInCoreUnits.height;
 			if(outerBoxWidth > 0.8 * (xMax-xMin)) {
@@ -479,7 +519,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 				g2.drawString(bottomText, rightArrowX + arrowSize, yBottom + (yMin+outerBoxHeight-yBottom+unit)/2);				
 			}
 			
-			return outerHeight + unit/5;			
+			return outerHeight + unit/5;
 		}
 	}
 	
@@ -586,7 +626,6 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		final int numPagesWidth = (coreImageInCoreUnitsW+pageSizeInCoreUnitsW-1) / pageSizeInCoreUnitsW;
 		final int numPagesHeight = (coreImageInCoreUnitsH+pageSizeInCoreUnitsH-1) / pageSizeInCoreUnitsH;		
 		final int numberOfPages = numPagesWidth*numPagesHeight; 
-
 		
 		if(printWorker != null) {
 			int numPages = getNumberOfPages() + (getCoverPageShow() ? 1 : 0);

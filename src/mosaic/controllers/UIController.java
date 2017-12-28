@@ -6,7 +6,7 @@ import javax.swing.event.*;
 
 import mosaic.io.*;
 
-public class UIController implements ChangeListener, ModelHandler<BrickGraphicsState> {
+public class UIController implements IChangeMonitor, ChangeListener, ModelHandler<BrickGraphicsState> {
 	private boolean showColorDistributionChart, showMagnifier, showColors, showLegend, showTotals;
 	
 	private List<ChangeListener> listeners;
@@ -80,6 +80,7 @@ public class UIController implements ChangeListener, ModelHandler<BrickGraphicsS
 		notifyListeners();
 	}
 	
+	@Override
 	public void addChangeListener(ChangeListener listener) {
 		listeners.add(listener);
 	}

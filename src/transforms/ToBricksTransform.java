@@ -391,6 +391,8 @@ public class ToBricksTransform implements InstructionsTransform {
 	}
 	
 	private void addAll(Map<LEGOColor, Integer> m) {
+		if(normalColorsChoosen == null)
+			return; // nop
 		for(int x = 0; x < normalColorsChoosen.length; x++) {
 			for(int y = 0; y < normalColorsChoosen[0].length; y++) {
 				boolean normalColorChosen = normalColorsChoosen[x][y];

@@ -19,12 +19,11 @@ public class ColorLegend extends JToolBar implements ChangeListener, PipelineMos
 	private JScrollPane scrollPane;
 	private JList<LEGOColor.CountingLEGOColor> list;
 
-	public ColorLegend(MainController mc, MainWindow mw, Pipeline pipeline) {
+	public ColorLegend(MainController mc, Pipeline pipeline) {
 		super("Legend");
 		cc = mc.getColorController();
 		uc = mc.getUIController();
 		uc.addChangeListener(this);
-		brickedView = mw.getBrickedView();
 		pipeline.addMosaicListener(this);
 		
 		list = new JList<LEGOColor.CountingLEGOColor>();
@@ -32,6 +31,12 @@ public class ColorLegend extends JToolBar implements ChangeListener, PipelineMos
 		list.setCellRenderer(new CellRenderer());
 		list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		list.setBackground(getBackground());
+		list.setSelectionModel(new DefaultListSelectionModel() {
+			@Override
+		    public void setSelectionInterval(int ignore1, int ignore2) {
+		        super.setSelectionInterval(-1, -1); // So the user can't click the items.
+			}
+		});
 		mc.getMagnifierController().addChangeListener(this);
 
 		setLayout(new BorderLayout());
@@ -48,7 +53,7 @@ public class ColorLegend extends JToolBar implements ChangeListener, PipelineMos
 			if(identifier != null)
 				text = identifier + ".";
 			if(uc.showTotals())
-				text += " TOTAL: " + color.cnt;
+				text += " \u2211=" + color.cnt;
 			setText(text);
 			setIcon(new Icon() {
 				@Override
@@ -107,9 +112,15 @@ public class ColorLegend extends JToolBar implements ChangeListener, PipelineMos
 			}
 		}
 	}
+	
+	public void setBrickedView(BrickedView bw) {
+		brickedView = bw;
+	}
 
 	@Override
 	public void stateChanged(ChangeEvent e) {
+		if(brickedView == null)
+			return;
 		setVisible(uc.showLegend());
 		colors = brickedView.getLegendColors();
 		list.setListData(colors);
@@ -117,6 +128,8 @@ public class ColorLegend extends JToolBar implements ChangeListener, PipelineMos
 
 	@Override
 	public void mosaicChanged(Dimension ignore) {
+		if(brickedView == null)
+			return;
 		colors = brickedView.getLegendColors();
 		list.setListData(colors);
 	}

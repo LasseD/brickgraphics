@@ -14,6 +14,7 @@ import mosaic.io.*;
 import mosaic.rendering.Pipeline;
 import mosaic.rendering.RenderingProgressBar;
 import mosaic.ui.*;
+import mosaic.ui.dialogs.PrintDialog;
 import mosaic.ui.dialogs.ToBricksTypeFilterDialog;
 
 /**
@@ -43,7 +44,9 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 	
 	private MainWindow mw;
 	private SaveDialog saveDialog;
+	private PrintDialog printDialog;
 	private ToBricksTypeFilterDialog toBricksTypeFilterDialog;
+	private ColorLegend legend;
 	
 	// Image (for model state):
 	private String imageFileName;
@@ -74,10 +77,14 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 		uiController = new UIController(model);
 		magnifierController = new MagnifierController(model, uiController);
 		toBricksController = new ToBricksController(this, model);
+		printController = new PrintController(model, this, pipeline);		
 		Log.log("Created controllers after " + (System.currentTimeMillis()-startTime) + "ms.");
 
 		// Set up UI:
+		legend = new ColorLegend(this, pipeline);
 		mw = new MainWindow(this, model, pipeline, renderingProgressBar);
+		printController.setMainWindow(mw);
+		legend.setBrickedView(mw.getBrickedView());
 		listeners.add(mw);
 		toBricksController.initiateUI(mw);
 		optionsController.initiateOptionsDialog(mw);
@@ -101,8 +108,8 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 		else
 			notifyListeners(model);
 		
-		printController = new PrintController(model, this, mw, pipeline);
 		saveDialog = new SaveDialog(mw);
+		printDialog = new PrintDialog(mw, printController, colorController, magnifierController, pipeline);
 		toBricksTypeFilterDialog = new ToBricksTypeFilterDialog(toBricksController, mw);
 		
 		pipeline.start();
@@ -203,6 +210,14 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 
 	public ToBricksController getToBricksController() {
 		return toBricksController;
+	}
+
+	public ColorLegend getLegend() {
+		return legend;
+	}
+	
+	public PrintDialog getPrintDialog() {
+		return printDialog;
 	}
 	
 	@Override

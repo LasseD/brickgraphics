@@ -119,6 +119,51 @@ public class Icons {
 		};		
 	}
 	
+	public static Icon moveDown(final int size) {
+		return new BrickGraphicsIcon(size) {
+			@Override
+			public void paint(Graphics2D g2) {
+				g2.setColor(Color.BLACK);
+				int[] xs = new int[]{0, size/2, size, size, size/2, 0};
+				int[] ys = new int[]{0, size/2,    0, size/2, size, size/2};
+				g2.fillPolygon(xs,  ys, 6);
+			}
+		};		
+	}
+	public static Icon moveLeft(final int size) {
+		return new BrickGraphicsIcon(size) {
+			@Override
+			public void paint(Graphics2D g2) {
+				g2.setColor(Color.BLACK);
+				int[] xs = new int[]{0     , size/2, size, size/2, size, size/2};
+				int[] ys = new int[]{size/2,      0,    0, size/2, size, size};
+				g2.fillPolygon(xs,  ys, 6);
+			}
+		};		
+	}
+	public static Icon moveUp(final int size) {
+		return new BrickGraphicsIcon(size) {
+			@Override
+			public void paint(Graphics2D g2) {
+				g2.setColor(Color.BLACK);
+				int[] xs = new int[]{0     , size/2,   size, size, size/2, 0};
+				int[] ys = new int[]{size/2,      0, size/2, size, size/2, size};
+				g2.fillPolygon(xs,  ys, 6);
+			}
+		};		
+	}
+	public static Icon moveRight(final int size) {
+		return new BrickGraphicsIcon(size) {
+			@Override
+			public void paint(Graphics2D g2) {
+				g2.setColor(Color.BLACK);
+				int[] xs = new int[]{0, size/2,   size, size/2, 0, size/2};
+				int[] ys = new int[]{0,      0, size/2, size, size, size/2};
+				g2.fillPolygon(xs,  ys, 6);
+			}
+		};		
+	}
+	
 	public static Icon dimensionLockOpen(int size) {
 		return new HalfWidthIcon(size) {
 			@Override

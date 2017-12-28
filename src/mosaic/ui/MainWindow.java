@@ -26,7 +26,6 @@ public class MainWindow extends JFrame implements ChangeListener, ModelHandler<B
 	private BrickedView brickedView;
 	private JSplitPane splitPane;
 	private ColorChooserDialog colorChooserDialog;
-	private MagnifierWindow magnifierWindow;
 	private MainController mc;
 	private Pipeline pipeline;
 	private Rectangle lastNormalPlacement;
@@ -46,8 +45,6 @@ public class MainWindow extends JFrame implements ChangeListener, ModelHandler<B
 
 		brickedView = new BrickedView(mc, model, pipeline);
 		Log.log("Created right view after " + (System.currentTimeMillis()-startTime) + "ms.");
-		magnifierWindow = new MagnifierWindow(mc, this, pipeline);
-		Log.log("Created magnifier after " + (System.currentTimeMillis()-startTime) + "ms.");
 
 		addWindowListener(new WindowAdapter() {
 			@Override
@@ -105,7 +102,7 @@ public class MainWindow extends JFrame implements ChangeListener, ModelHandler<B
 		{
 			// Legend:
 			JPanel pLegend = new JPanel(new BorderLayout());
-			ColorLegend colorLegend = magnifierWindow.getLegend();
+			ColorLegend colorLegend = mc.getLegend();
 			pLegend.add(colorLegend, BorderLayout.CENTER);
 			cp.add(pLegend, BorderLayout.EAST);
 		}
@@ -159,8 +156,10 @@ public class MainWindow extends JFrame implements ChangeListener, ModelHandler<B
 
 	public void finishUpRibbonMenuAndIcon() {
 		colorChooserDialog = new ColorChooserDialog(mc, MainWindow.this, pipeline); // Must be made before ribbon!
+
 		Ribbon ribbon = new Ribbon(mc, MainWindow.this);
-		mc.getToBricksController().addComponents(ribbon, mc);
+		//mc.getToBricksController().addComponents(ribbon, mc);
+		
 		getContentPane().add(ribbon, BorderLayout.NORTH);
 		ColorSettingsDialog csd = new ColorSettingsDialog(MainWindow.this, mc.getColorController());
 		setJMenuBar(new MainMenu(mc, MainWindow.this, csd));

@@ -11,7 +11,6 @@ import javax.swing.event.*;
 import transforms.ToBricksTransform;
 import mosaic.io.BrickGraphicsState;
 import mosaic.rendering.PipelineMosaicListener;
-import mosaic.ui.*;
 
 /**
  * Functions: 
@@ -21,7 +20,7 @@ import mosaic.ui.*;
  *  - switch view of symbols/colors (matching legend)
  * @author LD
  */
-public class MagnifierController implements ChangeListener, MouseListener, MouseMotionListener, KeyListener, ModelHandler<BrickGraphicsState>, PipelineMosaicListener {
+public class MagnifierController implements ChangeListener, IChangeMonitor, KeyListener, ModelHandler<BrickGraphicsState>, PipelineMosaicListener {
 	private List<ChangeListener> listeners; // such as GUI components (actual magnifier) and bricked view with rectangle.
 	private UIController uiController;
 
@@ -31,7 +30,6 @@ public class MagnifierController implements ChangeListener, MouseListener, Mouse
 	private Dimension coreImageSizeInCoreUnits; // to move mouse on
 	private ToBricksTransform tbTransform; // with info for core image
 	private Dimension shownImageSizeInPixels;
-	private Point mouseOffset;
 
 	public MagnifierController(Model<BrickGraphicsState> model, UIController uiController) {
 		this.uiController = uiController;
@@ -40,7 +38,6 @@ public class MagnifierController implements ChangeListener, MouseListener, Mouse
 		handleModelChange(model);
 		corePositionInCoreUnits = new Point(0,0);
 		model.addModelHandler(this);
-		mouseOffset = new Point();
 	}
 	
 	public Dimension getSizeInMosaicBlocks() {
@@ -140,6 +137,7 @@ public class MagnifierController implements ChangeListener, MouseListener, Mouse
 		sanify();
 	}
 
+	@Override
 	public void addChangeListener(ChangeListener listener) {
 		listeners.add(listener);
 	}
@@ -168,14 +166,17 @@ public class MagnifierController implements ChangeListener, MouseListener, Mouse
 		return new Rectangle(corePositionInCoreUnits.x, corePositionInCoreUnits.y, getMagnifierWidthInCoreUnits(), getMagnifierHeightInCoreUnits());
 	}
 
+	public int getMagnifierPage() {
+		int x = corePositionInCoreUnits.x/getMagnifierWidthInCoreUnits();
+		int y = corePositionInCoreUnits.y/getMagnifierHeightInCoreUnits();
+		int w = coreImageSizeInCoreUnits.width/getMagnifierWidthInCoreUnits();
+		return x + y*w;
+	}
+
 	public Dimension getCoreImageSizeInCoreUnits() {
 		return coreImageSizeInCoreUnits;
 	}
 	
-	public void setMouseOffset(int x, int y) {
-		mouseOffset = new Point(x, y);
-	}
-
 	public void setShownImageSize(Dimension shownImageSizeInPixels) {
 		this.shownImageSizeInPixels = shownImageSizeInPixels;
 		sanify();
@@ -184,76 +185,30 @@ public class MagnifierController implements ChangeListener, MouseListener, Mouse
 	public Dimension getShownImageSizeInPixels() {
 		return shownImageSizeInPixels;
 	}
-
-	private void snapCoreToGrid(Point mouseOnShown) {
-		if(coreImageSizeInCoreUnits == null || sizeInMosaicBlocks == null || shownImageSizeInPixels == null)
-			return;
-		int mouseOnCoreXInCoreUnits = (int)(mouseOnShown.x / (double)shownImageSizeInPixels.width * coreImageSizeInCoreUnits.getWidth());
-		int mouseOnCoreYInCoreUnits = (int)(mouseOnShown.y / (double)shownImageSizeInPixels.height * coreImageSizeInCoreUnits.getHeight());
-
-		corePositionInCoreUnits = new Point(mouseOnCoreXInCoreUnits, mouseOnCoreYInCoreUnits);
-
-		snapCoreToGrid();
-	}
 	
-	private void snapCoreToGrid() {
-		int unitW = getMagnifierWidthInCoreUnits();
-		int unitH = getMagnifierHeightInCoreUnits();
-
-		corePositionInCoreUnits.x = bound(corePositionInCoreUnits.x, 0, coreImageSizeInCoreUnits.width-1);
-		corePositionInCoreUnits.y = bound(corePositionInCoreUnits.y, 0, coreImageSizeInCoreUnits.height-1);
-		
-		corePositionInCoreUnits.x = (int)(corePositionInCoreUnits.x/(double)unitW)*unitW;
-		corePositionInCoreUnits.y = (int)(corePositionInCoreUnits.y/(double)unitH)*unitH;		
+	public void moveMagnifierRight() {
+		moveMagnifier(KeyEvent.VK_RIGHT);
 	}
-	
-	/**
-	 * Assert shownImage is shown on canvas.
-	 * @param canvas
-	 */
-	public void drawHighlightRect(Graphics2D g2) {
-		if(!uiController.showMagnifier() || coreImageSizeInCoreUnits == null || shownImageSizeInPixels == null)
-			return;
-		// draw highlighting rectangle:
-		double scaleX = shownImageSizeInPixels.width / coreImageSizeInCoreUnits.getWidth();
-		double scaleY = shownImageSizeInPixels.height / coreImageSizeInCoreUnits.getHeight();
-		int x = (int)Math.round(corePositionInCoreUnits.x * scaleX);
-		int y = (int)Math.round(corePositionInCoreUnits.y * scaleY);
-		int w = (int)Math.round(getMagnifierWidthInCoreUnits() * scaleX)-2; 
-		int h = (int)Math.round(getMagnifierHeightInCoreUnits() * scaleY)-2; 
-		
-		Rectangle highlightingRect = new Rectangle(x, y, w, h);
-		
-		Cropper.drawCropHighlight(g2, highlightingRect);
+	public void moveMagnifierLeft() {
+		moveMagnifier(KeyEvent.VK_LEFT);
 	}
-	
-	/**
-	 * Enable on double click:
-	 */
-	@Override
-	public void mouseClicked(MouseEvent e) {
-		if(!uiController.showMagnifier() && e.getClickCount() > 1){
-			uiController.flipShowMagnifier();
-		}
+	public void moveMagnifierUp() {
+		moveMagnifier(KeyEvent.VK_UP);
 	}
-	
-	/**
-	 * right/left: wrap around
-	 * up down: no wrap around
-	 */
-	@Override
-	public void keyPressed(KeyEvent e) {
+	public void moveMagnifierDown() {
+		moveMagnifier(KeyEvent.VK_DOWN);
+	}
+	private void moveMagnifier(int keyEventVKDirection) {
 		if(!uiController.showMagnifier())
 			return;
 		
-		int key = e.getKeyCode();
 		int incX = getMagnifierWidthInCoreUnits();
 		int incY = getMagnifierHeightInCoreUnits();
 		
 		int w = coreImageSizeInCoreUnits.width;
 		int h = coreImageSizeInCoreUnits.height;
 		
-		switch(key) {
+		switch(keyEventVKDirection) {
 		case KeyEvent.VK_LEFT:
 			corePositionInCoreUnits.x-=incX;
 			if(corePositionInCoreUnits.x < 0) {
@@ -276,55 +231,25 @@ public class MagnifierController implements ChangeListener, MouseListener, Mouse
 			if(corePositionInCoreUnits.y >= h)
 				corePositionInCoreUnits.y = 0;
 			break;
-		}
-
-		snapCoreToGrid();
-		
+		default:
+			return; // Do not notify listeners.
+		}				
 		notifyListeners(null);
 	}
 	
-	private void moveMouseToShownImage(Point p) {
-		p.x-=mouseOffset.x;
-		p.y-=mouseOffset.y;
+	/**
+	 * right/left: wrap around
+	 * up down: no wrap around
+	 */
+	@Override
+	public void keyPressed(KeyEvent e) {
+		moveMagnifier(e.getKeyCode());
 	}
 	
-	@Override
-	public void mouseEntered(MouseEvent e) {}
-	@Override
-	public void mouseExited(MouseEvent e) {}
-	@Override
-	public void mouseDragged(MouseEvent e) {
-		if(!uiController.showMagnifier())
-			return;
-		Point p = e.getPoint();
-		moveMouseToShownImage(p);
-		snapCoreToGrid(p);
-		notifyListeners(null);
-	}
 	@Override
 	public void keyReleased(KeyEvent e) {}
 	@Override
 	public void keyTyped(KeyEvent e) {}
-	@Override
-	public void mousePressed(MouseEvent e) {
-		if(!uiController.showMagnifier())
-			return;
-		Point p = e.getPoint();
-		moveMouseToShownImage(p);
-		snapCoreToGrid(p);
-		notifyListeners(null);
-	}
-	@Override
-	public void mouseReleased(MouseEvent e) {
-		if(!uiController.showMagnifier())
-			return;
-		Point p = e.getPoint();
-		moveMouseToShownImage(p);
-		snapCoreToGrid(p);
-		notifyListeners(null);
-	}
-	@Override
-	public void mouseMoved(MouseEvent e) {}
 
 	@Override
 	public void stateChanged(ChangeEvent e) {
