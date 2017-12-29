@@ -11,8 +11,6 @@ import mosaic.ui.actions.*;
 import mosaic.ui.dialogs.ColorSettingsDialog;
 
 public class MainMenu extends JMenuBar {
-	private static final long serialVersionUID = 3921145264492575680L;
-
 	public MainMenu(MainController mc, MainWindow mw, ColorSettingsDialog csd) {
 		// File menu:
 		JMenu fileMenu = new JMenu("File");
@@ -23,7 +21,8 @@ public class MainMenu extends JMenuBar {
 		fileMenu.add(MosaicIO.createSaveAsAction(mc, mw));
 		fileMenu.add(new ExportLDR(mc, mw));
 		fileMenu.add(new ExportLXF(mc, mw));
-		fileMenu.add(mc.getPrintController().createPrintAction(mc.getPrintDialog()));
+		fileMenu.add(MosaicIO.createSaveMosaicSnapshotAction(mc, mw));
+		fileMenu.add(PrintController.createPrintAction(mc.getPrintDialog()));
 		fileMenu.addSeparator();
 		fileMenu.add(new ExitAction(mc.getModel()));
 

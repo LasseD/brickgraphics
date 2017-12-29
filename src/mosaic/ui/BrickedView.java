@@ -8,8 +8,10 @@ import java.awt.*;
 
 import javax.swing.*;
 import javax.swing.event.*;
+
 import colors.*;
 import mosaic.controllers.*;
+import mosaic.controllers.PrintController.ShowPosition;
 import mosaic.io.*;
 import mosaic.rendering.Pipeline;
 import mosaic.rendering.PipelineMosaicListener;
@@ -28,6 +30,7 @@ public class BrickedView extends JPanel implements ChangeListener, PipelineMosai
 	private ScaleTransform scaler; // Used for size calculations
 	private ColorLegend legend;
 	private PrintController printController;
+	private Dimension shownImageSize;
 	
 	// UI:
 	public static final String MAGNIFIER = "MAGNIFIER", MOSAIC = "MOSAIC";	
@@ -99,6 +102,10 @@ public class BrickedView extends JPanel implements ChangeListener, PipelineMosai
 		toBricksTransform.setBasicUnitSize(t.getConstructionWidthInBasicUnits(), t.getConstructionHeightInBasicUnits());
 		pipeline.invalidate();
 	}
+	
+	public Dimension getShownImageSize() {
+		return shownImageSize;
+	}
 
 	@Override
 	public void stateChanged(ChangeEvent e) {
@@ -142,14 +149,13 @@ public class BrickedView extends JPanel implements ChangeListener, PipelineMosai
 				return;
 
 			Dimension size = getSize();
-			scaler.setWidth(size.width-2);
-			scaler.setHeight(size.height-2);
+			scaler.setWidth(size.width);
+			scaler.setHeight(size.height);
 
-			Dimension shownImageSize = scaler.getTransformedSize(mosaicImageSize);
+			shownImageSize = scaler.getTransformedSize(mosaicImageSize);
 			magnifierController.setShownImageSize(shownImageSize);
 				
 			Graphics2D g2 = (Graphics2D)g;
-			g2.translate(1, 1); // make space for highlight rectangle:
 
 			// Perform actual drawing:
 			toBricksTransform.drawAll(g2, shownImageSize);
@@ -161,18 +167,31 @@ public class BrickedView extends JPanel implements ChangeListener, PipelineMosai
 			super(new BorderLayout()); // Orientation in top. ButtonPanel in center.
 			
 			// Top panel with position guide:
-			JPanel topPanel = new JPanel() {
+			final JPanel topPanel = new JPanel() {
 				@Override
 				public void paintComponent(Graphics g) {
 					super.paintComponent(g);
 					Graphics2D g2 = (Graphics2D)g;
 					Dimension size = getSize();
-					Log.log("Panel size: " + size.width + " x " + size.height);
 					int page = magnifierController.getMagnifierPage();
 					printController.drawShownPositionForMagnifier(g2, page, size.width, size.height);
 				}
 			};
 			topPanel.setPreferredSize(new Dimension(16, 112));
+			printController.addChangeListener(new ChangeListener() {				
+				@Override
+				public void stateChanged(ChangeEvent e) {
+					if(printController.getShowPosition() == ShowPosition.None) {
+						if(topPanel.isVisible())
+							topPanel.setVisible(false);
+					}
+					else {
+						if(!topPanel.isVisible())
+							topPanel.setVisible(true);						
+					}
+					topPanel.repaint();
+				}
+			});
 			add(topPanel, BorderLayout.NORTH);
 			
 			// Button + magnifier panel:

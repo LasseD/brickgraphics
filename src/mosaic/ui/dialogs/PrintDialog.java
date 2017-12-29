@@ -30,7 +30,7 @@ public class PrintDialog extends JDialog implements ChangeListener {
 	private ColorController cc;
 	private MagnifierController mc;
 	// Input boxes:
-	private LividTextField tfMagnifiersPerPageWidth, tfMagnifiersPerPageHeight, tfMagnifierSizeWidth, tfMagnifierSizeHeight, tfFontSize;
+	private LividTextField tfMagnifiersPerPageWidth, tfMagnifiersPerPageHeight, tfMagnifierSizeWidth, tfMagnifierSizeHeight, tfFontSize, tfMagnifierSizePercentage;
 	private JCheckBox cbCoverPageShow, cbCoverPageShowFileName, cbCoverPageShowLegend, cbShowColors, cbShowLegend, cbShowPageNumber;
 	private JRadioButton[] rbCoverPagePictureType, rbShowPosition;
 	private JComboBox<String> cColorName;
@@ -344,6 +344,7 @@ public class PrintDialog extends JDialog implements ChangeListener {
 		pShowColors.add(cbShowColors);
 		midBottomLeftPanel.add(pShowColors);
 		
+		// Show legend:
 		cbShowLegend = new JCheckBox("Show parts callout for each page");
 		cbShowLegend.setAlignmentX(Component.LEFT_ALIGNMENT);
 		cbShowLegend.addActionListener(new ActionListener() {			
@@ -355,6 +356,30 @@ public class PrintDialog extends JDialog implements ChangeListener {
 		JPanel pShowLegend = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		pShowLegend.add(cbShowLegend);
 		midBottomLeftPanel.add(pShowLegend);
+		// Magnifier size (percentage):
+		{
+			JPanel pMagnifierSizePercentage = new JPanel(new FlowLayout(FlowLayout.LEFT));
+			//pMagnifierSize.setAlignmentX(Component.LEFT_ALIGNMENT);
+			tfMagnifierSizePercentage = new LividTextField(3);		
+			pMagnifierSizePercentage.add(new JLabel("Size of the building block:"));
+			pMagnifierSizePercentage.add(tfMagnifierSizePercentage);
+			pMagnifierSizePercentage.add(new JLabel("%"));
+			tfMagnifierSizePercentage.addActionListener(new ActionListener() {				
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					try {
+						int p = Integer.parseInt(tfMagnifierSizePercentage.getText());
+						if(p < 1 || p > 100)
+							return;
+						pc.setMagnifierSizePercentage(p, PrintDialog.this);
+					}
+					catch(NumberFormatException ignore) {
+					}
+				}
+			});
+			midBottomLeftPanel.add(pMagnifierSizePercentage);
+		}		
+		// Show page number:
 		cbShowPageNumber = new JCheckBox("Show page numbers");
 		cbShowPageNumber.setAlignmentX(Component.LEFT_ALIGNMENT);
 		cbShowPageNumber.addActionListener(new ActionListener() {			
@@ -435,6 +460,11 @@ public class PrintDialog extends JDialog implements ChangeListener {
 			String h = ""+mc.getSizeInMosaicBlocks().height;
 			if(!tfMagnifierSizeHeight.getText().trim().equals(h))
 				tfMagnifierSizeHeight.setText(h);			
+		}
+		{
+			String p = ""+pc.getMagnifierSizePercentage();
+			if(!tfMagnifierSizePercentage.getText().trim().equals(p))
+				tfMagnifierSizePercentage.setText(p);
 		}		
 		cbShowColors.setSelected(pc.getShowColors());
 		cbShowLegend.setSelected(pc.getShowLegend());

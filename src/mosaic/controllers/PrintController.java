@@ -12,8 +12,6 @@ import java.util.*;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.event.*;
-import javax.swing.plaf.basic.BasicFormattedTextFieldUI;
-
 import colors.LEGOColor;
 import mosaic.controllers.MagnifierController;
 import mosaic.io.BrickGraphicsState;
@@ -43,6 +41,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 	// Model state:
 	private boolean coverPageShow, coverPageShowFileName, coverPageShowLegend, showLegend, showPageNumber;
 	private float fontSizeMM;
+	private int magnifierSizePercentage;
 	private CoverPagePictureType coverPagePictureType;
 	private ShowPosition showPosition;
 	private Dimension magnifiersPerPage;
@@ -113,6 +112,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		showPageNumber = (Boolean)model.get(BrickGraphicsState.PrintShowPageNumber);
 		magnifiersPerPage = (Dimension)model.get(BrickGraphicsState.PrintMagnifiersPerPage);
 		fontSizeMM = (Float)model.get(BrickGraphicsState.PrintFontSize);
+		magnifierSizePercentage = (Integer)model.get(BrickGraphicsState.PrintMagnifierSizePercentage);
 	}
 	
 	public void addChangeListener(ChangeListener l) {
@@ -125,6 +125,10 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		}
 	}
 	
+	public void setMagnifierSizePercentage(int i, Object caller) {
+		magnifierSizePercentage = i;
+		notifyListeners(new ChangeEvent(caller));		
+	}
 	public void setFontSize(float f, Object caller) {
 		fontSizeMM = f;
 		notifyListeners(new ChangeEvent(caller));		
@@ -172,6 +176,9 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 	public float getFontSize() {
 		return fontSizeMM;
 	}
+	public int getMagnifierSizePercentage() {
+		return magnifierSizePercentage;
+	}
 	public boolean getCoverPageShow() {
 		return coverPageShow;
 	}
@@ -206,7 +213,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		return printerJob;
 	}
 	
-	public Action createPrintAction(final PrintDialog printDialog) {
+	public static Action createPrintAction(final PrintDialog printDialog) {
 		Action printAction = new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -397,22 +404,20 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		}
 		FontMetrics fm = g2.getFontMetrics();
 
-		Dimension coreImage = magnifierController.getCoreImageSizeInCoreUnits();
-		if(coreImage == null)
+		Dimension coreImageSizeInCoreUnits = magnifierController.getCoreImageSizeInCoreUnits();
+		if(coreImageSizeInCoreUnits == null)
 			return 0; // Not ready.
-		final int coreImageInCoreUnitsW = coreImage.width;
-		final int coreImageInCoreUnitsH = coreImage.height;
+		final int coreImageInCoreUnitsW = coreImageSizeInCoreUnits.width;
+		final int coreImageInCoreUnitsH = coreImageSizeInCoreUnits.height;
 		final Dimension magnifierSizeInCoreUnits = magnifierController.getSizeInUnits();
 		final int pageSizeInCoreUnitsW = magnifierSizeInCoreUnits.width;
 		final int pageSizeInCoreUnitsH = magnifierSizeInCoreUnits.height;
 
 		final int numPagesWidth = (coreImageInCoreUnitsW+pageSizeInCoreUnitsW-1) / pageSizeInCoreUnitsW;
 		final int numPagesHeight = (coreImageInCoreUnitsH+pageSizeInCoreUnitsH-1) / pageSizeInCoreUnitsH;		
-				
-		final Dimension pageSizeInCoreUnits = magnifierController.getSizeInUnits();
 		
 		return drawShowPosition(page, numPagesWidth, numPagesHeight, fm, 
-				0, xMax, yMin, yMax, g2, unit, coreImage, pageSizeInCoreUnits);
+				0, xMax, yMin, yMax, g2, unit, coreImageSizeInCoreUnits, magnifierSizeInCoreUnits);
 	}
 	
 	private double drawShowPosition(int page, int numPagesWidth, int numPagesHeight, FontMetrics fm, 
@@ -425,9 +430,6 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		// Written:
 		int fromLeft = (page % numPagesWidth)+1;
 		int fromTop = (page / numPagesWidth)+1;
-		Log.log("From left: " + fromLeft);
-		Log.log("From Top: " + fromTop);
-		Log.log("Num pages width: " + numPagesWidth);
 		if(showPosition == ShowPosition.Written) {
 			String pageNumberString = "" + fromLeft + " \u2192     " + fromTop + " \u2193";
 			Rectangle2D pageNumberStringBounds = fm.getStringBounds(pageNumberString, g2);
@@ -494,7 +496,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 			int yTop = yMin + (int)((fromTop-1)*innerBoxHeight);
 			int yBottom = yMin + (int)(fromTop*innerBoxHeight);
 			g2.setColor(Color.RED);
-			g2.fillRect(xLeft, yTop, (int)innerBoxWidth, (int)innerBoxHeight);
+			g2.fillRect(xLeft, yTop, (int)innerBoxWidth+1, (int)innerBoxHeight+1);
 			g2.setColor(Color.BLACK);
 			g2.drawLine(outerBoxX, yTop, outerBoxX+outerBoxWidth, yTop);
 			g2.drawLine(outerBoxX, yBottom, outerBoxX+outerBoxWidth, yBottom);
@@ -528,12 +530,12 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		Dimension shownMagnifierSize = new Dimension((int)pf.getImageableWidth(), (int)((pf.getImageableWidth() * pageSizeInCoreUnitsH) / pageSizeInCoreUnitsW));
 		int indentX = xMin;
 		int indentY = yMax - shownMagnifierSize.height;
-		int parts = (showLegend ? 2 : 1);
-		if(shownMagnifierSize.height > (yMax-yMin)/parts) {
-			shownMagnifierSize.height = (yMax-yMin)/parts;
+		//final int magnifierSizePct = (showLegend ? magnifierSizePercentage : 100);
+		if(shownMagnifierSize.height > (yMax-yMin)*magnifierSizePercentage/100) {
+			shownMagnifierSize.height = (yMax-yMin)*magnifierSizePercentage/100;
 			shownMagnifierSize.width = (shownMagnifierSize.height * pageSizeInCoreUnitsW) / pageSizeInCoreUnitsH;
 			indentX = (xMax+xMin-shownMagnifierSize.width)/2;
-			indentY = showLegend ? yMin + (yMax-yMin)/2 : yMin;
+			indentY = yMax - shownMagnifierSize.width;//showLegend ? yMin + (yMax-yMin)/2 : yMin;
 		}
 		
 		// draw magnified:
@@ -699,6 +701,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		model.set(BrickGraphicsState.PrintShowPageNumber, showPageNumber);
 		model.set(BrickGraphicsState.PrintMagnifiersPerPage, magnifiersPerPage);
 		model.set(BrickGraphicsState.PrintFontSize, fontSizeMM);
+		model.set(BrickGraphicsState.PrintMagnifierSizePercentage, magnifierSizePercentage);
 	}
 
 	@Override

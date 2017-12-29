@@ -2,6 +2,7 @@ package mosaic.io;
 
 import java.io.*;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.event.*;
 import java.awt.image.*;
@@ -237,6 +238,45 @@ public class MosaicIO {
 		saveAs.putValue(Action.DISPLAYED_MNEMONIC_INDEX_KEY, "Save As".indexOf('A'));
 		saveAs.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
 		
+		return saveAs;
+	}
+	
+	public static Action createSaveMosaicSnapshotAction(final MainController mc, final MainWindow mw) {	
+		final List<FileFilter> filters = new LinkedList<FileFilter>();
+		for(String imgType : ImageIO.getWriterFileSuffixes()) {
+			if(imgType.equals("jpeg"))
+				continue; // confuses when there is both "jpeg"and "jpg".
+			filters.add(new FileNameExtensionFilter("Image, " + imgType, imgType));
+		}
+		
+		Action saveAs = new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				File file = mc.showSaveDialog("Save a snapshot of the mosaic", filters.toArray(new FileFilter[filters.size()]));
+				if(file == null) 
+					return;
+				try {
+					Dimension d = mw.getBrickedView().getShownImageSize();
+					BufferedImage image = new BufferedImage(d.width, d.height, BufferedImage.TYPE_INT_RGB);
+					Graphics2D g2 = (Graphics2D)image.getGraphics();
+					mw.getBrickedView().getToBricksTransform().drawAll(g2, d);
+					saveImage(image, file);
+					JOptionPane.showMessageDialog(mw, "Snapshot saved sucessfully!", "File saved",JOptionPane.INFORMATION_MESSAGE);
+					Log.log("Saved snapshot: " + file.getName());
+				} catch (Exception e1) {
+					String message = "An error ocurred while saving file " + file.getName() + "\n" + e1.getMessage();
+					JOptionPane.showMessageDialog(mw, message, "Error when saving file", JOptionPane.ERROR_MESSAGE);
+				}	
+			}
+		};
+		
+		saveAs.putValue(Action.SHORT_DESCRIPTION, "Save a snapshot of the mosaic to a given file.");
+		saveAs.putValue(Action.SMALL_ICON, Icons.get(16, "fileexport"));
+		saveAs.putValue(Action.LARGE_ICON_KEY, Icons.get(32, "fileexport"));
+		saveAs.putValue(Action.NAME, "Save Snapshot");
+		saveAs.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_T);
+		saveAs.putValue(Action.DISPLAYED_MNEMONIC_INDEX_KEY, "Save Snapshot".indexOf('t'));
+		saveAs.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_T, InputEvent.CTRL_DOWN_MASK));
 		return saveAs;
 	}
 	

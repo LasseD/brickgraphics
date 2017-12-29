@@ -81,7 +81,7 @@ public class FloydSteinbergTransform extends BufferedLEGOColorTransform {
 		int h = in.getHeight();
 		if(w == 0 || h == 0)
 			throw new IllegalArgumentException("In-image has null dimension!");
-		io.Log.log("Floyd-Steinberg " + w + "x" + h + " with " + LEGOColorLookUp.size() + " colors.");		
+		//io.Log.log("Floyd-Steinberg " + w + "x" + h + " with " + LEGOColorLookUp.size() + " colors.");		
 		
 		int[] pixels = new int[w*h];
 		in.getRGB(0, 0, w, h, pixels, 0, w);

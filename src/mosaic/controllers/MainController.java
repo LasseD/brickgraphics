@@ -169,8 +169,8 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 		this.mosaicFile = file;
 	}
 	
-	public File showSaveDialog(String saveMessage, FileFilter filter) {		
-		return saveDialog.showSaveDialog(saveMessage, filter);
+	public File showSaveDialog(String saveMessage, FileFilter... filters) {		
+		return saveDialog.showSaveDialog(saveMessage, filters);
 	}
 	
 	public void showToBricksTypeFilterDialog() {

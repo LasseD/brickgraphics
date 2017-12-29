@@ -169,7 +169,7 @@ public class MagnifierController implements ChangeListener, IChangeMonitor, KeyL
 	public int getMagnifierPage() {
 		int x = corePositionInCoreUnits.x/getMagnifierWidthInCoreUnits();
 		int y = corePositionInCoreUnits.y/getMagnifierHeightInCoreUnits();
-		int w = coreImageSizeInCoreUnits.width/getMagnifierWidthInCoreUnits();
+		int w = (coreImageSizeInCoreUnits.width+getMagnifierWidthInCoreUnits()-1)/getMagnifierWidthInCoreUnits();
 		return x + y*w;
 	}
 

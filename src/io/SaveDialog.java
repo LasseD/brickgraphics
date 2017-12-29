@@ -32,10 +32,11 @@ public class SaveDialog {
 	 * @param saveMessage
 	 * @return null if no file selected
 	 */
-	public File showSaveDialog(String saveMessage, FileFilter filter) {
+	public File showSaveDialog(String saveMessage, FileFilter... filters) {
 		for(FileFilter ff : fileChooser.getChoosableFileFilters())
 			fileChooser.removeChoosableFileFilter(ff);
-		fileChooser.addChoosableFileFilter(filter);
+		for(FileFilter ff : filters)
+			fileChooser.addChoosableFileFilter(ff);
 	
 		int retVal = fileChooser.showSaveDialog(toModalize);
 		if(retVal != JFileChooser.APPROVE_OPTION) {

@@ -20,6 +20,7 @@ public class Ribbon extends JToolBar {
 		// Load & Save:
 		add(MosaicIO.createOpenAction(mc, mw));
 		add(MosaicIO.createSaveAction(mc, mw));
+		add(PrintController.createPrintAction(mc.getPrintDialog()));
 		addSeparator();
 		
 		// Toggles:
@@ -52,6 +53,7 @@ public class Ribbon extends JToolBar {
 		add(createHidingButton(new MagnifierWidener(magnifierController), hideWhenMagnifierDisabled, magnifierController));
 		add(createHidingButton(new MagnifierSlimmer(magnifierController), hideWhenMagnifierDisabled, magnifierController));
 		add(createHidingButton(new ToggleMagnifierColors(uiController), hideWhenMagnifierDisabled, magnifierController));
+		add(createHidingButton(new TogglePositionDisplay(mc.getPrintController()), hideWhenMagnifierDisabled, magnifierController));
 	}
 	
 	public static interface IHideButton {
@@ -60,7 +62,8 @@ public class Ribbon extends JToolBar {
 
 	public static JButton createHidingButton(Action action, final IHideButton hideButton, IChangeMonitor monitor) {
 		final JButton ret = new JButton(action);
-		ret.setText(null);
+		if(ret.getIcon() != null)
+			ret.setText(null);
 		monitor.addChangeListener(new ChangeListener() {			
 			@Override
 			public void stateChanged(ChangeEvent e) {

@@ -1,7 +1,6 @@
 package bricks;
 
 import icon.*;
-
 import java.awt.Dimension;
 import java.awt.image.*;
 import colors.*;
@@ -37,9 +36,7 @@ public enum ToBricksType {
 		@Override
 		public Dimension getTransformedSize(Dimension in, ToBricksTransform tbt) {
 			Dimension normal = tbt.getPlateFromSideTransform(1).getTransformedSize(in);
-			Dimension sideways = tbt.getVerticalPlateFromSideTransform().getTransformedSize(in);
-
-			return new Dimension(sideways.width, normal.height);
+			return new Dimension(normal.width*5, normal.height*2);
 		}		
 
 		@Override
@@ -54,9 +51,7 @@ public enum ToBricksType {
 			LEGOColorGrid sidewaysColors = mainTransform.lcTransform(sideways);			
 
 			in = tbt.getSnotOutputTransform().transform(in);
-			//System.out.println("SNOT transform prepared in: " + (System.currentTimeMillis()-start) + "ms.");
 			BufferedImage res = tbt.bestMatch(normalColors, sidewaysColors, in);
-			//System.out.println("SNOT written in: " + (System.currentTimeMillis()-start) + "ms. total.");			
 			return res;
 		}
 	}, 

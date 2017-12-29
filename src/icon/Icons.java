@@ -8,7 +8,6 @@ import javax.swing.*;
 import java.io.*;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -211,11 +210,18 @@ public class Icons {
 		return new BrickGraphicsIcon(size) {
 			@Override
 			public void paint(Graphics2D g2) {
+				Stroke tmpStroke = g2.getStroke();
+				g2.setStroke(new BasicStroke(2));
 				g2.setColor(Color.BLACK);
-				g2.drawLine(0,  0, size-1, 0);
-				g2.drawLine(0,  0, size/2, size/2);
-				g2.drawLine(0, size-1, size/2, size/2);
-				g2.drawLine(0,  size-1, size, size-1);
+				g2.drawLine(1,  1, size/2-1, 1); // Top line
+				g2.drawLine(1,  1, size*2/5, size/2);
+				g2.drawLine(1, size-1, size*2/5, size/2);
+				g2.drawLine(1,  size-1, size/2, size-1); // Bottom line
+				// Equals sign:
+				int yDiffEqualsSign = size/7;
+				g2.drawLine(size/2, size/2-yDiffEqualsSign, size-1, size/2-yDiffEqualsSign);
+				g2.drawLine(size/2, size/2+yDiffEqualsSign, size-1, size/2+yDiffEqualsSign);
+				g2.setStroke(tmpStroke);
 			}
 		};		
 	}
@@ -224,8 +230,8 @@ public class Icons {
 		return new BrickGraphicsIcon(size) {
 			@Override
 			public void paint(Graphics2D g2) {
-				g2.setColor(Color.RED);
-				g2.fillRect(0,  0, size, size);
+				//g2.setColor(Color.RED);
+				//g2.fillRect(0,  0, size, size);
 				g2.setColor(Color.BLACK);
 				g2.drawRect(0,  0, size, size);
 				int xMin = size*2/10;
@@ -558,7 +564,13 @@ public class Icons {
 		return new BrickGraphicsIcon(size) {
 			@Override
 			public void paint(Graphics2D g2) {
-				Cropper.drawCropHighlight(g2, new Rectangle(3, 4, size-8, size-9));
+				g2.setColor(Color.BLACK);
+				final int headDiam = 4*size/9;
+				g2.fillOval((size-headDiam)/2, size/6, headDiam, headDiam);
+				int[] xs = new int[]{size/8, size/2, 7*size/8};
+				int[] ys = new int[]{size, size/2, size};
+				g2.fillPolygon(xs,  ys, 3);
+				Cropper.drawCropHighlight(g2, new Rectangle(3, 4, size-6, 3*size/5));
 			}
 		};
 	}
@@ -724,18 +736,10 @@ public class Icons {
 		return new BrickGraphicsIcon(size) {
 			@Override
 			public void paint(Graphics2D g2) {
-				// draw left side:
-				Paint p = g2.getPaint();
-				Paint gradient = new LinearGradientPaint(0, 0, 0, size-1, new float[]{0,1}, new Color[]{Color.RED, Color.BLUE});
-				g2.setPaint(gradient);
-				g2.fillArc(0, 0, size, size, 90, 180); 
-				g2.setPaint(p);
-				
-				// draw transformed side:
 				g2.setColor(Color.RED);
-				g2.fillArc(0, 0, size, size, 0, 90); 
+				g2.fillArc(0, 0, size, size, -90, 180); 
 				g2.setColor(Color.BLUE);
-				g2.fillArc(0, 0, size, size, 0, -90); 
+				g2.fillArc(0, 0, size, size, 90, 180); 
 				
 				g2.setColor(Color.BLACK);
 				g2.drawOval(0, 0, size-1, size-1);
@@ -748,28 +752,33 @@ public class Icons {
 		return new BrickGraphicsIcon(size) {
 			@Override
 			public void paint(Graphics2D g2) {
-				final Random rand = new Random(10937);
-				// draw left side:
-				Paint p = g2.getPaint();
-				Paint gradient = new LinearGradientPaint(0, 0, 0, size-1, new float[]{0,1}, new Color[]{Color.RED, Color.BLUE});
-				g2.setPaint(gradient);
-				g2.fillArc(0, 0, size, size, 90, 180); 
-				g2.setPaint(p);
-				
-				// draw transformed side:
+				// draw background:
 				g2.setColor(Color.RED);
 				g2.fillArc(0, 0, size, size, -90, 180); 
-
 				g2.setColor(Color.BLUE);
-				final int BLOCK_SIZE = 1;
-				for(int y = 0; y < size; y+=BLOCK_SIZE) {
-					float partBlue = y /(float)size;
-					int d = size/2-y;
-					int width = (int)Math.sqrt(size*size/4 - d*d);
-					for(int x = size/2; x < size/2+width; x+=BLOCK_SIZE) {
-						if(rand.nextFloat() < partBlue)
-  						  g2.fillRect(x, y, BLOCK_SIZE, BLOCK_SIZE);
-					}
+				g2.fillArc(0, 0, size, size, 90, 180); 
+
+				// draw dithering:
+				final int BLOCK_SIZE = 2;
+
+				// Left side: Color red on top of blue:
+				g2.setColor(Color.RED);
+				for(int x = size/2-BLOCK_SIZE, skip = 2; x >= size/4; x-=BLOCK_SIZE, ++skip) {
+					int dx = size/2-x;
+					int height = (int)Math.sqrt(size*size/4 - dx*dx);
+					for(int y = size/2-height + (7*skip%3)*BLOCK_SIZE; y < size/2+height; y+=BLOCK_SIZE*skip) {
+					  g2.fillRect(x, y, BLOCK_SIZE, BLOCK_SIZE);
+					}					
+				}
+				
+				// Right side:
+				g2.setColor(Color.BLUE);
+				for(int x = size/2, skip = 2; x < 3*size/4; x+=BLOCK_SIZE, ++skip) {
+					int dx = x-size/2;
+					int height = (int)Math.sqrt(size*size/4 - dx*dx);
+					for(int y = size/2-height + (5*skip%2)*BLOCK_SIZE; y < size/2+height; y+=BLOCK_SIZE*skip) {
+					  g2.fillRect(x, y, BLOCK_SIZE, BLOCK_SIZE);
+					}					
 				}
 				
 				g2.setColor(Color.BLACK);

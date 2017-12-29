@@ -292,6 +292,8 @@ public class ToBricksTransform implements InstructionsTransform {
 	
 	private Set<LEGOColor> drawSnot(Graphics2D g2, Rectangle basicUnitRect, 
 			Dimension toSize, boolean drawColors, boolean showOutlines) {
+		if(normalColorsChoosen == null)
+			return new TreeSet<LEGOColor>();
 		if(!drawColors) {
 			g2.setColor(Color.WHITE);
 			g2.fillRect(0, 0, toSize.width, toSize.height);			
@@ -356,8 +358,8 @@ public class ToBricksTransform implements InstructionsTransform {
 				
 				int xIndent = (int)Math.round(scaleW*x+scaleW/n2*i);
 				int yIndent = (int)Math.round(scaleH*y+scaleH/n5*j);
-				int w = (int)Math.round(scaleW/n2);
-				int h = (int)Math.round(scaleH/n5);
+				int w = (int)(1+scaleW/n2);
+				int h = (int)(1+scaleH/n5);
 				Rectangle r = new Rectangle(xIndent, yIndent, w, h);
 
 				if(drawColors) {
