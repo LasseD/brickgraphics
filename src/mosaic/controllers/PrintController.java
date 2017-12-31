@@ -534,7 +534,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 			shownMagnifierSize.height = (yMax-yMin)*magnifierSizePercentage/100;
 			shownMagnifierSize.width = (shownMagnifierSize.height * pageSizeInCoreUnitsW) / pageSizeInCoreUnitsH;
 			indentX = (xMax+xMin-shownMagnifierSize.width)/2;
-			indentY = yMax - shownMagnifierSize.width;
+			indentY = yMax - shownMagnifierSize.height;
 		}
 		
 		// draw magnified:

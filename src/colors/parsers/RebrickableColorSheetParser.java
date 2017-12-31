@@ -22,8 +22,8 @@ public class RebrickableColorSheetParser implements ColorSheetParserI {
 		List<String> out = new LinkedList<String>();
 		
 		ParserHelper.skipPastLineStartingWith(br, "<table class=", true);
-		ParserHelper.skipPastLine(br, "</tr>", true);
-		// Now we are at the line with non-transparent colors:
+		ParserHelper.skipPastLine(br, "</thead>", true);
+
 		String line;
 		br.readLine();
 		while(true) {
@@ -33,19 +33,7 @@ public class RebrickableColorSheetParser implements ColorSheetParserI {
 				break;
 			readTRs(out, line, map);			
 		}
-		
-		ParserHelper.skipPastLine(br, "</tr>", true);
-		// Now we are at the line with transparent colors:
-
-		br.readLine();
-		while(true) {
-			br.readLine();
-			line = br.readLine();
-			if(line == null || line.endsWith("</div>"))
-				break;
-			readTRs(out, line, map);			
-		}
-		
+				
 		return out;
 	}
 	

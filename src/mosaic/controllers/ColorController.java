@@ -252,16 +252,16 @@ public class ColorController implements ModelHandler<BrickGraphicsState> {
 	public String getLoadRebrickableURL() {
 		return loadRebrickableURL;
 	}
-	public boolean loadColorsFromURL(String url, JDialog toMoalizeOnError) {
+	public boolean loadColorsFromURL(String url, JDialog toModalizeOnError) {
 		try {
 			ColorSheetParser.saveFromWeb(url, this);
 		} catch (IOException e) {
-			JOptionPane.showMessageDialog(toMoalizeOnError, "Error loading colors from web: " + e.getMessage(), "Error loading colors", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(toModalizeOnError, "Error loading colors from web: " + e.getMessage(), "Error loading colors", JOptionPane.ERROR_MESSAGE);
 			Log.log(e);
 			return false;
 		}
 		loadRebrickableURL = url;
-		reloadColorsFile(toMoalizeOnError);
+		reloadColorsFile(toModalizeOnError);
 		reloadColorGroups(true); // Current implementation requires the groups to be reloaded.
 		return true;
 	}

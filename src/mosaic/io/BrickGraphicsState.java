@@ -28,7 +28,7 @@ public enum BrickGraphicsState implements ModelState {
 	ColorsShowOtherColorsGroup(true),
 	ColorsMinParts(1),
 	ColorsMinSets(100),
-	ColorsLoadRebrickableURL("http://rebrickable.com/colors"),
+	ColorsLoadRebrickableURL("https://rebrickable.com/colors/"),
 	ColorsLoadRebrickableFile(""),
 	ColorsLoadLDDXMLFile(""),
 	
