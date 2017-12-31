@@ -17,7 +17,7 @@ import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 
 /**
- * @author ld
+ * @author LD
  */
 public class AboutDialog extends JDialog {
 	public static final String NAME_STR = "About";

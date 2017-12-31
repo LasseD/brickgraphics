@@ -27,7 +27,7 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 	public static final String STATE_FILE_NAME = "lddmc.kvm";
 	public static final int VERSION_MAJOR = 0;
 	public static final int VERSION_MINOR = 9;
-	public static final int VERSION_MICRO = 3;
+	public static final int VERSION_MICRO = 4;
 	public static final String APP_VERSION = VERSION_MAJOR + "." + VERSION_MINOR + "." + VERSION_MICRO;
 	public static final String HELP_URL = "http://c-mt.dk/software/lddmc/help";
 	
