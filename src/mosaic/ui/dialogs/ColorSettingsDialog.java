@@ -230,9 +230,7 @@ public class ColorSettingsDialog extends JDialog implements ChangeListener {
 			bottomPanel.add(new JLabel("Notice: The old backup file will be deleted!"));
 			titlePanel.add(bottomPanel, BorderLayout.SOUTH);
 			setupPanel.add(titlePanel);
-		}
-		
-		
+		}		
 		
 		// Filters:
 		{

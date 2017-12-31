@@ -7,7 +7,7 @@ import mosaic.controllers.ColorController;
 
 /**
  * ID, Name, #rgb, |parts|, |sets|, from, to, LEGO names, LDraw IDs, Bricklink IDs, Peeron names
- * @author ld
+ * @author LD
  */
 public class RebrickableColorSheetParser implements ColorSheetParserI {
 	@Override

@@ -2,7 +2,6 @@ package mosaic.ui;
 
 import icon.*;
 import java.awt.*;
-import java.util.*;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -52,7 +51,7 @@ public class ColorLegend extends JToolBar implements ChangeListener, PipelineMos
 			String text = "";
 			if(identifier != null)
 				text = identifier + ".";
-			if(uc.showTotals())
+			if(uc.showTotals() && color.cnt > 0)
 				text += " \u2211=" + color.cnt;
 			setText(text);
 			setIcon(new Icon() {
@@ -90,27 +89,43 @@ public class ColorLegend extends JToolBar implements ChangeListener, PipelineMos
 		}
 	}
 	
-	public void setHighlightedColors(Set<LEGOColor> highlights) {
-		if(!uc.showLegend() || colors == null || highlights.isEmpty())
+	public void setHighlightedColors(LEGOColor.CountingLEGOColor[] m) {
+		if(!uc.showLegend() || colors == null || m.length == 0)
 			return;
+		LEGOColor.CountingLEGOColor[] highlights = new LEGOColor.CountingLEGOColor[LEGOColor.getMaxRebrickableId()+1];
+		for(int i = 0; i < m.length; ++i)
+			highlights[m[i].c.getIDRebrickable()] = m[i];
+		
+		// Update data:
+		if(uc.showTotals()) {
+			for(LEGOColor.CountingLEGOColor color : colors) {
+				int id = color.c.getIDRebrickable();
+				if(highlights[id] != null)
+					color.cnt = highlights[id].cnt;
+				else
+					color.cnt = 0;
+			}
+			list.setListData(colors);			
+		}
+
 		// Remove already selected indices:
 		int[] alreadySelected = list.getSelectedIndices();
 		for(int index : alreadySelected) {
-			if(highlights.contains(colors[index].c)) {
-				highlights.remove(colors[index].c);
+			int id = colors[index].c.getIDRebrickable();
+			if(highlights[id] != null) {
+				highlights[id] = null;
 			}
 			else {
 				list.removeSelectionInterval(index,  index);
 			}
 		}		
-		if(highlights.isEmpty())
-			return;
-		
 		for(int i = 0; i < colors.length; i++) {
-			if(highlights.contains(colors[i].c)) {
+			int id = colors[i].c.getIDRebrickable();
+			if(highlights[id] != null) {
 				list.addSelectionInterval(i, i);
 			}
 		}
+		//list.repaint();
 	}
 	
 	public void setBrickedView(BrickedView bw) {
@@ -121,9 +136,9 @@ public class ColorLegend extends JToolBar implements ChangeListener, PipelineMos
 	public void stateChanged(ChangeEvent e) {
 		if(brickedView == null)
 			return;
-		setVisible(uc.showLegend());
-		colors = brickedView.getLegendColors();
-		list.setListData(colors);
+		if(isVisible() != uc.showLegend())
+			setVisible(uc.showLegend());
+		mosaicChanged(null);
 	}
 
 	@Override
@@ -131,6 +146,7 @@ public class ColorLegend extends JToolBar implements ChangeListener, PipelineMos
 		if(brickedView == null)
 			return;
 		colors = brickedView.getLegendColors();
-		list.setListData(colors);
+		if(!uc.showMagnifier() || !uc.showTotals())
+			list.setListData(colors);
 	}
 }

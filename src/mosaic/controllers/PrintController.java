@@ -81,7 +81,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
         printerJob.setPrintable(PrintController.this, pageFormat);				
 		if(printerJob.printDialog()) {
 	    	progressDialog = new ProgressDialog(mw, "Printing");
-	    	printWorker = progressDialog.createWorker(new Runnable() {				
+	    	printWorker = progressDialog.createWorker(new Runnable() {
 				@Override
 				public void run() {
 			    	try {
@@ -525,17 +525,16 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		}
 	}
 	
-	private int drawMagnifier(Graphics2D g2, int page, int numPagesWidth, int xMin, int xMax, int yMin, int yMax, int pageSizeInCoreUnitsW, int pageSizeInCoreUnitsH, PageFormat pf, Set<LEGOColor> used) {
+	private int drawMagnifier(Graphics2D g2, int page, int numPagesWidth, int xMin, int xMax, int yMin, int yMax, int pageSizeInCoreUnitsW, int pageSizeInCoreUnitsH, PageFormat pf, Set<LEGOColor.CountingLEGOColor> used) {
 		// Find out how big each page is (compared to full image):
 		Dimension shownMagnifierSize = new Dimension((int)pf.getImageableWidth(), (int)((pf.getImageableWidth() * pageSizeInCoreUnitsH) / pageSizeInCoreUnitsW));
 		int indentX = xMin;
 		int indentY = yMax - shownMagnifierSize.height;
-		//final int magnifierSizePct = (showLegend ? magnifierSizePercentage : 100);
 		if(shownMagnifierSize.height > (yMax-yMin)*magnifierSizePercentage/100) {
 			shownMagnifierSize.height = (yMax-yMin)*magnifierSizePercentage/100;
 			shownMagnifierSize.width = (shownMagnifierSize.height * pageSizeInCoreUnitsW) / pageSizeInCoreUnitsH;
 			indentX = (xMax+xMin-shownMagnifierSize.width)/2;
-			indentY = yMax - shownMagnifierSize.width;//showLegend ? yMin + (yMax-yMin)/2 : yMin;
+			indentY = yMax - shownMagnifierSize.width;
 		}
 		
 		// draw magnified:
@@ -548,7 +547,9 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		basicUnitRect.x = (page % numPagesWidth)*basicUnitRect.width;
 		basicUnitRect.y = (page / numPagesWidth)*basicUnitRect.height;
 		
-		used.addAll(tbTransform.draw(g2, basicUnitRect, shownMagnifierSize, uiController.showColors(), true));
+		LEGOColor.CountingLEGOColor[] m = tbTransform.draw(g2, basicUnitRect, shownMagnifierSize, uiController.showColors(), true);
+		for(int i = 0; i < m.length; ++i)
+			used.add(m[i]);
 		
 		g2.setColor(Color.RED);
 		for(int x = 1; x < magnifiersPerPage.width; ++x) {
@@ -564,7 +565,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		return indentY;
 	}
 	
-	private void drawLegend(Graphics2D g2, int xMin, int xMax, int yMin, int yMax, int fontSizeIn1_72inches, Set<LEGOColor> used) {
+	private void drawLegend(Graphics2D g2, int xMin, int xMax, int yMin, int yMax, int fontSizeIn1_72inches, Set<LEGOColor.CountingLEGOColor> used) {
 		if(!showLegend)
 			return;
 		int rowHeight = fontSizeIn1_72inches*6/5;
@@ -575,7 +576,8 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		
 		int textHeight = fontSizeIn1_72inches;
 
-		for(LEGOColor c : used) {
+		for(LEGOColor.CountingLEGOColor cc : used) {
+			LEGOColor c = cc.c;
 			int x = i%columns;
 			int y = i/columns;
 
@@ -669,7 +671,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		yMin += drawShowPosition(page, numPagesWidth, numPagesHeight, fm, xMin, xMax, yMin, yMax, g2, fontSizeIn1_72inches, coreImageInCoreUnits, pageSizeInCoreUnits);
 		
 		// magnifier:
-		Set<LEGOColor> used = new TreeSet<LEGOColor>();
+		Set<LEGOColor.CountingLEGOColor> used = new TreeSet<LEGOColor.CountingLEGOColor>();
 		yMax = drawMagnifier(g2, page, numPagesWidth, xMin, xMax, yMin, yMax, pageSizeInCoreUnitsW, pageSizeInCoreUnitsH, pf, used);
 		
 		// Legend:

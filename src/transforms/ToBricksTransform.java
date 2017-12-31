@@ -2,9 +2,6 @@ package transforms;
 
 import java.awt.*;
 import java.awt.image.*;
-import java.util.*;
-import java.util.List;
-
 import transforms.ScaleTransform.ScaleQuality;
 import mosaic.controllers.ColorController;
 import mosaic.io.InstructionsBuilderI;
@@ -245,7 +242,7 @@ public class ToBricksTransform implements InstructionsTransform {
 	 * Only for SNOT
 	 */
 	@Override
-	public Set<LEGOColor> drawLastInstructions(Graphics2D g2, 
+	public LEGOColor.CountingLEGOColor[] drawLastInstructions(Graphics2D g2, 
 			Rectangle basicUnitRect, int blockWidth, int blockHeight, Dimension toSize) {
 		if(blockWidth != 10 || blockHeight != 10)
 			throw new IllegalArgumentException("Block 10x10");
@@ -253,47 +250,45 @@ public class ToBricksTransform implements InstructionsTransform {
 		return drawSnot(g2, basicUnitRect, toSize, false, true);
 	}
 	
-	public Set<LEGOColor> drawAll(Graphics2D g2, Dimension toSize) {
+	public LEGOColor.CountingLEGOColor[] drawAll(Graphics2D g2, Dimension toSize) {
 		Rectangle basicUnitRect = new Rectangle(0, 0, width, height);
 		return draw(g2, basicUnitRect, toSize, true, false);
 	}
 	
-	public Set<LEGOColor> draw(Graphics2D g2, Rectangle basicUnitRect, Dimension toSize, boolean showColors, boolean showOutlines) {
+	public LEGOColor.CountingLEGOColor[] draw(Graphics2D g2, Rectangle basicUnitRect, Dimension toSize, boolean showColors, boolean showOutlines) {
 		int basicUnitWidth = getToBricksType().getUnitWidth();
 		int basicUnitHeight = getToBricksType().getUnitHeight();
-		Set<LEGOColor> used;
 		if(getToBricksType() == ToBricksType.SNOT_IN_2_BY_2) {
 			if(showColors)
-				used = drawLastColors(g2, basicUnitRect, basicUnitWidth, basicUnitHeight, toSize, 0, 0, showOutlines);
+				return drawLastColors(g2, basicUnitRect, basicUnitWidth, basicUnitHeight, toSize, 0, 0, showOutlines);
 			else
-				used = drawLastInstructions(g2, basicUnitRect, basicUnitWidth, basicUnitHeight, toSize);
+				return drawLastInstructions(g2, basicUnitRect, basicUnitWidth, basicUnitHeight, toSize);
 		}
 		else {
 			if(showColors) {
 				ToBricksType tbt = getToBricksType();
-				used = getMainTransform().drawLastColors(g2, basicUnitRect, basicUnitWidth, basicUnitHeight, toSize, tbt.getStudsShownWide(), tbt.getStudsShownTall(), showOutlines);
+				return getMainTransform().drawLastColors(g2, basicUnitRect, basicUnitWidth, basicUnitHeight, toSize, tbt.getStudsShownWide(), tbt.getStudsShownTall(), showOutlines);
 			}
 			else
-				used = getMainTransform().drawLastInstructions(g2, basicUnitRect, basicUnitWidth, basicUnitHeight, toSize);
+				return getMainTransform().drawLastInstructions(g2, basicUnitRect, basicUnitWidth, basicUnitHeight, toSize);
 		}
-		return used;
 	}
 
 	/*
 	 * Only for SNOT
 	 */
 	@Override
-	public Set<LEGOColor> drawLastColors(Graphics2D g2, Rectangle basicUnitRect, int blockWidth, int blockHeight, Dimension toSize, int numStudsWide, int numStudsTall, boolean showOutlines) {
+	public LEGOColor.CountingLEGOColor[] drawLastColors(Graphics2D g2, Rectangle basicUnitRect, int blockWidth, int blockHeight, Dimension toSize, int numStudsWide, int numStudsTall, boolean showOutlines) {
 		if(blockWidth != 10 || blockHeight != 10)
 			throw new IllegalArgumentException("Block 10x10");
 			
 		return drawSnot(g2, basicUnitRect, toSize, true, showOutlines);
 	}
 	
-	private Set<LEGOColor> drawSnot(Graphics2D g2, Rectangle basicUnitRect, 
+	private LEGOColor.CountingLEGOColor[] drawSnot(Graphics2D g2, Rectangle basicUnitRect, 
 			Dimension toSize, boolean drawColors, boolean showOutlines) {
 		if(normalColorsChoosen == null)
-			return new TreeSet<LEGOColor>();
+			return new LEGOColor.CountingLEGOColor[]{};
 		if(!drawColors) {
 			g2.setColor(Color.WHITE);
 			g2.fillRect(0, 0, toSize.width, toSize.height);			
@@ -317,29 +312,35 @@ public class ToBricksTransform implements InstructionsTransform {
 			g2.setColor(Color.BLACK);
 			g2.drawRect(0, 0, toSize.width, toSize.height);			
 		}
-		Set<LEGOColor> used = new TreeSet<LEGOColor>();
+		LEGOColor.CountingLEGOColor[] m = new LEGOColor.CountingLEGOColor[LEGOColor.getMaxRebrickableId()+1];
+		int cnt = 0;
 		for(int x = 0; x < w; x++) {
 			for(int y = 0; y < h; y++) {
 				int ix = basicUnitRect.x/10+x;
 				int iy = basicUnitRect.y/10+y;
 				
 				if(normalColorsChoosen.length > ix && normalColorsChoosen[ix].length > iy) {
-					if(normalColorsChoosen[ix][iy]) {
-						used.addAll(snot(g2, basicUnitRect, true, drawColors, scaleW, scaleH, fontHeight, x, y, showOutlines));
-					}
-					else {
-						used.addAll(snot(g2, basicUnitRect, false, drawColors, scaleW, scaleH, fontHeight, x, y, showOutlines));
-					}		
+					if(normalColorsChoosen[ix][iy])
+						cnt += snot(m, g2, basicUnitRect, true, drawColors, scaleW, scaleH, fontHeight, x, y, showOutlines);
+					else
+						cnt += snot(m, g2, basicUnitRect, false, drawColors, scaleW, scaleH, fontHeight, x, y, showOutlines);
 				}
 			}
 		}
-		return used;
+		
+		LEGOColor.CountingLEGOColor[] ret = new LEGOColor.CountingLEGOColor[cnt];
+		for(int i = 0, idx = 0; i < m.length; ++i) {
+			if(m[i] != null)
+				ret[idx++] = m[i];			
+		}
+		return ret;
 	}
 	
 	/*
 	 * For Instructions
 	 */
-	private List<LEGOColor> snot(Graphics2D g2, Rectangle basicUnitRect, boolean normal, boolean drawColors, 
+	private int snot(LEGOColor.CountingLEGOColor[] m, Graphics2D g2, Rectangle basicUnitRect, 
+								 boolean normal, boolean drawColors, 
 			          			 double scaleW, double scaleH, int fontSize, int x, int y, boolean showOutlines) {
 		int n2 = 2;
 		int n5 = 5;
@@ -348,13 +349,20 @@ public class ToBricksTransform implements InstructionsTransform {
 			n5 = 2;
 		}
 		
-		List<LEGOColor> used = new LinkedList<LEGOColor>();
+		int ret = 0;
 		for(int j = 0; j < n5; j++) { // =
 			int iy = basicUnitRect.y/n2+y*n5+j;
 			for(int i = 0; i < n2; i++) { // |
 				int ix = basicUnitRect.x/n5+x*n2+i;
 				LEGOColor color = (normal ? normalColors : sidewaysColors).getRow(iy)[ix];
-				used.add(color);
+				int idx = color.getIDRebrickable();
+				
+				if(m[idx] == null) {
+					m[idx] = new LEGOColor.CountingLEGOColor(color, 1);
+					++ret;
+				}
+				else
+					m[idx].cnt++;
 				
 				int xIndent = (int)Math.round(scaleW*x+scaleW/n2*i);
 				int yIndent = (int)Math.round(scaleH*y+scaleH/n5*j);
@@ -380,21 +388,25 @@ public class ToBricksTransform implements InstructionsTransform {
 				}
 			}			
 		}
-		return used;
+		return ret;
 	}
 
-	private static void addOne(Map<LEGOColor, Integer> m, LEGOColor c) {
-		if(m.containsKey(c)) {
-			m.put(c, m.get(c)+1);					
+	private static boolean addOne(LEGOColor.CountingLEGOColor[] m, LEGOColor c) {
+		int idx = c.getIDRebrickable();
+		if(m[idx] != null) {
+			m[idx].cnt++;
+			return false;
 		}
 		else {
-			m.put(c, 1);					
+			m[idx] = new LEGOColor.CountingLEGOColor(c, 1);					
+			return true;
 		}
 	}
 	
-	private void addAll(Map<LEGOColor, Integer> m) {
+	private int addAll(LEGOColor.CountingLEGOColor[] m) {
 		if(normalColorsChoosen == null)
-			return; // nop
+			return 0; // nop
+		int size = 0;
 		for(int x = 0; x < normalColorsChoosen.length; x++) {
 			for(int y = 0; y < normalColorsChoosen[0].length; y++) {
 				boolean normalColorChosen = normalColorsChoosen[x][y];
@@ -409,34 +421,25 @@ public class ToBricksTransform implements InstructionsTransform {
 				for(int h = 0; h < n5; ++h) {
 					LEGOColor[] row = (normalColorChosen ? normalColors : sidewaysColors).getRow(y*n5+h);
 					for(int w = 0; w < n2; ++w) {
-						addOne(m, row[x*n2+w]);
+						if(addOne(m, row[x*n2+w]))
+							++size;
 					}
 				}				
 			}
 		}
+		return size;
 	}
 	
 	@Override
 	public LEGOColor.CountingLEGOColor[] lastUsedColorCounts() {
-		Map<LEGOColor, Integer> colorCounts = new TreeMap<LEGOColor, Integer>();
-
-		addAll(colorCounts);
-		
-		List<Map.Entry<LEGOColor, Integer>> l = new ArrayList<Map.Entry<LEGOColor, Integer>>(colorCounts.entrySet());
-		Collections.sort(l, new Comparator<Map.Entry<LEGOColor, Integer>>() {
-			@Override
-			public int compare(Map.Entry<LEGOColor, Integer> o1, Map.Entry<LEGOColor, Integer> o2) {
-				//return o2.getValue().compareTo(o1.getValue());
-				return o1.getKey().getIDRebrickable() - o2.getKey().getIDRebrickable();
-			}
-		});
-		LEGOColor.CountingLEGOColor[] out = new LEGOColor.CountingLEGOColor[l.size()];
-		for(int i = 0; i < l.size(); i++) {
-			out[i] = new LEGOColor.CountingLEGOColor(); 
-			out[i].c = l.get(i).getKey();
-			out[i].cnt = l.get(i).getValue();
+		LEGOColor.CountingLEGOColor[] m = new LEGOColor.CountingLEGOColor[LEGOColor.getMaxRebrickableId()+1];
+		int size = addAll(m);
+		LEGOColor.CountingLEGOColor[] ret = new LEGOColor.CountingLEGOColor[size];		
+		for(int i = 0, idx = 0; i < m.length; i++) {
+			if(m[i] != null)
+				ret[idx++] = m[i];
 		}
-		return out;
+		return ret;
 	}
 
 	// ONLY FOR SNOT!

@@ -5,10 +5,9 @@ import transforms.ScaleTransform.ScaleQuality;
 import icon.Icons;
 import io.*;
 import java.awt.*;
-
+import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.event.*;
-
 import colors.*;
 import mosaic.controllers.*;
 import mosaic.controllers.PrintController.ShowPosition;
@@ -16,8 +15,6 @@ import mosaic.io.*;
 import mosaic.rendering.Pipeline;
 import mosaic.rendering.PipelineMosaicListener;
 import bricks.ToBricksType;
-import java.awt.event.*;
-import java.util.Set;
 
 public class BrickedView extends JPanel implements ChangeListener, PipelineMosaicListener {
 	private Dimension mosaicImageSize;
@@ -89,10 +86,10 @@ public class BrickedView extends JPanel implements ChangeListener, PipelineMosai
 	public LEGOColor.CountingLEGOColor[] getLegendColors() {
 		if(toBricksTransform == null)
 			throw new IllegalStateException();
-		if(toBricksTransform.getToBricksType() == ToBricksType.SNOT_IN_2_BY_2) {
+		if(toBricksTransform.getToBricksType() == ToBricksType.SNOT_IN_2_BY_2)
 			return toBricksTransform.lastUsedColorCounts();				
-		}
-		return toBricksTransform.getMainTransform().lastUsedColorCounts();								
+		else
+			return toBricksTransform.getMainTransform().lastUsedColorCounts();								
 	}
 	
 	private void updateTransform(ToBricksController t) {
@@ -159,7 +156,7 @@ public class BrickedView extends JPanel implements ChangeListener, PipelineMosai
 
 			// Perform actual drawing:
 			toBricksTransform.drawAll(g2, shownImageSize);
-		}		
+		}
 	}
 	
 	private class MagnifierCanvas extends JPanel {
@@ -248,9 +245,9 @@ public class BrickedView extends JPanel implements ChangeListener, PipelineMosai
 					g2.setColor(Color.BLACK);
 					ToBricksTransform tbTransform = magnifierController.getTBTransform();
 					Rectangle basicUnitRect = magnifierController.getCoreRect();
-					Set<LEGOColor> used = tbTransform.draw(g2, basicUnitRect, shownMagnifierSize, uiController.showColors(), true);
+					LEGOColor.CountingLEGOColor[] used = tbTransform.draw(g2, basicUnitRect, shownMagnifierSize, uiController.showColors(), true);
 					legend.setHighlightedColors(used);
-				}				
+				}
 			};
 			buttonPanel.add(displayPanel);
 			

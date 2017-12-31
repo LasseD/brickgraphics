@@ -1,10 +1,7 @@
 package transforms;
 
 import java.awt.*;
-
 import colors.*;
-
-import java.util.*;
 
 public interface InstructionsTransform extends Transform {
 	/**
@@ -17,7 +14,7 @@ public interface InstructionsTransform extends Transform {
 	 * @param numStuds Number of studs to draw on a single block
 	 * @return a set with the colors used.
 	 */
-	public Set<LEGOColor> drawLastInstructions(Graphics2D g2, Rectangle unitBounds, int blockWidth, int blockHeight, Dimension toSize);
-	public Set<LEGOColor> drawLastColors(Graphics2D g2, Rectangle unitBounds, int blockWidth, int blockHeight, Dimension toSize, int numStudsWide, int numStudsTall, boolean drawOutlines);
+	public LEGOColor.CountingLEGOColor[] drawLastInstructions(Graphics2D g2, Rectangle unitBounds, int blockWidth, int blockHeight, Dimension toSize);
+	public LEGOColor.CountingLEGOColor[] drawLastColors(Graphics2D g2, Rectangle unitBounds, int blockWidth, int blockHeight, Dimension toSize, int numStudsWide, int numStudsTall, boolean drawOutlines);
 	public LEGOColor.CountingLEGOColor[] lastUsedColorCounts();
 }

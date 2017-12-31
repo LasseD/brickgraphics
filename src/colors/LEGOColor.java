@@ -13,8 +13,10 @@ public class LEGOColor implements Comparable<LEGOColor>, Serializable {
 	private int parts, sets, from, to;
 	private String namesLEGO, idsLDraw, idsBrickLink, namesPeeron;
 	
+	private static int maxRebrickableId = 0;
+	
 	public LEGOColor(int rgb) {
-		idRebrickable = rgb;
+		idRebrickable = rgb;		
 		name = "Pure RGB #" + rgb;
 		sets = Integer.MAX_VALUE;
 		parts = Integer.MAX_VALUE;
@@ -23,9 +25,15 @@ public class LEGOColor implements Comparable<LEGOColor>, Serializable {
 		idLEGO = 0;
 		idsLDraw = "0";
 		setRGB(new Color(rgb));
+		if(maxRebrickableId < idRebrickable)
+			maxRebrickableId = idRebrickable;
 	}
 	
 	private LEGOColor() {}
+	
+	public static int getMaxRebrickableId() {
+		return maxRebrickableId;
+	}
 		
 	public static LEGOColor parse(String s) {
 		if(s == null)
@@ -40,6 +48,8 @@ public class LEGOColor implements Comparable<LEGOColor>, Serializable {
 		
 		LEGOColor c = new LEGOColor();
 		c.idRebrickable = parseInt(parts[0]);
+		if(maxRebrickableId < c.idRebrickable)
+			maxRebrickableId = c.idRebrickable;
 		c.name = parts[1];
 		if(c.idRebrickable == BLACK.idRebrickable)
 			c.setRGB(BLACK.rgb);
@@ -228,8 +238,23 @@ public class LEGOColor implements Comparable<LEGOColor>, Serializable {
 		return idRebrickable < other.idRebrickable ? -1 : (idRebrickable == other.idRebrickable ? 0 : 1);
 	}
 	
-	public static class CountingLEGOColor {
+	public static class CountingLEGOColor implements Comparable<CountingLEGOColor> {
 		public LEGOColor c;
 		public int cnt;
+		
+		public CountingLEGOColor(LEGOColor c, int cnt) {
+			this.c = c;
+			this.cnt = cnt;
+		}
+		
+		@Override
+		public int compareTo(CountingLEGOColor other) {
+			return c.compareTo(other.c);
+		}
+		
+		@Override
+		public String toString() {
+			return c.toString() + ", cnt: " + cnt;
+		}
 	}
 }

@@ -7,15 +7,10 @@ import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.*;
-import java.util.*;
-import java.util.Map.Entry;
-
 import mosaic.controllers.ColorController;
-
 import colors.*;
 
-public abstract class BufferedLEGOColorTransform implements LEGOColorTransform,
-		InstructionsTransform {
+public abstract class BufferedLEGOColorTransform implements LEGOColorTransform, InstructionsTransform {
 	private TransformationSet[] sets;
 	private int pairIndex, lastIndex;
 	private ColorController cc;
@@ -95,7 +90,7 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform,
 	}*/
 
 	@Override
-	public Set<LEGOColor> drawLastInstructions(Graphics2D g2,
+	public LEGOColor.CountingLEGOColor[] drawLastInstructions(Graphics2D g2,
 			Rectangle unitBounds, int blockWidth, int blockHeight,
 			Dimension toSize) {
 		g2.setColor(Color.WHITE);
@@ -108,9 +103,8 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform,
 		int cellW = (int) Math.round(scaleW);
 		int cellH = (int) Math.round(scaleH);
 
-		Set<LEGOColor> used = new TreeSet<LEGOColor>();
 		if(lastIndex == -1 || sets[lastIndex] == null)
-			return used;
+			return new LEGOColor.CountingLEGOColor[]{};
 		
 		LEGOColorGrid transformedColors = sets[lastIndex].colors;
 		Font font = LEGOColor.makeFont(g2, cellW - 4, cellH - 4, cc,
@@ -118,6 +112,9 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform,
 		g2.setFont(font);
 		FontMetrics fm = g2.getFontMetrics(font);
 		int fontHeight = (fm.getDescent() + fm.getAscent()) / 2;
+
+		LEGOColor.CountingLEGOColor[] m = new LEGOColor.CountingLEGOColor[LEGOColor.getMaxRebrickableId()+1];
+		int cnt = 0;
 
 		g2.setColor(Color.BLACK);
 		for (int y = 0; y < h; y++) {
@@ -135,7 +132,13 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform,
 				int ix = unitBounds.x / blockWidth + x;
 				if (ix < transformedColors.getWidth()) {
 					LEGOColor color = row[ix];
-					used.add(color);
+					int idx = color.getIDRebrickable();
+					if(m[idx] == null) {
+						m[idx] = new LEGOColor.CountingLEGOColor(color, 1);
+						++cnt;
+					}
+					else
+						m[idx].cnt++;
 
 					String id = cc.getShortIdentifier(color);
 					int originX = (int) (r.getCenterX() - g2.getFontMetrics(
@@ -145,11 +148,11 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform,
 				}
 			}
 		}
-		return used;
+		return trim(m, cnt);
 	}
 
 	@Override
-	public Set<LEGOColor> drawLastColors(Graphics2D g2, Rectangle unitBounds,
+	public LEGOColor.CountingLEGOColor[] drawLastColors(Graphics2D g2, Rectangle unitBounds,
 			int blockWidth, int blockHeight, Dimension toSize,
 			int numStudsWide, int numStudsTall, boolean drawOutlines) {
 		// Find scaling parameters:
@@ -161,11 +164,12 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform,
 		int cellH = (int) Math.ceil(scaleH);
 
 		// draw colors and studs:
-		Set<LEGOColor> used = new TreeSet<LEGOColor>();
 		if(lastIndex == -1 || sets[lastIndex] == null)
-			return used;
-		LEGOColorGrid transformedColors = sets[lastIndex].colors;
-		
+			return new LEGOColor.CountingLEGOColor[]{};
+		LEGOColor.CountingLEGOColor[] m = new LEGOColor.CountingLEGOColor[LEGOColor.getMaxRebrickableId()+1];
+		int cnt = 0;
+
+		LEGOColorGrid transformedColors = sets[lastIndex].colors;		
 		for (int y = 0; y < h; y++) {
 			int yIndent = (int) Math.round(scaleH * y);
 			int iy = unitBounds.y / blockHeight + y;
@@ -180,7 +184,14 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform,
 				int ix = unitBounds.x / blockWidth + x;
 				if (ix < transformedColors.getWidth()) {
 					LEGOColor color = row[ix];
-					used.add(color);
+					int idx = color.getIDRebrickable();
+					if(m[idx] == null) {
+						m[idx] = new LEGOColor.CountingLEGOColor(color, 1);
+						++cnt;
+					}
+					else {
+						m[idx].cnt++;
+					}
 					g2.setColor(color.getRGB());
 					g2.fill(r);
 
@@ -203,7 +214,7 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform,
 		}
 		
 		if(!drawOutlines)
-			return used;
+			return trim(m, cnt);
 
 		// Draw lines:
 		// Draw upper and left lines as the others will be drawn brick by brick:
@@ -239,9 +250,9 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform,
 			}
 		}
 
-		return used;
+		return trim(m, cnt);
 	}
-
+	
 	@Override
 	public LEGOColor.CountingLEGOColor[] lastUsedColorCounts() {
 		if (lastIndex == -1 || sets[lastIndex] == null)
@@ -250,38 +261,33 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform,
 		if (transformedColors == null)
 			return new LEGOColor.CountingLEGOColor[] {};
 
-		Map<LEGOColor, Integer> m = new TreeMap<LEGOColor, Integer>();
+		LEGOColor.CountingLEGOColor[] m = new LEGOColor.CountingLEGOColor[LEGOColor.getMaxRebrickableId()+1];
+		int entries = 0;
 		for (int y = 0; y < transformedColors.getHeight(); y++) {
 			LEGOColor[] row = transformedColors.getRow(y);
 			for (int x = 0; x < row.length; x++) {
 				LEGOColor c = row[x];
-				if (m.containsKey(c)) {
-					m.put(c, m.get(c) + 1);
+				LEGOColor.CountingLEGOColor mc = m[c.getIDRebrickable()];
+				if (m[c.getIDRebrickable()] != null) {
+					mc.cnt++;
 				} else {
-					m.put(c, 1);
+					m[c.getIDRebrickable()] = new LEGOColor.CountingLEGOColor(c, 1);
+					++entries;
 				}
 			}
 		}
-		List<Map.Entry<LEGOColor, Integer>> l = new ArrayList<Map.Entry<LEGOColor, Integer>>(
-				m.entrySet());
-		Collections.sort(l, new Comparator<Map.Entry<LEGOColor, Integer>>() {
-			@Override
-			public int compare(Entry<LEGOColor, Integer> o1,
-					Entry<LEGOColor, Integer> o2) {
-				return o1.getKey().getIDRebrickable()
-						- o2.getKey().getIDRebrickable();
-			}
-		});
-		LEGOColor.CountingLEGOColor[] out = new LEGOColor.CountingLEGOColor[l
-				.size()];
-		for (int i = 0; i < l.size(); i++) {
-			out[i] = new LEGOColor.CountingLEGOColor();
-			out[i].c = l.get(i).getKey();
-			out[i].cnt = l.get(i).getValue();
-		}
-		return out;
+		return trim(m, entries);
 	}
 
+	private static LEGOColor.CountingLEGOColor[] trim(LEGOColor.CountingLEGOColor[] m, int size) {
+		LEGOColor.CountingLEGOColor[] out = new LEGOColor.CountingLEGOColor[size];
+		for (int i = 0, idx = 0; i <= LEGOColor.getMaxRebrickableId(); i++) {
+			if(m[i] != null)
+				out[idx++] = m[i];
+		}
+		return out;		
+	}
+	
 	public LEGOColorGrid lastInstructions() {
 		return sets[lastIndex].colors;
 	}
