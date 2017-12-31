@@ -19,7 +19,7 @@ import mosaic.io.MosaicIO;
  */
 public class ColorSettingsDialog extends JDialog implements ChangeListener {
 	private ColorController cc;
-	private JTextField tfLoadRebrickableURL, tfLoadRebrickableFile, tfLoadLDDXMLFile;
+	private JTextField tfLoadRebrickableURL, tfLoadRebrickableFile;
 	private LividTextField tfFromYear, tfToYear, tfMinSets, tfMinParts;
 	private JCheckBox cbShowMetallic, cbShowTransparent, cbShowOnlyLDD, cbShowOtherColorsGroup;
 	private static final String DIALOG_TITLE = "Color Settings";
@@ -80,27 +80,6 @@ public class ColorSettingsDialog extends JDialog implements ChangeListener {
 				}
 			});
 			titlePanel.add(tfLoadRebrickableFile);
-			titlePanel.add(findButton);
-			titlePanel.add(loadFileButton);
-			setupPanel.add(titlePanel);
-		}
-		{
-			// LDD XML File:
-			JPanel titlePanel = new JPanel(new FlowLayout());
-			titlePanel.setBorder(BorderFactory.createTitledBorder("Update LDD color IDs using ldraw.xml from either an LDD installation or gallaghersart.com"));
-			tfLoadLDDXMLFile = new JTextField(40);
-			JButton findButton = new JButton("...");
-			findButton.addActionListener(MosaicIO.createLDDXMLFileOpenAction(this, tfLoadLDDXMLFile));
-			JButton loadFileButton = new JButton("Load ldraw.xml file");
-			loadFileButton.addActionListener(new ActionListener() {				
-				@Override
-				public void actionPerformed(ActionEvent arg0) {
-					boolean ok = cc.loadLDDXMLFile(tfLoadLDDXMLFile.getText(), ColorSettingsDialog.this);
-					if(ok)
-						JOptionPane.showMessageDialog(ColorSettingsDialog.this, "Successfully read ldraw.xml file!", "Colors updated", JOptionPane.PLAIN_MESSAGE);
-				}
-			});
-			titlePanel.add(tfLoadLDDXMLFile);
 			titlePanel.add(findButton);
 			titlePanel.add(loadFileButton);
 			setupPanel.add(titlePanel);
@@ -340,7 +319,6 @@ public class ColorSettingsDialog extends JDialog implements ChangeListener {
 		
 		tfLoadRebrickableURL.setText(cc.getLoadRebrickableURL());
 		tfLoadRebrickableFile.setText(cc.getLoadRebrickableFile());
-		tfLoadLDDXMLFile.setText(cc.getLoadLDDXMLFile());
 		
 		String fy = "" + cc.getFromYear();
 		if(!tfFromYear.getText().trim().equals(fy))

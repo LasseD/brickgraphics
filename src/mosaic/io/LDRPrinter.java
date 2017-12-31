@@ -99,18 +99,24 @@ public class LDRPrinter {
 		InstructionsBuilderI builder = new InstructionsBuilderI() {
 			@Override
 			public void add(int id, int x, int y, LEGOColor color) {
+				if(!color.isLDraw())
+					return;
+				
 				String part = "3024.DAT";
 				if(y%5==0)
 					part = "3070B.DAT";
-				out.printf("1 %d 0 %d %d 0 0 -1 0 1 0 1 0 0 %s\n", color.getFirstIDLDraw(), 8*y, 20*x, part);
+				out.printf("1 %d 0 %d %d 0 0 -1 0 1 0 1 0 0 %s\n", color.getLDraw()[0].getID(), 8*y, 20*x, part);
 			}
 
 			@Override
 			public void addSideways(int id, int x, int y, LEGOColor color) {
+				if(!color.isLDraw())
+					return;
+
 				String part = "3024.DAT";
 				if(x%5==4)
 					part = "3070B.DAT";
-				out.printf("1 %d 0 %d %d -1 0 0 0 0 -1 0 -1 0 %s\n", color.getFirstIDLDraw(), 10+20*y, -2+8*x, part);
+				out.printf("1 %d 0 %d %d -1 0 0 0 0 -1 0 -1 0 %s\n", color.getLDraw()[0].getID(), 10+20*y, -2+8*x, part);
 			}
 		};
 		
@@ -233,7 +239,10 @@ public class LDRPrinter {
 					LEGOColor[] row = instructions.getRow(y);
 					for(int i = 0; i < iMax; i++) {
 						int x = bx+i;
-						int color = row[x].getFirstIDLDraw();
+
+						if(!row[x].isLDraw())
+							continue;
+						int color = row[x].getLDraw()[0].getID();
 						out.printf("1 %d 0 %d %d %s", color, yMult*y, xMult*x, orientAndDat);
 						out.println();
 					}

@@ -54,13 +54,15 @@ public class Part implements Comparable<Part> {
 	}
 	
 	public void printLDR(PrintWriter out, int xMult, int yMult, int zMult) {
+		if(!color.isLDraw())
+			throw new IllegalStateException("Color is not available in LDraw: " + color);
 		int overwriteY = yMult*y+type.getLDrawCenterY();
 		int overwriteX = xMult*x+type.getLDrawCenterX();
 		int overwriteZ = z*zMult;
 		if(type.getCategory() == Category.Brick)
 			overwriteZ += 2*zMult;
-
-		int overwriteColor = color.getFirstIDLDraw();
+		
+		int overwriteColor = color.getLDraw()[0].getID();
 		out.printf("1 %d %d %d %d %s %s.dat", overwriteColor, overwriteX, overwriteZ, overwriteY, 
 				LDraw_STUDS_UP_TURNS[type.getTimesTurned90Degrees()], type.getID());
 		out.println(); // Because \n apparently is a different character...

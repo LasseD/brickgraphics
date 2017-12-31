@@ -2,15 +2,14 @@ package colors.parsers;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.ParseException;
 import java.util.List;
-
-import mosaic.controllers.ColorController;
 
 /**
  * Return list of the following format (corresponds to ordering of Rebrickable list):
- * ID, Name, #rgb, |parts|, |sets|, from, to, LEGO names, LDraw IDs, Bricklink IDs, Peeron names
- * @author ld
+ * rebrickableID, rebrickableName, #rgb, |parts|, |sets|, from, to, LEGO IDs+names, LDraw IDs+names, Bricklink IDs+names, BrickOwl ids+names
+ * @author LD
  */
 public interface ColorSheetParserI {
-	List<String> parse(InputStreamReader isr, ColorController cc) throws IOException;
+	List<String> parse(InputStreamReader isr) throws IOException, ParseException;
 }

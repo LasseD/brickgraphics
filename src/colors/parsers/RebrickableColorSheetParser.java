@@ -2,99 +2,66 @@ package colors.parsers;
 
 import java.util.*;
 import java.io.*;
+import java.text.ParseException;
+import colors.ColorIdNamePair;
 import colors.LEGOColor;
-import mosaic.controllers.ColorController;
 
 /**
  * ID, Name, #rgb, |parts|, |sets|, from, to, LEGO names, LDraw IDs, Bricklink IDs, Peeron names
  * @author LD
  */
 public class RebrickableColorSheetParser implements ColorSheetParserI {
+	public static void main(String[] args) throws Exception {
+		RebrickableColorSheetParser p = new RebrickableColorSheetParser();
+		InputStreamReader reader = new InputStreamReader(new FileInputStream(new File("C:\\workspace\\BrickGraphics\\ColorsRebrickable.html"))); // I'm just testing some local stuff on my Windows box.
+		List<String> lines = p.parse(reader);
+		for(String line : lines)
+			System.out.println(line);
+	}
+	
 	@Override
-	public List<String> parse(InputStreamReader isr, ColorController cc) throws IOException {
-		// construct lookup for rebrickable id -> ldd id:
-		Map<Integer,Integer> map = new TreeMap<Integer,Integer>();
-		for(LEGOColor color : cc.getColorsFromDisk()) {
-			map.put(color.getIDRebrickable(), color.getIDLEGO());
-		}
-		
+	public List<String> parse(InputStreamReader isr) throws IOException, ParseException {		
 		BufferedReader br = new BufferedReader(isr);
 		List<String> out = new LinkedList<String>();
 		
-		ParserHelper.skipPastLineStartingWith(br, "<table class=", true);
-		ParserHelper.skipPastLine(br, "</thead>", true);
+		ParserHelper.skipPastLine(br, "<tbody>", true);
 
 		String line;
-		br.readLine();
-		while(true) {
-			br.readLine();
-			line = br.readLine();
-			if(line == null || line.endsWith("</td>"))
-				break;
-			readTRs(out, line, map);			
-		}
-				
-		return out;
-	}
-	
-	private static void readTRs(List<String> out, String trs, Map<Integer,Integer> map) {
-		if(trs == null)
-			return;
-		char[] cs = trs.toCharArray();
-		int csi = 0;
-		//while(csi < cs.length) {
-			// Spool past <tr><td><img /></td><td>:
-			csi = eatTags(cs, csi, 2);
-			if(csi >= cs.length)
-				return;
-			// retrieve 11 pieces of data:
-			int id = 0;
-			StringBuilder sb = new StringBuilder();
-			for(int i = 0; i < 11; ++i) {
-				if(i != 0)
-					sb.append('|');
-				while(csi < cs.length) {
-					if(cs[csi] == '<') {
-						if(csi < cs.length-1 && cs[csi+1] == 'b') {
-							sb.append(' ');
-							csi++;
-							while(csi < cs.length && cs[csi] != '>')
-								csi++;
-							++csi;							
-						}
-						else 
-							break;
-					}	
-					else if(cs[csi] == '&') {
-						while(csi < cs.length && cs[csi] != ';')
-							csi++;
-						++csi;
-					}
-					else {
-						if(i == 0)
-							id = 10*id + cs[csi];
-						sb.append(cs[csi++]);						
-					}
+		while(null != (line = br.readLine())) {
+			if(!line.equals("<tr>"))
+				continue;
+			// Read color:
+			LEGOColor c = new LEGOColor();
+			List<ColorIdNamePair> data = new ArrayList<ColorIdNamePair>();
+			while(!"</tr>".equals(line = br.readLine())) {
+				if(line == null)
+					throw new ParseException("Expected </tr> before end of file", data.size());
+				line = line.trim();
+				if(line.startsWith("<td>") && line.endsWith("</td>")) {
+					c.loadRebrickableData(line.substring(4, line.length()-5));
 				}
-				csi = eatTags(cs, csi, 2);
+				else if(line.startsWith("<span")) {
+					line = line.substring(line.indexOf(">")+1);
+					int id = Integer.parseInt(line.substring(0, line.indexOf(" ")));
+					int indexOfSemiColon;
+					while((indexOfSemiColon = line.indexOf(";")) != -1) {
+						line = line.substring(indexOfSemiColon+1);
+						int indexOfAnd = line.indexOf("&");
+						if(indexOfAnd == -1)
+							break;
+						data.add(new ColorIdNamePair(id, line.substring(0, indexOfAnd)));
+						line = line.substring(indexOfAnd+1);
+					}					
+				}
+				else if(line.startsWith("</td>")) {
+					ColorIdNamePair[] pairs = new ColorIdNamePair[data.size()];
+					pairs = data.toArray(pairs);
+					c.loadRebrickableData(pairs);
+					data.clear();
+				}
 			}
-			sb.append('|');
-			if(map.containsKey(id))
-				sb.append(map.get(id));
-			else
-				sb.append("-1");
-			out.add(sb.toString());
-		//}
-	}
-	
-	private static int eatTags(char[] cs, int csi, int numTags) {
-		for(int ignore = 0; ignore < numTags; ++ignore) {
-			while(csi < cs.length && cs[csi] != '<')
-				++csi;
-			while(csi < cs.length && cs[csi] != '>')
-				++csi;
-			++csi;
-		}
-		return csi;
-	}
+			out.add(c.toDelimitedString());
+		}				
+		return out;
+	}	
 }

@@ -2,6 +2,7 @@ package mosaic.controllers;
 
 import java.awt.Color;
 import java.io.*;
+import java.text.ParseException;
 import java.util.*;
 import icon.*;
 import javax.swing.*;
@@ -26,7 +27,7 @@ public class ColorController implements ModelHandler<BrickGraphicsState> {
 	private String localizedFileNameNoTXT;
 	private int fromYear, toYear, minParts, minSets;
 	private boolean showMetallic, showTransparent, showOnlyLDD, showOtherColorsGroup;
-	private String loadRebrickableURL, loadRebrickableFile, loadLDDXMLFile;
+	private String loadRebrickableURL, loadRebrickableFile;
 	// Color Chooser state:
 	private LEGOColor[] colorChooserSelectedColors;
 	private boolean usesBackupColors;
@@ -87,7 +88,7 @@ public class ColorController implements ModelHandler<BrickGraphicsState> {
 		
 		Scanner scanner = new Scanner(f);
 		while(scanner.hasNextLine()) {
-			String[] line = scanner.nextLine().split("=");
+			String[] line = scanner.nextLine().split("[\\=]");
 			if(line.length <= 1)
 				continue;
 			String a = line[0].trim();
@@ -259,6 +260,10 @@ public class ColorController implements ModelHandler<BrickGraphicsState> {
 			JOptionPane.showMessageDialog(toModalizeOnError, "Error loading colors from web: " + e.getMessage(), "Error loading colors", JOptionPane.ERROR_MESSAGE);
 			Log.log(e);
 			return false;
+		} catch (ParseException e2) {
+			JOptionPane.showMessageDialog(toModalizeOnError, "Error parsing colors file from web: " + e2.getMessage(), "Error loading colors", JOptionPane.ERROR_MESSAGE);
+			Log.log(e2);
+			return false;
 		}
 		loadRebrickableURL = url;
 		reloadColorsFile(toModalizeOnError);
@@ -268,32 +273,21 @@ public class ColorController implements ModelHandler<BrickGraphicsState> {
 	public String getLoadRebrickableFile() {
 		return loadRebrickableFile;
 	}
-	public String getLoadLDDXMLFile() {
-		return loadLDDXMLFile;
-	}
-	public boolean loadColorsFromFile(String file, JDialog toMoalizeOnError) {
+	public boolean loadColorsFromFile(String file, JDialog toModalizeOnError) {
 		try {
-			ColorSheetParser.saveFromRebrickableFile(file, this);
+			ColorSheetParser.saveFromRebrickableFile(file);
 		} catch (IOException e) {
-			JOptionPane.showMessageDialog(toMoalizeOnError, "Error loading colors from file: " + e.getMessage(), "Error loading colors", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(toModalizeOnError, "Error loading colors from file: " + e.getMessage(), "Error loading colors", JOptionPane.ERROR_MESSAGE);
 			Log.log(e);
+			return false;
+		} catch (ParseException e2) {
+			JOptionPane.showMessageDialog(toModalizeOnError, "Error parsing colors file from file: " + e2.getMessage(), "Error loading colors", JOptionPane.ERROR_MESSAGE);
+			Log.log(e2);
 			return false;
 		}
 		loadRebrickableFile = file;
-		reloadColorsFile(toMoalizeOnError);
+		reloadColorsFile(toModalizeOnError);
 		reloadColorGroups(true); // Current implementation requires the groups to be reloaded.
-		return true;
-	}
-	public boolean loadLDDXMLFile(String file, JDialog toMoalizeOnError) {
-		try {
-			ColorSheetParser.saveFromLDDXMLFile(file, this);
-		} catch (IOException e) {
-			JOptionPane.showMessageDialog(toMoalizeOnError, "Error loading ldraw.xml file: " + e.getMessage(), "Error loading file", JOptionPane.ERROR_MESSAGE);
-			Log.log(e);
-			return false;
-		}
-		loadLDDXMLFile = file;
-		reloadColorsFile(toMoalizeOnError);
 		return true;
 	}
 	public int getFromYear() {
@@ -372,9 +366,17 @@ public class ColorController implements ModelHandler<BrickGraphicsState> {
 		case ID:
 			return ""+c.getIDRebrickable();
 		case LDRAW:
-			return ""+c.getFirstIDLDraw();
+			if(!c.isLDraw())
+				return "";
+			return ""+c.getLDraw()[0].getID();
 		case BRICKLINK:
-			return ""+c.getFirstIDBL();
+			if(!c.isBrickLink())
+				return "";
+			return ""+c.getBrickLink()[0].getID();
+		case BRICKOWL:
+			if(!c.isBrickOwl())
+				return "";
+			return ""+c.getBrickOwl()[0].getID();
 		case INCREMENTAL:
 			return incrementalIDs.get(c)+"";
 		case LEGO:
@@ -410,13 +412,15 @@ public class ColorController implements ModelHandler<BrickGraphicsState> {
 		case ID:
 			return ""+c.getIDRebrickable();
 		case LDRAW:
-			return c.getIDsLDraw();
+			return ColorIdNamePair.getIDs(c.getLDraw());
 		case BRICKLINK:
-			return c.getIDsBL();
+			return ColorIdNamePair.getIDs(c.getBrickLink());
+		case BRICKOWL:
+			return ColorIdNamePair.getIDs(c.getBrickOwl());
 		case INCREMENTAL:
 			return incrementalIDs.get(c)+"";
 		case LEGO:
-			return ""+c.getIDLEGO();
+			return ColorIdNamePair.getIDs(c.getLEGO());
 		default:
 			throw new IllegalStateException("Enum broken: " + shownID);
 		}
@@ -428,22 +432,26 @@ public class ColorController implements ModelHandler<BrickGraphicsState> {
 	public void setShownName(ShownName shownName) {
 		this.shownName = shownName;
 		if(shownName != ShownName.LOCALIZED)
-			notifyListeners(null); // TODO: Why only when not localized?
+			notifyListeners(null); // TODO: Why only when not localized?... I have forgotten.
 	}
 	public String getShownName(LEGOColor c) {
 		switch(shownName) {
 		case NONE:
 			return null;
 		case NAME:
-			return ""+c.getName();
+			return c.getName();
 		case RGB:
 			return "#" + Integer.toHexString(c.getRGB().getRGB());
 		case LAB:
 			return "("+c.getLAB()[0]+","+c.getLAB()[1]+","+c.getLAB()[2]+")";
 		case LEGO:
-			return c.getNamesLEGO();
-		case PEERON:
-			return c.getNamesPeeron();
+			return ColorIdNamePair.getNames(c.getLEGO());
+		case LDRAW:
+			return ColorIdNamePair.getNames(c.getLDraw());
+		case BRICKLINK:
+			return ColorIdNamePair.getNames(c.getBrickLink());
+		case BRICKOWL:
+			return ColorIdNamePair.getNames(c.getBrickOwl());
 		case LOCALIZED:
 			return localizedColors == null ? "-" : localizedColors.get(c);
 		default:
@@ -466,20 +474,20 @@ public class ColorController implements ModelHandler<BrickGraphicsState> {
 		sb.append(c.getLAB()[2]);
 		sb.append("), Num Parts: ");		
 		sb.append(c.getParts());
-		sb.append(", Num Sets: ");		
+		sb.append(", Num Sets: ");
 		sb.append(c.getSets());
 		sb.append(", Years ");		
 		sb.append(c.getFrom());
 		sb.append("-");				
 		sb.append(c.getTo());
-		sb.append(", LEGO Color(s):");		
-		sb.append(c.getNamesLEGO());
+		sb.append(", LEGO Color(s):");	
+		sb.append(ColorIdNamePair.getIdsAndNames(c.getLEGO()));
 		sb.append(", LDraw Color(s):");		
-		sb.append(c.getIDsLDraw());
+		sb.append(ColorIdNamePair.getIdsAndNames(c.getLDraw()));
 		sb.append(", BrickLink Color(s):");		
-		sb.append(c.getIDsBL());
-		sb.append(", Peeron Color(s):");		
-		sb.append(c.getNamesPeeron());
+		sb.append(ColorIdNamePair.getIdsAndNames(c.getBrickLink()));
+		sb.append(", BrickOwl Color(s):");		
+		sb.append(ColorIdNamePair.getIdsAndNames(c.getBrickOwl()));
 		return sb.toString();
 	}
 	
@@ -529,7 +537,6 @@ public class ColorController implements ModelHandler<BrickGraphicsState> {
 		minSets = (Integer)model.get(BrickGraphicsState.ColorsMinSets);
 		loadRebrickableURL = (String)model.get(BrickGraphicsState.ColorsLoadRebrickableURL);
 		loadRebrickableFile = (String)model.get(BrickGraphicsState.ColorsLoadRebrickableFile);
-		loadLDDXMLFile = (String)model.get(BrickGraphicsState.ColorsLoadLDDXMLFile);
 		updateColorListsAndFilters(this, false);
 
 		// Stuff for color chooser:
@@ -566,7 +573,6 @@ public class ColorController implements ModelHandler<BrickGraphicsState> {
 		model.set(BrickGraphicsState.ColorsMinSets, minSets);
 		model.set(BrickGraphicsState.ColorsLoadRebrickableURL, loadRebrickableURL);
 		model.set(BrickGraphicsState.ColorsLoadRebrickableFile, loadRebrickableFile);
-		model.set(BrickGraphicsState.ColorsLoadLDDXMLFile, loadLDDXMLFile);
 		// Color chooser:		
 		
 		int[] sc = new int[colorChooserSelectedColors.length];
@@ -578,7 +584,7 @@ public class ColorController implements ModelHandler<BrickGraphicsState> {
 	}
 
 	public static enum ShownID {
-		NONE("None"), ID("Rebrickable ID"), LDRAW("LDraw IDs"), BRICKLINK("Bricklink IDs"), INCREMENTAL("Incremental number"), LEGO("LEGO/LDD ID");
+		NONE("None"), ID("Rebrickable ID"), LEGO("LEGO/LDD IDs"), LDRAW("LDraw IDs"), BRICKLINK("BrickLink IDs"), BRICKOWL("BrickOwl IDs"), INCREMENTAL("Incremental number");
 
 		private final String displayName;
 		private ShownID(String displayName) {
@@ -590,7 +596,7 @@ public class ColorController implements ModelHandler<BrickGraphicsState> {
 		}
 	}
 	public static enum ShownName {
-		NONE("None"), NAME("Rebrickable name"), RGB("#RGB-value"), LAB("CIE Lab components"), LEGO("Official LEGO Names"), PEERON("Peeron names"), LOCALIZED(null);
+		NONE("None"), NAME("Rebrickable name"), RGB("#RGB-value"), LAB("CIE Lab components"), LEGO("LEGO/LDD Names"), LDRAW("LDraw Names"), BRICKLINK("BrickLink names"), BRICKOWL("BrickOwl names"), LOCALIZED(null);
 
 		private final String displayName;
 		private ShownName(String displayName) {

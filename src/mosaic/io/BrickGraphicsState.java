@@ -30,7 +30,6 @@ public enum BrickGraphicsState implements ModelState {
 	ColorsMinSets(100),
 	ColorsLoadRebrickableURL("https://rebrickable.com/colors/"),
 	ColorsLoadRebrickableFile(""),
-	ColorsLoadLDDXMLFile(""),
 	
 	// Printing:
 	PrintCoverPageShow(true),

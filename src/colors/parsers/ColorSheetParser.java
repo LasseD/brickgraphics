@@ -5,6 +5,7 @@ import java.net.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.text.ParseException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -16,44 +17,29 @@ public class ColorSheetParser {
 	public static final String COLORS_FILE = "colors.txt";
 	public static final String BACKUP_COLORS_FILE = "backup_colors.txt";
 	private static ColorSheetParserI htmlParser = new RebrickableColorSheetParser();
-	private static ColorSheetParserI xmlParser = new LDDXMLParser();
 	
-	public static void saveFromWeb(String uri, ColorController cc) throws MalformedURLException, IOException {
+	public static void saveFromWeb(String uri, ColorController cc) throws MalformedURLException, IOException, ParseException {
 		InputStream is = null;
 		try {
 	    	URL url = new URL(uri.trim());
 	    	is = url.openStream();
 
-	    	List<String> lines = htmlParser.parse(new InputStreamReader(is), cc);
-	    	writeColorsFile(lines);
+	    	List<String> colorsTxtFileLines = htmlParser.parse(new InputStreamReader(is));
+	    	writeColorsFile(colorsTxtFileLines);
 	    } finally {
-	        if (is != null) 
+	        if (is != null)
 	        	is.close();
 	    }
 	}
 	
-	public static void saveFromRebrickableFile(String file, ColorController cc) throws MalformedURLException, IOException {
+	public static void saveFromRebrickableFile(String file) throws MalformedURLException, IOException, ParseException {
 		InputStream is = null;
 		try {
 	    	File f = new File(file.trim());
 	    	is = new FileInputStream(f);
 
-	    	List<String> lines = htmlParser.parse(new InputStreamReader(is), cc);
-	    	writeColorsFile(lines);
-	    } finally {
-	        if (is != null) 
-	        	is.close();
-	    }
-	}
-	
-	public static void saveFromLDDXMLFile(String file, ColorController cc) throws MalformedURLException, IOException {
-		InputStream is = null;
-		try {
-	    	File f = new File(file.trim());
-	    	is = new FileInputStream(f);
-
-	    	List<String> lines = xmlParser.parse(new InputStreamReader(is), cc);
-	    	writeColorsFile(lines);
+	    	List<String> colorsTxtFileLines = htmlParser.parse(new InputStreamReader(is));
+	    	writeColorsFile(colorsTxtFileLines);
 	    } finally {
 	        if (is != null) 
 	        	is.close();
