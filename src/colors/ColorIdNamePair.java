@@ -43,7 +43,7 @@ public class ColorIdNamePair {
 			return "";
 		StringBuilder sb = new StringBuilder(pairs[0].toString());
 		for(int i = 1; i < pairs.length; ++i) {
-			sb.append('¤');
+			sb.append('#');
 			sb.append(pairs[i].toString());
 		}
 		return sb.toString();
@@ -52,7 +52,7 @@ public class ColorIdNamePair {
 	public static ColorIdNamePair[] parse(String encoded) {
 		if(encoded.isEmpty())
 			return new ColorIdNamePair[]{};
-		String[] parts = encoded.split("[¤]");
+		String[] parts = encoded.split("[\\#]");
 		ColorIdNamePair[] ret = new ColorIdNamePair[parts.length];
 		for(int i = 0; i < parts.length; ++i)
 			ret[i] = new ColorIdNamePair(parts[i]);

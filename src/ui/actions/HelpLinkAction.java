@@ -22,8 +22,8 @@ public class HelpLinkAction extends AbstractAction {
 		this.url = url;
 
 		putValue(SHORT_DESCRIPTION, "Open on-line help.");
-		putValue(Action.SMALL_ICON, Icons.get(Icons.SIZE_SMALL, "help"));
-		putValue(Action.LARGE_ICON_KEY, Icons.get(Icons.SIZE_LARGE, "help"));
+		putValue(Action.SMALL_ICON, Icons.get(Icons.SIZE_SMALL, "help", "HELP"));
+		putValue(Action.LARGE_ICON_KEY, Icons.get(Icons.SIZE_LARGE, "help", "HELP"));
 		putValue(NAME, NAME_STR);
 		putValue(Action.MNEMONIC_KEY, KeyEvent.VK_O);
 		putValue(Action.DISPLAYED_MNEMONIC_INDEX_KEY, NAME_STR.indexOf('O'));

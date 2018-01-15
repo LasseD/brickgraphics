@@ -78,7 +78,7 @@ public class PrintDialog extends JDialog implements ChangeListener {
 		}
 	}
 	
-	private void loadColorNames() {
+	private void loadColorNames(boolean force) {
 		// Only change if files have changed!
 		boolean same = true;
 		String[] newLocalizedNames = cc.getLocalizedFileNamesNoTXT();
@@ -92,7 +92,7 @@ public class PrintDialog extends JDialog implements ChangeListener {
 				}
 			}
 		}
-		if(same)
+		if(same && !force)
 			return;
 		lastSeenLocalizedNames = newLocalizedNames;
 		
@@ -122,7 +122,7 @@ public class PrintDialog extends JDialog implements ChangeListener {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					PrinterJob job = pc.getPrinterJob();
-			        PageFormat pf = job.pageDialog(pc.getPageFormat()); // job.pageDialog(attributes);
+			        PageFormat pf = job.pageDialog(pc.getPageFormat());
 			        pc.setPageFormat(pf, PrintDialog.this);
 				}
 			});
@@ -171,7 +171,7 @@ public class PrintDialog extends JDialog implements ChangeListener {
 				pColorName.add(new JLabel("Color name"));
 				cColorName = new JComboBox<String>();
 				// Separate reloader function (so the list is updated when locales change)
-				loadColorNames();
+				loadColorNames(true);
 				setSelectedColorName();
 				cColorName.addActionListener(new ActionListener() {				
 					@Override
@@ -473,7 +473,7 @@ public class PrintDialog extends JDialog implements ChangeListener {
 
 		if(cColorNumber.getSelectedIndex() != cc.getShownID().ordinal())
 			cColorNumber.setSelectedItem(cc.getShownID());
-		loadColorNames();
+		loadColorNames(false);
 		setSelectedColorName();
 		
 		boolean cps = pc.getCoverPageShow();

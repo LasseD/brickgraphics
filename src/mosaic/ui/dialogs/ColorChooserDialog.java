@@ -108,9 +108,12 @@ public class ColorChooserDialog extends JDialog implements ChangeListener {
 			widest = Math.max(widest, label.getPreferredSize().width+2);
 		}
 		Set<LEGOColor> filteredColors = new TreeSet<LEGOColor>(cc.getFilteredColors());
+
 		Set<LEGOColor> colorChooserSelectedColors = new TreeSet<LEGOColor>();
-		for(LEGOColor c : cc.getColorChooserSelectedColors())
+		for(LEGOColor c : cc.getColorChooserSelectedColors()) {
 			colorChooserSelectedColors.add(c);
+		}
+		
 		for(ColorGroup group : colorGroups) {
 			if(!cc.getShowOtherColorsGroup() && group.isOtherColorsGroup())
 				continue;
@@ -263,6 +266,7 @@ public class ColorChooserDialog extends JDialog implements ChangeListener {
 			setHorizontalAlignment(SwingConstants.CENTER);
 			setPreferredSize(new Dimension(size, size));
 			setBackground(color.getRGB());
+			setForeground(color.getRGB());
 			
 			setSelected(selected);
 		}

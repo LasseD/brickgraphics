@@ -163,7 +163,7 @@ public class MainWindow extends JFrame implements ChangeListener, ModelHandler<B
 		getContentPane().add(ribbon, BorderLayout.NORTH);
 		ColorSettingsDialog csd = new ColorSettingsDialog(MainWindow.this, mc.getColorController());
 		setJMenuBar(new MainMenu(mc, MainWindow.this, csd));
-		setIconImage(Icons.get(32, "icon").getImage());		
+		setIconImage(Icons.get(32, "icon", "LDDMC").getImage());		
 
 		ribbon.setVisible(false);
 		ribbon.setVisible(true);		

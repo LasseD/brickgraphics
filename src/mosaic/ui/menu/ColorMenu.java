@@ -63,7 +63,7 @@ public class ColorMenu extends JMenu implements ChangeListener {
 		colorTextMenu.setDisplayedMnemonicIndex(1);
 		add(colorTextMenu);
 		
-		updateColorTextMenu();
+		updateColorTextMenu(true);
 		updateSelectedItems();
 	}
 	
@@ -88,7 +88,7 @@ public class ColorMenu extends JMenu implements ChangeListener {
 		}		
 	}
 	
-	private void updateColorTextMenu() {
+	private void updateColorTextMenu(boolean force) {
 		// Only change if files have changed!
 		boolean same = true;
 		String[] newLocalizedNames = cc.getLocalizedFileNamesNoTXT();
@@ -102,7 +102,7 @@ public class ColorMenu extends JMenu implements ChangeListener {
 				}
 			}
 		}
-		if(same)
+		if(same && !force)
 			return;
 		lastSeenLocalizedNames = newLocalizedNames;
 		
@@ -147,7 +147,7 @@ public class ColorMenu extends JMenu implements ChangeListener {
 
 	@Override
 	public void stateChanged(ChangeEvent e) {
-		updateColorTextMenu();
+		updateColorTextMenu(false);
 		updateSelectedItems();
 	}
 }

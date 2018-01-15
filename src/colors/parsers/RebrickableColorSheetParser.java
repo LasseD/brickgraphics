@@ -40,17 +40,18 @@ public class RebrickableColorSheetParser implements ColorSheetParserI {
 				if(line.startsWith("<td>") && line.endsWith("</td>")) {
 					c.loadRebrickableData(line.substring(4, line.length()-5));
 				}
-				else if(line.startsWith("<span")) {
+				else if(line.startsWith("<span")) { // ID,name pairs line.
 					line = line.substring(line.indexOf(">")+1);
-					int id = Integer.parseInt(line.substring(0, line.indexOf(" ")));
+					int id = Integer.parseInt(line.substring(0, line.indexOf(" "))); // int before ' '
 					int indexOfSemiColon;
 					while((indexOfSemiColon = line.indexOf(";")) != -1) {
-						line = line.substring(indexOfSemiColon+1);
-						int indexOfAnd = line.indexOf("&");
+						line = line.substring(indexOfSemiColon+1); // Go to next ';'. The next color name is right after.
+						int indexOfAnd = line.indexOf("&"); // Color name ends at '&'
 						if(indexOfAnd == -1)
 							break;
 						data.add(new ColorIdNamePair(id, line.substring(0, indexOfAnd)));
-						line = line.substring(indexOfAnd+1);
+						int indexOfComma = line.indexOf(","); // Color name ends at '&'
+						line = line.substring(indexOfComma+1);
 					}					
 				}
 				else if(line.startsWith("</td>")) {
@@ -60,7 +61,7 @@ public class RebrickableColorSheetParser implements ColorSheetParserI {
 					data.clear();
 				}
 			}
-			out.add(c.toDelimitedString());
+			out.add(c.toString());
 		}				
 		return out;
 	}	

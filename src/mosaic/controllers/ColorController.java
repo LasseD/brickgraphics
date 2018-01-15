@@ -32,16 +32,7 @@ public class ColorController implements ModelHandler<BrickGraphicsState> {
 	private LEGOColor[] colorChooserSelectedColors;
 	private boolean usesBackupColors;
 	
-	private static volatile ColorController instance = null;
-
-	public static ColorController instance(Model<BrickGraphicsState> model) {
-		if(instance != null)
-			return instance;
-		instance = new ColorController(model);
-		return instance;
-	}
-	
-	private ColorController(Model<BrickGraphicsState> model) {
+	public ColorController(Model<BrickGraphicsState> model) {
 		listeners = new LinkedList<ChangeListener>();
 		incrementalIDs = new TreeMap<LEGOColor, Integer>();
 		allLocalizedColors = new TreeMap<String, Map<LEGOColor, String> >(); // other two localization attributes null is ok.
@@ -50,11 +41,14 @@ public class ColorController implements ModelHandler<BrickGraphicsState> {
 		
 		handleModelChange(model);
 		Icons.colorControllerLoaded(this);
+		
 		try {
 			reloadColorTranslations(null, false);
 		} catch (IOException e) {
 			Log.log(e);
+			updateColorListsAndFilters(null, false); // Continue without translations.
 		}
+		
 		try {
 			ColorSheetParser.ensureBackupColorsFile();
 		} catch (IOException e) {
@@ -63,8 +57,9 @@ public class ColorController implements ModelHandler<BrickGraphicsState> {
 	}
 	
 	public LEGOColor[] getColorChooserSelectedColors() {
-		if(colorChooserSelectedColors == null || colorChooserSelectedColors.length < 2)
+		if(colorChooserSelectedColors == null || colorChooserSelectedColors.length < 2) {
 			return LEGOColor.BW;
+		}
 		return colorChooserSelectedColors;
 	}
 	
@@ -103,6 +98,9 @@ public class ColorController implements ModelHandler<BrickGraphicsState> {
 			allLocalizedColors.put(fileNameNoTXT, translation);
 	}
 	public int reloadColorTranslations(Object source, boolean propagate) throws IOException {
+		allLocalizedColors.clear();
+		localizedColors = null;
+
 		File folder = new File(COLOR_TRANSLATION_FOLDER_NAME);
 		if(!folder.isDirectory())
 			throw new IOException("The folder " + COLOR_TRANSLATION_FOLDER_NAME + " does not exist.");
@@ -113,14 +111,13 @@ public class ColorController implements ModelHandler<BrickGraphicsState> {
 				return name.endsWith(".txt");
 			}
 		});
-		allLocalizedColors.clear();
-		localizedColors = null;
+		
 		Map<String, LEGOColor> helperMap = new TreeMap<String, LEGOColor>();
 		for(LEGOColor c : colorsFromDisk)
 			helperMap.put(c.getName(), c);
 		for(File file : files) {
 			readColorTranslationFile(file, helperMap);
-		}	
+		}
 		updateColorListsAndFilters(source, propagate);
 		return files.length;
 	}
@@ -493,19 +490,15 @@ public class ColorController implements ModelHandler<BrickGraphicsState> {
 	
 	public static List<LEGOColor> generateBackupColors() {
 		List<LEGOColor> colors = new LinkedList<LEGOColor>();
-		colors.add(generateLEGOColor(Color.BLACK));
-		colors.add(generateLEGOColor(Color.DARK_GRAY));
-		colors.add(generateLEGOColor(Color.GRAY));
-		colors.add(generateLEGOColor(Color.LIGHT_GRAY));
-		colors.add(generateLEGOColor(Color.WHITE));
-		colors.add(generateLEGOColor(Color.RED));
-		colors.add(generateLEGOColor(Color.BLUE));
-		colors.add(generateLEGOColor(Color.GREEN));
-		colors.add(generateLEGOColor(Color.YELLOW));		
+		colors.add(LEGOColor.BLACK);
+		colors.add(new LEGOColor(Color.DARK_GRAY, 8, "Dark Gray"));
+		colors.add(new LEGOColor(Color.GRAY, 7, "Gray"));
+		colors.add(LEGOColor.WHITE);
+		colors.add(new LEGOColor(Color.RED, 4, "Red"));
+		colors.add(new LEGOColor(Color.BLUE, 1, "Blue"));
+		colors.add(new LEGOColor(Color.GREEN, 10, "Green"));
+		colors.add(new LEGOColor(Color.YELLOW, 14, "Yellow"));	
 		return colors;
-	}
-	private static LEGOColor generateLEGOColor(Color c) {
-		return new LEGOColor(c.getRGB());
 	}
 		
 	public void addChangeListener(ChangeListener listener) {
@@ -552,7 +545,7 @@ public class ColorController implements ModelHandler<BrickGraphicsState> {
 				if(selectedColorsFromModel.contains(color.getIDRebrickable()))
 					selectedColorList.add(color);
 			}
-			this.colorChooserSelectedColors = selectedColorList.toArray(new LEGOColor[selectedColors.length]);
+			this.colorChooserSelectedColors = selectedColorList.toArray(new LEGOColor[selectedColorList.size()]);
 		}
 		
 		notifyListeners(null);		

@@ -1,16 +1,16 @@
 package icon;
 
 import icon.ToBricksIcon.ToBricksIconType;
+import io.Log;
 
 import java.awt.*;
 import java.awt.geom.*;
+import java.awt.image.BufferedImage;
 import javax.swing.*;
-import java.io.*;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-
 import colors.*;
 import mosaic.controllers.ColorController;
 import mosaic.ui.*;
@@ -41,9 +41,26 @@ public class Icons {
 		}
 	}
 	
-	public static ImageIcon get(int size, String image) {
-		String fileName = "icons" + File.separator + size + "x" + size + File.separator + image + ".png";
+	public static ImageIcon get(int size, String image, String backupName) {
+		String fileName = "icons/" + size + "x" + size + "/" + image + ".png";		
 		ImageIcon icon = new ImageIcon(fileName);
+		if(icon.getIconWidth() <= 0) { // Draw backup image:
+			Log.log("Could not open image file '" + fileName + "'. Creating backup image.");
+			BufferedImage bufferedImage = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
+			Graphics g = bufferedImage.getGraphics();
+			g.setFont(new Font("SansSerif", Font.PLAIN, 8));
+			g.setColor(Color.WHITE);
+			g.fillRect(0,  0, size-1, size-1);
+			
+			g.setColor(Color.RED);
+			g.drawLine(0, 1, size-1, 1);
+			g.drawLine(0, size-2, size-1, size-2);
+			
+			g.setColor(Color.BLACK);
+			g.drawRect(0,  0, size-1, size-1);
+			g.drawString(backupName, 2, size/2+4);
+			icon = new ImageIcon(bufferedImage);
+		}
 		return icon;
 	}
 
@@ -773,7 +790,7 @@ public class Icons {
 				
 				// Right side:
 				g2.setColor(Color.BLUE);
-				for(int x = size/2, skip = 2; x < 3*size/4; x+=BLOCK_SIZE, ++skip) {
+				for(int x = size/2+1, skip = 2; x < 3*size/4; x+=BLOCK_SIZE, ++skip) {
 					int dx = x-size/2;
 					int height = (int)Math.sqrt(size*size/4 - dx*dx);
 					for(int y = size/2-height + (5*skip%2)*BLOCK_SIZE; y < size/2+height; y+=BLOCK_SIZE*skip) {

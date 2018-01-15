@@ -46,7 +46,7 @@ public class Griddy extends JFrame implements ModelHandler<GriddyState>, WindowL
 			JOptionPane.showMessageDialog(null, "The log file " + LOG_FILE_NAME + " could not be opened for writing.\nLDDMC might not have sufficient permissions.\nLog messages are written to console if available.\nThe error message:\n" + e1.getMessage(), "Failed to open/create log file", JOptionPane.WARNING_MESSAGE);
 		}
 
-		setIconImage(Icons.get(32, "icon").getImage());
+		setIconImage(Icons.get(32, "icon", "GRIDDY").getImage());
 		model = new Model<GriddyState>(STATE_FILE_NAME, GriddyState.class);
 		zoom = new Zoom(model);
 		displayArea = new DisplayArea(model, zoom); // will add itself as zoom listener.

@@ -73,7 +73,7 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 		
 		// Set up controllers:
 		optionsController = new OptionsController(model);
-		colorController = ColorController.instance(model);
+		colorController = new ColorController(model);
 		uiController = new UIController(model);
 		magnifierController = new MagnifierController(model, uiController);
 		toBricksController = new ToBricksController(this, model);
@@ -113,6 +113,7 @@ public class MainController implements ModelHandler<BrickGraphicsState> {
 		toBricksTypeFilterDialog = new ToBricksTypeFilterDialog(toBricksController, mw);
 		
 		pipeline.start();
+		Log.log("MainController initiated.");
 	}
 	
 	public static void main(String[] args) {

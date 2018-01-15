@@ -124,8 +124,8 @@ public class MosaicIO {
 		};
 
 		open.putValue(Action.SHORT_DESCRIPTION, "Select picture to open and load.");
-		open.putValue(Action.SMALL_ICON, Icons.get(16, "image"));
-		open.putValue(Action.LARGE_ICON_KEY, Icons.get(32, "image"));
+		open.putValue(Action.SMALL_ICON, Icons.get(16, "image", "OPEN"));
+		open.putValue(Action.LARGE_ICON_KEY, Icons.get(32, "image", "OPEN"));
 		open.putValue(Action.NAME, "Open");
 		open.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_O);
 		open.putValue(Action.DISPLAYED_MNEMONIC_INDEX_KEY, "Open".indexOf('O'));
@@ -192,8 +192,8 @@ public class MosaicIO {
 		};
 
 		save.putValue(Action.SHORT_DESCRIPTION, "Save the mosaic.");
-		save.putValue(Action.SMALL_ICON, Icons.get(16, "filesave"));
-		save.putValue(Action.LARGE_ICON_KEY, Icons.get(32, "filesave"));
+		save.putValue(Action.SMALL_ICON, Icons.get(16, "filesave", "SAVE"));
+		save.putValue(Action.LARGE_ICON_KEY, Icons.get(32, "filesave", "SAVE"));
 		save.putValue(Action.NAME, "Save");
 		save.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_O);
 		save.putValue(Action.DISPLAYED_MNEMONIC_INDEX_KEY, "Save".indexOf('S'));
@@ -231,8 +231,8 @@ public class MosaicIO {
 			}
 		};
 		saveAs.putValue(Action.SHORT_DESCRIPTION, "Save the mosaic to a given file.");
-		saveAs.putValue(Action.SMALL_ICON, Icons.get(16, "filesaveas"));
-		saveAs.putValue(Action.LARGE_ICON_KEY, Icons.get(32, "filesaveas"));
+		saveAs.putValue(Action.SMALL_ICON, Icons.get(16, "filesaveas", "SAVE AS"));
+		saveAs.putValue(Action.LARGE_ICON_KEY, Icons.get(32, "filesaveas", "SAVE AS"));
 		saveAs.putValue(Action.NAME, "Save As");
 		saveAs.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_A);
 		saveAs.putValue(Action.DISPLAYED_MNEMONIC_INDEX_KEY, "Save As".indexOf('A'));
@@ -271,8 +271,8 @@ public class MosaicIO {
 		};
 		
 		saveAs.putValue(Action.SHORT_DESCRIPTION, "Save a snapshot of the mosaic to a given file.");
-		saveAs.putValue(Action.SMALL_ICON, Icons.get(16, "fileexport"));
-		saveAs.putValue(Action.LARGE_ICON_KEY, Icons.get(32, "fileexport"));
+		saveAs.putValue(Action.SMALL_ICON, Icons.get(16, "fileexport", "EXPORT"));
+		saveAs.putValue(Action.LARGE_ICON_KEY, Icons.get(32, "fileexport", "EXPORT"));
 		saveAs.putValue(Action.NAME, "Save Snapshot");
 		saveAs.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_T);
 		saveAs.putValue(Action.DISPLAYED_MNEMONIC_INDEX_KEY, "Save Snapshot".indexOf('t'));

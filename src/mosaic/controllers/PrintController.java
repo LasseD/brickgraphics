@@ -47,7 +47,6 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 	private Dimension magnifiersPerPage;
 	private PrinterJob printerJob;
 	private MainWindow mw;
-	private ProgressDialog progressDialog;
 	private ProgressDialog.ProgressWorker printWorker;
 	
 	public PrintController(Model<BrickGraphicsState> model, MainController mc, Pipeline pipeline) {
@@ -80,12 +79,18 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 			throw new IllegalStateException();
         printerJob.setPrintable(PrintController.this, pageFormat);				
 		if(printerJob.printDialog()) {
-	    	progressDialog = new ProgressDialog(mw, "Printing");
+			final ProgressDialog progressDialog = new ProgressDialog(mw, "Printing", new ProgressDialog.CancelAction() {
+				@Override
+				public void cancel() {
+					printerJob.cancel();
+				}
+			});
 	    	printWorker = progressDialog.createWorker(new Runnable() {
 				@Override
 				public void run() {
 			    	try {
-				    	printerJob.print();				    		
+			    		Log.log("Initiating printing.");
+				    	printerJob.print();				    	
 			    	}
 				    catch(PrinterAbortException e1) {
 				    	Log.log("Printing aborted.");
@@ -95,6 +100,9 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 						JOptionPane.showMessageDialog(mw, message, "Error when printing", JOptionPane.ERROR_MESSAGE);
 						Log.log(e2);
 				    }
+			    	finally {
+			    		printWorker = null;
+			    	}
 				}
 			});
 			printWorker.execute();
@@ -223,8 +231,8 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		};
 
 		printAction.putValue(Action.SHORT_DESCRIPTION, "Print the mosaic.");
-		printAction.putValue(Action.SMALL_ICON, Icons.get(16, "printer"));
-		printAction.putValue(Action.LARGE_ICON_KEY, Icons.get(32, "printer"));
+		printAction.putValue(Action.SMALL_ICON, Icons.get(16, "printer", "PRINT"));
+		printAction.putValue(Action.LARGE_ICON_KEY, Icons.get(32, "printer", "PRINT"));
 		printAction.putValue(Action.NAME, "Print");
 		printAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_P);
 		printAction.putValue(Action.DISPLAYED_MNEMONIC_INDEX_KEY, "Print".indexOf('P'));

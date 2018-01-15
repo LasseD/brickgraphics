@@ -177,8 +177,8 @@ public class IOActions {
 		};
 
 		open.putValue(Action.SHORT_DESCRIPTION, "Select picture to open and load.");
-		open.putValue(Action.SMALL_ICON, Icons.get(16, "image"));
-		open.putValue(Action.LARGE_ICON_KEY, Icons.get(32, "image"));
+		open.putValue(Action.SMALL_ICON, Icons.get(16, "image", "LOAD"));
+		open.putValue(Action.LARGE_ICON_KEY, Icons.get(32, "image", "LOAD"));
 		open.putValue(Action.NAME, "Open");
 		open.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_O);
 		open.putValue(Action.DISPLAYED_MNEMONIC_INDEX_KEY, "Open".indexOf('O'));
@@ -206,8 +206,8 @@ public class IOActions {
 		};
 
 		save.putValue(Action.SHORT_DESCRIPTION, "Save the mosaic.");
-		save.putValue(Action.SMALL_ICON, Icons.get(16, "filesave"));
-		save.putValue(Action.LARGE_ICON_KEY, Icons.get(32, "filesave"));
+		save.putValue(Action.SMALL_ICON, Icons.get(16, "filesave", "SAVE"));
+		save.putValue(Action.LARGE_ICON_KEY, Icons.get(32, "filesave", "SAVE"));
 		save.putValue(Action.NAME, "Save");
 		save.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_O);
 		save.putValue(Action.DISPLAYED_MNEMONIC_INDEX_KEY, "Save".indexOf('S'));
@@ -253,8 +253,8 @@ public class IOActions {
 		};
 
 		saveAs.putValue(Action.SHORT_DESCRIPTION, "Save to a given file.");
-		saveAs.putValue(Action.SMALL_ICON, Icons.get(16, "filesaveas"));
-		saveAs.putValue(Action.LARGE_ICON_KEY, Icons.get(32, "filesaveas"));
+		saveAs.putValue(Action.SMALL_ICON, Icons.get(16, "filesaveas", "SAVE AS"));
+		saveAs.putValue(Action.LARGE_ICON_KEY, Icons.get(32, "filesaveas", "SAVE AS"));
 		saveAs.putValue(Action.NAME, "Save As");
 		saveAs.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_A);
 		saveAs.putValue(Action.DISPLAYED_MNEMONIC_INDEX_KEY, "Save As".indexOf('A'));
@@ -302,8 +302,8 @@ public class IOActions {
 		};
 
 		export.putValue(Action.SHORT_DESCRIPTION, "Save Screenshot.");
-		export.putValue(Action.SMALL_ICON, Icons.get(16, "fileexport"));
-		export.putValue(Action.LARGE_ICON_KEY, Icons.get(32, "fileexport"));
+		export.putValue(Action.SMALL_ICON, Icons.get(16, "fileexport", "EXPORT"));
+		export.putValue(Action.LARGE_ICON_KEY, Icons.get(32, "fileexport", "EXPORT"));
 		export.putValue(Action.NAME, "Save Screenshot");
 		export.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_E);
 		export.putValue(Action.DISPLAYED_MNEMONIC_INDEX_KEY, "Save Screenshot".indexOf('e'));

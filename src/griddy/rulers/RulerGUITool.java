@@ -7,8 +7,6 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class RulerGUITool extends JPanel {
-	private static final long serialVersionUID = 3181093137596405592L;
-
 	public RulerGUITool(BorderRuler ruler) {
 		add(new LengthField(ruler));
 		add(new LengthTypeButton(ruler));
@@ -55,10 +53,10 @@ public class RulerGUITool extends JPanel {
 
 		private void setIcon(boolean locked) {
 			if(locked) {
-				super.setIcon(Icons.get(Icons.SIZE_SMALL, "lock"));				
+				super.setIcon(Icons.get(Icons.SIZE_SMALL, "lock", "LOCK"));				
 			}
 			else {
-				super.setIcon(Icons.get(Icons.SIZE_SMALL, "unlock"));								
+				super.setIcon(Icons.get(Icons.SIZE_SMALL, "unlock", "UNLOCK"));								
 			}			
 		}
 		

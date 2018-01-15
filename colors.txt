@@ -1,131 +1,131 @@
 75|Speckle Black-Copper|#0|7|5|2006|2006|75$COP. DIF.|75$Speckle_Black_Copper|116$Speckle Black-Copper|133$Speckle Black Copper
-132|Speckle Black-Silver|#0|188|76|2005|2013|132$Black Glitter¤132$, ¤132$CO.SILVER DIF|132$Speckle_Black_Silver|111$Speckle Black-Silver|24$Speckle Black
+132|Speckle Black-Silver|#0|188|76|2005|2013|132$Black Glitter#132$CO.SILVER DIF|132$Speckle_Black_Silver|111$Speckle Black-Silver|24$Speckle Black
 133|Speckle Black-Gold|#0|5|5|2010|2011||133$Speckle_Black_Gold|151$Speckle Black-Gold|35$Speckle Black Gold
-148|Pearl Dark Gray|#575857|2419|1293|2002|2018|316$Titanium Metallic¤316$, ¤316$TITAN. METAL.¤148$Mettalic Dark Grey¤148$, ¤148$MET.DK.GREY|83$Metallic_Black¤148$Pearl_Dark_Gray¤87$Metallic_Dark_Gray|77$Pearl Dark Gray|119$Pearl Dark Gray
-72|Dark Bluish Gray|#6c6e68|157000|45154|2003|2018|199$Dark stone grey¤199$, ¤199$DK. ST. GREY|72$Dark_Bluish_Gray|85$Dark Bluish Gray|50$Dark Stone Gray
-179|Flat Silver|#898788|9125|3642|2000|2018|315$Silver Metallic¤315$, ¤315$SILVER MET.|179$Flat_Silver|95$Flat Silver|117$Flat Silver
+148|Pearl Dark Gray|#575857|2419|1293|2002|2018|316$Titanium Metallic#316$TITAN. METAL.#148$Mettalic Dark Grey#148$MET.DK.GREY|83$Metallic_Black#148$Pearl_Dark_Gray#87$Metallic_Dark_Gray|77$Pearl Dark Gray|119$Pearl Dark Gray
+72|Dark Bluish Gray|#6c6e68|157000|45154|2003|2018|199$Dark stone grey#199$DK. ST. GREY|72$Dark_Bluish_Gray|85$Dark Bluish Gray|50$Dark Stone Gray
+179|Flat Silver|#898788|9125|3642|2000|2018|315$Silver Metallic#315$SILVER MET.|179$Flat_Silver|95$Flat Silver|117$Flat Silver
 150|Pearl Very Light Gray|#abadac|7|6|2002|2003||150$Pearl_Very_Light_Grey|119$Pearl Very Light Gray|27$Pearl Very Light Gray
-71|Light Bluish Gray|#a0a5a9|213372|55092|1998|2018|194$Medium stone grey¤194$, ¤194$MED. ST-GREY|71$Light_Bluish_Gray|86$Light Bluish Gray|64$Medium Stone Gray
+71|Light Bluish Gray|#a0a5a9|213372|55092|1998|2018|194$Medium stone grey#194$MED. ST-GREY|71$Light_Bluish_Gray|86$Light Bluish Gray|64$Medium Stone Gray
 1000|Glow in Dark White|#d9d9d9|184|60|2005|2017|329$WHITE GLOW|329$Glow_In_Dark_White|159$Glow in Dark White|129$Glow in the Dark White
-151|Very Light Bluish Gray|#e6e3e0|222|105|2004|2013|208$Light stone grey¤208$, ¤208$LGH. ST. GREY|151$Very_Light_Bluish_Gray|99$Very Light Bluish Gray|90$Light Stone Gray
+151|Very Light Bluish Gray|#e6e3e0|222|105|2004|2013|208$Light stone grey#208$LGH. ST. GREY|151$Very_Light_Bluish_Gray|99$Very Light Bluish Gray|90$Light Stone Gray
 383|Chrome Silver|#e0e0e0|1164|530|1977|2016|309$Metalized Silver|383$Chrome_Silver|22$Chrome Silver|115$Chrome Silver
-47|Trans-Clear|#fcfcfc|22365|7036|1950|2018|40$Transparent¤40$, ¤40$TR.|47$Trans_Clear|12$Trans-Clear|97$Transparent
+47|Trans-Clear|#fcfcfc|22365|7036|1950|2018|40$Transparent#40$TR.|47$Trans_Clear|12$Trans-Clear|97$Transparent
 15|White|#ffffff|228751|66899|1950|2018|1$White|15$White|1$White|92$White
-117|Glitter Trans-Clear|#ffffff|22|14|2003|2016|117$Transparent Glitter¤117$, ¤117$TR.W.GLITTER|117$Glitter_Trans_Clear|101$Glitter Trans-Clear|131$Transparent Glitter
+117|Glitter Trans-Clear|#ffffff|22|14|2003|2016|117$Transparent Glitter#117$TR.W.GLITTER|117$Glitter_Trans_Clear|101$Glitter Trans-Clear|131$Transparent Glitter
 79|Milky White|#ffffff|187|121|1963|2011|20$Nature|79$Milky_White|60$Milky White|130$Translucent White
-183|Pearl White|#f2f3f2|33|20|2003|2006|183$Metallic White¤183$, ¤183$MET. WHITE|183$Pearl_White|83$Pearl White|123$Pearlescent
-40|Trans-Black|#635f52|5415|1982|1999|2018|111$Tr. Brown¤111$, ¤111$TR.BROWN|40$Trans_Black|13$Trans-Black|95$Transparent Black
+183|Pearl White|#f2f3f2|33|20|2003|2006|183$Metallic White#183$MET. WHITE|183$Pearl_White|83$Pearl White|123$Pearlescent
+40|Trans-Black|#635f52|5415|1982|1999|2018|111$Tr. Brown#111$TR.BROWN|40$Trans_Black|13$Trans-Black|95$Transparent Black
 77|Light Pink|#fecccf|12|11|1994|2007|223$Light Pink|77$Light_Pink|56$Light Pink|68$Light Pink
 100|Light Salmon|#febabd|30|14|1997|2004|100$Light red|100$Light_Salmon|26$Light Salmon|5$Light Salmon
 335|Sand Red|#d67572|564|43|2001|2004|153$Sand red|335$Sand_Red|58$Sand Red|87$Sand Red
-320|Dark Red|#720e0f|17270|4418|2001|2018|154$Dark red¤154$, ¤154$NEW DARK RED¤154$, ¤154$10. MULTI|320$Dark_Red|59$Dark Red|56$Dark Red
-36|Trans-Red|#c91a09|13079|4518|1969|2018|41$Tr. Red¤41$, ¤41$TR.RED|36$Trans_Red|17$Trans-Red|108$Transparent Red
-4|Red|#c91a09|172579|50151|1950|2018|21$Bright red¤21$, ¤21$BR.RED¤184$Metallic Bright Red¤184$, ¤184$MET. BR. RED|4$Red¤184$Metallic_Bright_Red|5$Red|81$Red
+320|Dark Red|#720e0f|17270|4418|2001|2018|154$Dark red#154$NEW DARK RED#154$10. MULTI|320$Dark_Red|59$Dark Red|56$Dark Red
+36|Trans-Red|#c91a09|13079|4518|1969|2018|41$Tr. Red#41$TR.RED|36$Trans_Red|17$Trans-Red|108$Transparent Red
+4|Red|#c91a09|172579|50151|1950|2018|21$Bright red#21$BR.RED#184$Metallic Bright Red#184$MET. BR. RED|4$Red#184$Metallic_Bright_Red|5$Red|81$Red
 216|Rust|#b31004|12|7|1997|2000|216$Rust|216$Rust|27$Rust|83$Rust
 12|Salmon|#f2705e|3|3|1997|1999|4$Brick Red|12$Salmon|25$Salmon|84$Salmon
-70|Reddish Brown|#582a12|49714|14553|1993|2018|192$Reddish Brown¤192$, ¤192$RED. BROWN|70$Reddish_Brown|88$Reddish Brown|82$Reddish Brown
+70|Reddish Brown|#582a12|49714|14553|1993|2018|192$Reddish Brown#192$RED. BROWN|70$Reddish_Brown|88$Reddish Brown|82$Reddish Brown
 450|Fabuland Brown|#b67b50|41|29|1982|1988|12$Light Orange Brown|450$Fabuland_Brown|106$Fabuland Brown|23$Fabuland Brown
-6|Brown|#583927|8842|3483|1974|2017|187$Sand Yellow Metallic¤187$, ¤187$MET. EAR.ORA¤217$Brown¤25$Earth Orange¤25$, ¤25$EARTH-ORA|6$Brown|8$Brown|46$Brown
-134|Copper|#ae7a59|269|103|2001|2017|139$Copper¤139$, ¤139$RED. GOLD¤1016$COPPER INK¤134$COPPER, DR.LA.|134$Copper|84$Copper|116$Copper
+6|Brown|#583927|8842|3483|1974|2017|187$Sand Yellow Metallic#187$MET. EAR.ORA#217$Brown#25$Earth Orange#25$EARTH-ORA|6$Brown|8$Brown|46$Brown
+134|Copper|#ae7a59|269|103|2001|2017|139$Copper#139$RED. GOLD#1016$COPPER INK#134$COPPER, DR.LA.|134$Copper|84$Copper|116$Copper
 92|Flesh|#d09168|118|77|2002|2017|18$Nougat|92$Flesh|28$Flesh|6$Flesh
 28|Dark Tan|#958a73|15453|3774|2002|2018|138$Sand yellow|28$Dark_Tan|69$Dark Tan|57$Dark Tan
-78|Light Flesh|#f6d7b3|2092|1956|2003|2018|283$Light Nougat¤283$, ¤283$L.NOUGAT|78$Light_Flesh|90$Light Flesh|65$Light Flesh
+78|Light Flesh|#f6d7b3|2092|1956|2003|2018|283$Light Nougat#283$L.NOUGAT|78$Light_Flesh|90$Light Flesh|65$Light Flesh
 60|Chrome Antique Brass|#645a4c|28|14|2001|2005||60$Chrome_Antique_Brass|57$Chrome Antique Brass|110$Chrome Brass
 68|Very Light Orange|#f3cf9b|2|2|2000|2006|36$Light Yellowish Orange|68$Very_Light_Orange|96$Very Light Orange|91$Very Light Orange
-178|Flat Dark Gold|#b48455|75|56|2003|2007|1001$Gold Metallic¤1001$, ¤1001$MET.SAND.YEL|178$Flat_Dark_Gold|81$Flat Dark Gold|21$Flat Dark Gold
+178|Flat Dark Gold|#b48455|75|56|2003|2007|1001$Gold Metallic#1001$MET.SAND.YEL|178$Flat_Dark_Gold|81$Flat Dark Gold|21$Flat Dark Gold
 86|Dark Flesh|#7c503a|130|81|2004|2013|86$BROWN|86$Dark_Flesh|91$Dark Flesh|52$Dark Flesh
-84|Medium Dark Flesh|#cc702a|4446|1307|2010|2018|312$Medium Nougat¤312$, ¤312$M. NOUGAT|84$Medium_Dark_Flesh|150$Medium Dark Flesh|74$Medium Dark Flesh
-182|Trans-Orange|#f08f1c|5897|1869|2003|2018|182$Tr. Bright Orange¤182$, ¤182$TR. BR. ORANGE|57$Trans_Orange|98$Trans-Orange|105$Transparent Orange
-25|Orange|#fe8a18|18709|5922|1993|2018|106$Bright orange¤106$, ¤106$BR.ORANGE|25$Orange|4$Orange|80$Orange
-484|Dark Orange|#a95500|4024|1476|1998|2018|38$Dark Orange¤38$, ¤38$DK.ORA|484$Dark_Orange|68$Dark Orange|54$Dark Orange
-57|Trans-Neon Orange|#ff800d|4845|1703|1993|2017|47$Tr. Flu. Reddish orange¤47$, ¤47$TR.FL.REDORA|38$Trans_Neon_Orange|18$Trans-Neon Orange|161$Transparent Neon Reddish Orange
+84|Medium Dark Flesh|#cc702a|4446|1307|2010|2018|312$Medium Nougat#312$M. NOUGAT|84$Medium_Dark_Flesh|150$Medium Dark Flesh|74$Medium Dark Flesh
+182|Trans-Orange|#f08f1c|5897|1869|2003|2018|182$Tr. Bright Orange#182$TR. BR. ORANGE|57$Trans_Orange|98$Trans-Orange|105$Transparent Orange
+25|Orange|#fe8a18|18709|5922|1993|2018|106$Bright orange#106$BR.ORANGE|25$Orange|4$Orange|80$Orange
+484|Dark Orange|#a95500|4024|1476|1998|2018|38$Dark Orange#38$DK.ORA|484$Dark_Orange|68$Dark Orange|54$Dark Orange
+57|Trans-Neon Orange|#ff800d|4845|1703|1993|2017|47$Tr. Flu. Reddish orange#47$TR.FL.REDORA|38$Trans_Neon_Orange|18$Trans-Neon Orange|161$Transparent Neon Reddish Orange
 125|Light Orange|#f9ba61|23|14|2002|2006||125$Light_Orange|32$Light Orange|8$Light Orange
 1004|Trans Flame Yellowish Orange|#fcb76d|5|5|2003|2004|231$TR. FL. YEL ORA|231$Trans_Bright_Light_Orange|164$Trans Light Orange|
-366|Earth Orange|#fa9c1c|80|67|1982|2012|128$Dark Nougat¤128$, ¤128$DARK NOUGAT¤1008$L.ORABROWN|366$Earth_Orange¤128$Dark_Nougat|29$Earth Orange|59$Earth Orange
-19|Tan|#e4cd9e|59278|13900|1982|2018|5$Brick yellow¤5$, ¤5$BRICK-YEL|19$Tan|2$Tan|89$Tan
+366|Earth Orange|#fa9c1c|80|67|1982|2012|128$Dark Nougat#128$DARK NOUGAT#1008$L.ORABROWN|366$Earth_Orange#128$Dark_Nougat|29$Earth Orange|59$Earth Orange
+19|Tan|#e4cd9e|59278|13900|1982|2018|5$Brick yellow#5$BRICK-YEL|19$Tan|2$Tan|89$Tan
 142|Pearl Light Gold|#dcbc81|19|19|2000|2006|127$Gold|142$Pearl_Light_Gold|61$Pearl Light Gold|121$Pearl Light Gold
-297|Pearl Gold|#aa7f2e|10986|3720|2002|2017|297$Warm Gold¤297$, ¤297$W.GOLD|297$Pearl_Gold|115$Pearl Gold|120$Pearl Gold
-191|Bright Light Orange|#f8bb3d|5414|2104|2004|2018|191$Flame yellowish orange¤191$, ¤191$FL. YELL-ORA|191$Bright_Light_Orange|110$Bright Light Orange|43$Bright Light Orange
-308|Dark Brown|#352100|6186|2083|2008|2018|308$Dark Brown¤308$, ¤308$DK. BROWN|308$Dark_Brown|120$Dark Brown|51$Dark Brown
-462|Medium Orange|#ffa70b|284|165|1950|2008|105$Br. yellowish orange¤105$, ¤105$BR.YELORA|462$Medium_Orange|31$Medium Orange|7$Medium Orange
-82|Metallic Gold|#dbac34|371|184|1997|2017|1004$W.GOLD, DR.LA.¤335$GOLD INK|82$Metallic_Gold|65$Metallic Gold|124$Metallic Gold
-14|Yellow|#f2cd37|121586|38760|1950|2018|24$Bright yellow¤24$, ¤24$BR.YEL|14$Yellow|3$Yellow|93$Yellow
-46|Trans-Yellow|#f5cd2f|7936|2688|1969|2018|44$Tr. Yellow¤44$, ¤44$TR.YEL|46$Trans_Yellow|19$Trans-Yellow|109$Transparent Yellow
+297|Pearl Gold|#aa7f2e|10986|3720|2002|2017|297$Warm Gold#297$W.GOLD|297$Pearl_Gold|115$Pearl Gold|120$Pearl Gold
+191|Bright Light Orange|#f8bb3d|5414|2104|2004|2018|191$Flame yellowish orange#191$FL. YELL-ORA|191$Bright_Light_Orange|110$Bright Light Orange|43$Bright Light Orange
+308|Dark Brown|#352100|6186|2083|2008|2018|308$Dark Brown#308$DK. BROWN|308$Dark_Brown|120$Dark Brown|51$Dark Brown
+462|Medium Orange|#ffa70b|284|165|1950|2008|105$Br. yellowish orange#105$BR.YELORA|462$Medium_Orange|31$Medium Orange|7$Medium Orange
+82|Metallic Gold|#dbac34|371|184|1997|2017|1004$W.GOLD, DR.LA.#335$GOLD INK|82$Metallic_Gold|65$Metallic Gold|124$Metallic Gold
+14|Yellow|#f2cd37|121586|38760|1950|2018|24$Bright yellow#24$BR.YEL|14$Yellow|3$Yellow|93$Yellow
+46|Trans-Yellow|#f5cd2f|7936|2688|1969|2018|44$Tr. Yellow#44$TR.YEL|46$Trans_Yellow|19$Trans-Yellow|109$Transparent Yellow
 1005|Trans Fire Yellow|#fbe890|2|2|2001|2001|234$TR. FIRE YELL|||
 18|Light Yellow|#fbe696|233|102|1994|2006|3$Light yellow|18$Light_Yellow|33$Light Yellow|9$Light Yellow
 54|Trans-Neon Yellow|#dab000|12|9|2001|2003|157$Transparent Fluorescent Yellow|54$Trans_Neon_Yellow|121$Trans-Neon Yellow|104$Transparent Neon Yellow
 334|Chrome Gold|#bba53d|1286|738|1989|2016|310$Metalized Gold|334$Chrome_Gold|21$Chrome Gold|2$Chrome Gold
 503|Very Light Gray|#e6e3da|5|3|2003|2004|103$Light grey|503$Very_Light_Gray|49$Very Light Gray|19$Very Light Gray
-21|Glow In Dark Opaque|#d4d5c9|160|85|1990|2011|50$Phosp. White¤50$, ¤50$PHOS.WHITE|21$Glow_In_Dark_Opaque|46$Glow In Dark Opaque|127$Glow in the Dark Opaque
-8|Dark Gray|#6d6e5c|21043|7377|1978|2017|27$Dark grey¤27$, ¤27$DK.GREY|8$Dark_Gray|10$Dark Gray|53$Dark Gray
-326|Olive Green|#9b9a5a|2248|702|2012|2018|330$Olive Green¤330$, ¤330$OLIVE GREEN|330$Olive_Green|155$Olive Green|79$Olive Green
-42|Trans-Neon Green|#f8f184|5416|1870|1988|2017|49$Tr. Flu. Green¤49$, ¤49$TR.FL.GREEN|42$Trans_Neon_Green|16$Trans-Neon Green|103$Transparent Neon Green
-226|Bright Light Yellow|#fff03a|696|323|2004|2017|226$Cool Yellow¤226$, ¤226$COOL YEL.|226$Bright_Light_Yellow|103$Bright Light Yellow|44$Bright Light Yellow
-115|Medium Lime|#c7d23c|97|39|1999|2005|115$Med. yellowish green¤115$, ¤115$MD.YEL-GREEN|115$Medium_Lime|76$Medium Lime|77$Medium Lime
+21|Glow In Dark Opaque|#d4d5c9|160|85|1990|2011|50$Phosp. White#50$PHOS.WHITE|21$Glow_In_Dark_Opaque|46$Glow In Dark Opaque|127$Glow in the Dark Opaque
+8|Dark Gray|#6d6e5c|21043|7377|1978|2017|27$Dark grey#27$DK.GREY|8$Dark_Gray|10$Dark Gray|53$Dark Gray
+326|Olive Green|#9b9a5a|2248|702|2012|2018|330$Olive Green#330$OLIVE GREEN|330$Olive_Green|155$Olive Green|79$Olive Green
+42|Trans-Neon Green|#f8f184|5416|1870|1988|2017|49$Tr. Flu. Green#49$TR.FL.GREEN|42$Trans_Neon_Green|16$Trans-Neon Green|103$Transparent Neon Green
+226|Bright Light Yellow|#fff03a|696|323|2004|2017|226$Cool Yellow#226$COOL YEL.|226$Bright_Light_Yellow|103$Bright Light Yellow|44$Bright Light Yellow
+115|Medium Lime|#c7d23c|97|39|1999|2005|115$Med. yellowish green#115$MD.YEL-GREEN|115$Medium_Lime|76$Medium Lime|77$Medium Lime
 1002|Glitter Trans-Neon Green|#c0f500|7|6|2015|2017|339$TR.FL.GRE W/GLI|339$Glitter_Trans_Neon_Green|163$Glitter Trans-Neon Green|167$Transparent Neon Green Glitter
-27|Lime|#bbe90b|14940|4968|1982|2018|119$Br. yellowish green¤119$, ¤119$BR.YEL-GREEN|27$Lime|34$Lime|70$Lime
-120|Light Lime|#d9e4a7|19|13|2001|2007|120$Lig. yellowish green¤120$, ¤120$L.YEL-GREEN|120$Light_Lime|35$Light Lime|67$Light Lime
-35|Trans-Bright Green|#d9e4a7|1262|482|2003|2017|227$Transparent Bright Yellowish Green¤227$, ¤227$TR. BR. YEL GR¤311$Transparent Bright Green¤311$, ¤311$TR. BR. GREEN|35$Trans_Bright_Green|108$Trans-Bright Green|96$Transparent Bright Green
-158|Yellowish Green|#dfeea5|633|191|2012|2017|326$Spring Yellow Green¤326$, ¤326$SPR. YELL. GREE||158$Yellowish Green|94$Yellowish Green
+27|Lime|#bbe90b|14940|4968|1982|2018|119$Br. yellowish green#119$BR.YEL-GREEN|27$Lime|34$Lime|70$Lime
+120|Light Lime|#d9e4a7|19|13|2001|2007|120$Lig. yellowish green#120$L.YEL-GREEN|120$Light_Lime|35$Light Lime|67$Light Lime
+35|Trans-Bright Green|#d9e4a7|1262|482|2003|2017|227$Transparent Bright Yellowish Green#227$TR. BR. YEL GR#311$Transparent Bright Green#311$TR. BR. GREEN|35$Trans_Bright_Green|108$Trans-Bright Green|96$Transparent Bright Green
+158|Yellowish Green|#dfeea5|633|191|2012|2017|326$Spring Yellow Green#326$SPR. YELL. GREE||158$Yellowish Green|94$Yellowish Green
 81|Metallic Green|#899b5f|28|18|2001|2003|200$Lemon Metallic|81$Metallic_Green|70$Metallic Green|125$Metallic Green
-17|Light Green|#c2dab8|78|55|1950|2011|6$Light green¤6$, ¤6$L.GREEN|17$Light_Green|38$Light Green|11$Light Green
-294|Glow In Dark Trans|#bdc6ad|70|23|2005|2011|294$Phosphorescent Green¤294$, ¤294$PH.GREEN|294$Glow_In_Dark_Trans|118$Glow In Dark Trans|128$Glow in the Dark Transparent
+17|Light Green|#c2dab8|78|55|1950|2011|6$Light green#6$L.GREEN|17$Light_Green|38$Light Green|11$Light Green
+294|Glow In Dark Trans|#bdc6ad|70|23|2005|2011|294$Phosphorescent Green#294$PH.GREEN|294$Glow_In_Dark_Trans|118$Glow In Dark Trans|128$Glow in the Dark Transparent
 378|Sand Green|#a0bcac|7650|1047|2000|2017|151$Sand green|378$Sand_Green|48$Sand Green|18$Sand Green
 7|Light Gray|#9ba19d|90254|24394|1954|2017|2$Grey|7$Light_Gray|9$Light Gray|66$Light Gray
-34|Trans-Green|#84b68d|3207|1539|1969|2018|48$Tr. Green¤48$, ¤48$TR.GREEN|34$Trans_Green|20$Trans-Green|100$Transparent Green
-10|Bright Green|#4b9f4a|3880|1584|1950|2018|37$Bright Green¤37$, ¤37$BR.GREEN|10$Bright_Green|36$Bright Green|41$Bright Green
-2|Green|#237841|40323|11994|1950|2018|28$Dark green¤28$, ¤28$DK.GREEN¤186$Metallic Dark Green¤186$, ¤186$MET. DK. GREEN|2$Green¤186$Metallic_Dark_Green|6$Green|61$Green
-74|Medium Green|#73dca1|159|104|1994|2011|29$Medium green¤29$, ¤29$MD.GREEN|74$Medium_Green|37$Medium Green|10$Medium Green
+34|Trans-Green|#84b68d|3207|1539|1969|2018|48$Tr. Green#48$TR.GREEN|34$Trans_Green|20$Trans-Green|100$Transparent Green
+10|Bright Green|#4b9f4a|3880|1584|1950|2018|37$Bright Green#37$BR.GREEN|10$Bright_Green|36$Bright Green|41$Bright Green
+2|Green|#237841|40323|11994|1950|2018|28$Dark green#28$DK.GREEN#186$Metallic Dark Green#186$MET. DK. GREEN|2$Green#186$Metallic_Dark_Green|6$Green|61$Green
+74|Medium Green|#73dca1|159|104|1994|2011|29$Medium green#29$MD.GREEN|74$Medium_Green|37$Medium Green|10$Medium Green
 62|Chrome Green|#3cb371|2|2|1999|1999||62$Chrome_Green|64$Chrome Green|113$Chrome Green
-288|Dark Green|#184632|7259|2015|2003|2018|141$Earth Green¤141$, ¤141$EARTH GREEN|288$Dark_Green|80$Dark Green|20$Dark Green
-135|Pearl Light Gray|#9ca3a8|3494|1417|2001|2018|179$Silver flip/flop¤179$, ¤179$SILVER¤298$Cool silver¤296$Cool silver¤131$Silver|135$Pearl_Light_Gray|66$Pearl Light Gray|122$Pearl Light Gray
-118|Aqua|#b3d7d1|206|89|2000|2015|118$Light bluish green¤118$, ¤118$L.BLUE-GREEN|118$Aqua|41$Aqua|13$Aqua
+288|Dark Green|#184632|7259|2015|2003|2018|141$Earth Green#141$EARTH GREEN|288$Dark_Green|80$Dark Green|20$Dark Green
+135|Pearl Light Gray|#9ca3a8|3494|1417|2001|2018|179$Silver flip/flop#179$SILVER#298$Cool silver#296$Cool silver#131$Silver|135$Pearl_Light_Gray|66$Pearl Light Gray|122$Pearl Light Gray
+118|Aqua|#b3d7d1|206|89|2000|2015|118$Light bluish green#118$L.BLUE-GREEN|118$Aqua|41$Aqua|13$Aqua
 323|Light Aqua|#adc3c0|710|353|2011|2017|323$Aqua|323$Light_Aqua|152$Light Aqua|62$Light Aqua
-41|Trans-Light Blue|#aeefec|11765|3951|1985|2018|42$Tr. Lg blue¤42$, ¤42$TR.L.BLUE¤42$, ¤42$1.MULT|43$Trans_Medium_Blue|15$Trans-Light Blue|101$Transparent Light Blue
-11|Light Turquoise|#55a5af|17|13|1999|2004|116$Med. bluish green¤116$, ¤116$MD.BL-GREEN|11$Light_Turquoise|40$Light Turquoise|12$Light Turquoise
-0|Black|#0|405356|115432|1957|2018|26$Black¤26$, ¤26$BLACK¤149$Metallic Black¤149$, ¤149$MET.BLACK¤1012$CONDUCT. BLACK|0$Black|11$Black|38$Black
-3|Dark Turquoise|#8f9b|1016|360|1998|2017|107$Bright bluish green¤107$, ¤107$BR.BLUEGREEN|3$Dark_Turquoise|39$Dark Turquoise|58$Dark Turquoise
-322|Medium Azure|#36aebf|4061|1779|2010|2018|322$Medium Azure¤322$, ¤322$MEDIUM AZUR|322$Medium_Azure|156$Medium Azure|73$Medium Azure
-1003|Glitter Trans-Light Blue|#68bcc5|24|15|2015|2017|302$PCTR LI.BLUE W/¤302$, ¤302$4.MULT|302$Glitter_Trans_Light_Blue|162$Glitter Trans-Light Blue|165$Transparent Light Blue Glitter
-143|Trans-Medium Blue|#cfe2f7|749|268|2001|2017|143$Tr. Flu. Blue¤143$, ¤143$TR.FL. BLUE|41$|74$Trans-Medium Blue|102$Transparent Medium Blue
+41|Trans-Light Blue|#aeefec|11765|3951|1985|2018|42$Tr. Lg blue#42$TR.L.BLUE#42$1.MULT|43$Trans_Medium_Blue|15$Trans-Light Blue|101$Transparent Light Blue
+11|Light Turquoise|#55a5af|17|13|1999|2004|116$Med. bluish green#116$MD.BL-GREEN|11$Light_Turquoise|40$Light Turquoise|12$Light Turquoise
+0|Black|#0|405356|115432|1957|2018|26$Black#26$BLACK#149$Metallic Black#149$MET.BLACK#1012$CONDUCT. BLACK|0$Black|11$Black|38$Black
+3|Dark Turquoise|#8f9b|1016|360|1998|2017|107$Bright bluish green#107$BR.BLUEGREEN|3$Dark_Turquoise|39$Dark Turquoise|58$Dark Turquoise
+322|Medium Azure|#36aebf|4061|1779|2010|2018|322$Medium Azure#322$MEDIUM AZUR|322$Medium_Azure|156$Medium Azure|73$Medium Azure
+1003|Glitter Trans-Light Blue|#68bcc5|24|15|2015|2017|302$PCTR LI.BLUE W/#302$4.MULT|302$Glitter_Trans_Light_Blue|162$Glitter Trans-Light Blue|165$Transparent Light Blue Glitter
+143|Trans-Medium Blue|#cfe2f7|749|268|2001|2017|143$Tr. Flu. Blue#143$TR.FL. BLUE|41$|74$Trans-Medium Blue|102$Transparent Medium Blue
 9|Light Blue|#b4d2e3|50|38|1995|2016|45$Light blue|9$Light_Blue|62$Light Blue|63$Light Blue
-232|Sky Blue|#7dbfdd|23|17|2003|2005|232$Dove blue¤232$, ¤232$DO. BLUE|232$Sky_Blue|87$Sky Blue|88$Sky Blue
-313|Maersk Blue|#3592c3|1146|178|1974|2011|11$Pastel Blue¤11$, ¤11$PASTBLU|313$Maersk_Blue|72$Maersk Blue|71$Maersk Blue
+232|Sky Blue|#7dbfdd|23|17|2003|2005|232$Dove blue#232$DO. BLUE|232$Sky_Blue|87$Sky Blue|88$Sky Blue
+313|Maersk Blue|#3592c3|1146|178|1974|2011|11$Pastel Blue#11$PASTBLU|313$Maersk_Blue|72$Maersk Blue|71$Maersk Blue
 321|Dark Azure|#78bc9|1806|589|2011|2018|321$Dark Azur|321$Dark_Azure|153$Dark Azure|47$Dark Azure
-212|Bright Light Blue|#9fc3e9|817|373|1993|2017|212$Light Royal blue¤212$, ¤212$LGH. ROY. BLUE|212$Bright_Light_Blue|105$Bright Light Blue|42$Bright Light Blue
+212|Bright Light Blue|#9fc3e9|817|373|1993|2017|212$Light Royal blue#212$LGH. ROY. BLUE|212$Bright_Light_Blue|105$Bright Light Blue|42$Bright Light Blue
 61|Chrome Blue|#6c96bf|44|19|1998|2006||61$Chrome_Blue|52$Chrome Blue|112$Chrome Blue
-1006|Trans Light Royal Blue|#b4d4f7|4|3|2001|2005|293$TR. L.ROYAL BLUE¤293$, ¤293$TR.L.ROYAL BLUE|293$Trans_Light_Blue_Violet||
-73|Medium Blue|#5a93db|8550|2072|1950|2018|102$Medium blue¤102$, ¤102$MD.BLUE|73$Medium_Blue|42$Medium Blue|14$Medium Blue
+1006|Trans Light Royal Blue|#b4d4f7|4|3|2001|2005|293$TR. L.ROYAL BLUE#293$TR.L.ROYAL BLUE|293$Trans_Light_Blue_Violet||
+73|Medium Blue|#5a93db|8550|2072|1950|2018|102$Medium blue#102$MD.BLUE|73$Medium_Blue|42$Medium Blue|14$Medium Blue
 64|Chrome Black|#1b2a34|3|3|2009|2009||64$Chrome_Black|122$Chrome Black|111$Chrome Black
 272|Dark Blue|#a3463|13816|4022|2001|2018|140$Earth blue|272$Dark_Blue|63$Dark Blue|48$Dark Blue
-1|Blue|#55bf|120166|29709|1950|2018|23$Bright Blue¤23$, ¤23$BR.BLUE¤185$Metallic Bright Blue¤185$, ¤185$MET. BR. BLUE|1$Blue|7$Blue|39$Blue
-43|Trans-Very Lt Blue|#c1dff0|148|46|2003|2006|229$Transparent Light Bluish Green¤229$, ¤229$TR. LGH. BL. GR|39$Trans_Light_Blue|113$Trans-Very Lt Blue|25$Transparent Very Light Blue
-137|Metal Blue|#7988a1|109|40|2002|2005|145$Sand blue metallic¤137$Metal Blue¤137$, ¤137$MET.SAND.BLU|137$Metal_Blue|78$Metal Blue|118$Metallic Blue
+1|Blue|#55bf|120166|29709|1950|2018|23$Bright Blue#23$BR.BLUE#185$Metallic Bright Blue#185$MET. BR. BLUE|1$Blue|7$Blue|39$Blue
+43|Trans-Very Lt Blue|#c1dff0|148|46|2003|2006|229$Transparent Light Bluish Green#229$TR. LGH. BL. GR|39$Trans_Light_Blue|113$Trans-Very Lt Blue|25$Transparent Very Light Blue
+137|Metal Blue|#7988a1|109|40|2002|2005|145$Sand blue metallic#137$Metal Blue#137$MET.SAND.BLU|137$Metal_Blue|78$Metal Blue|118$Metallic Blue
 379|Sand Blue|#6074a1|2324|816|2001|2018|135$Sand blue|379$Sand_Blue|55$Sand Blue|85$Sand Blue
 89|Royal Blue|#4c61db|249|235|1956|2012|195$R. BLUE|89$Blue_Violet||
-33|Trans-Dark Blue|#20a0|7133|2254|1978|2017|43$Tr. Blue¤43$, ¤43$TR.BLUE|33$Trans_Dark_Blue|14$Trans-Dark Blue|98$Transparent Dark Blue
-112|Blue-Violet|#6874ca|197|67|2004|2005|112$Medium Bluish Violet¤112$, ¤112$ML.BLUEVIOL|112$Medium_Violet|97$Blue-Violet|40$Royal Blue
-110|Violet|#4354a3|111|74|1999|2004|110$Bright Bluish Violet¤110$, ¤110$BR.BLUEVIOL¤1009$LILAC|110$Violet|43$Violet|15$Violet
-23|Dark Blue-Violet|#2032b0|4|4|2005|2006|196$Dark Royal blue¤196$, ¤196$DK. R.BLUE|23$Dark_Blue_Violet|109$Dark Blue-Violet|49$Dark Royal Blue
-80|Metallic Silver|#a5a9b4|1816|678|1957|2018|1002$C.SILVER, DR. L¤1015$C.SILVER¤336$SILVER INK|80$Metallic_Silver|67$Metallic Silver|126$Metallic Silver
-20|Light Violet|#c9cae2|98|68|1994|2005|39$Light bluish violet¤39$, ¤39$L.BLUEVIOL|20$Light_Violet|44$Light Violet|16$Light Violet
-129|Glitter Trans-Purple|#a5a5cb|35|20|2000|2017|129$Tr. Bright Bluish Violet w. Glitter 2%¤129$, ¤129$TR.BR.BL.V.G|129$Glitter_Trans_Purple|102$Glitter Trans-Purple|22$Transparent Purple Glitter
-52|Trans-Purple|#a5a5cb|1061|424|2000|2017|126$Tr. Bright bluish violet¤126$, ¤126$TR.KL.BL.VIO¤236$TR. BR. RED. LI|52$Trans_Purple|51$Trans-Purple|107$Transparent Purple
-1001|Medium Violet|#9391e4|2|2|1999|2005|219$Lilac¤112$Medium Bluish Violet|219$Lilac¤112$Medium_Violet|73$Medium Violet|78$Medium Violet
-85|Dark Purple|#3f3691|4896|1799|2004|2018|268$Medium Lilac¤268$, ¤268$M. LILAC|85$Dark_Purple|89$Dark Purple|55$Dark Purple
-30|Medium Lavender|#ac78ba|2094|841|2005|2018|324$Medium Lavender¤324$, ¤324$MEDIUM LAVENDEL|30$Medium_Lavender|157$Medium Lavender|76$Medium Lavender
+33|Trans-Dark Blue|#20a0|7133|2254|1978|2017|43$Tr. Blue#43$TR.BLUE|33$Trans_Dark_Blue|14$Trans-Dark Blue|98$Transparent Dark Blue
+112|Blue-Violet|#6874ca|197|67|2004|2005|112$Medium Bluish Violet#112$ML.BLUEVIOL|112$Medium_Violet|97$Blue-Violet|40$Royal Blue
+110|Violet|#4354a3|111|74|1999|2004|110$Bright Bluish Violet#110$BR.BLUEVIOL#1009$LILAC|110$Violet|43$Violet|15$Violet
+23|Dark Blue-Violet|#2032b0|4|4|2005|2006|196$Dark Royal blue#196$DK. R.BLUE|23$Dark_Blue_Violet|109$Dark Blue-Violet|49$Dark Royal Blue
+80|Metallic Silver|#a5a9b4|1816|678|1957|2018|1002$C.SILVER, DR. L#1015$C.SILVER#336$SILVER INK|80$Metallic_Silver|67$Metallic Silver|126$Metallic Silver
+20|Light Violet|#c9cae2|98|68|1994|2005|39$Light bluish violet#39$L.BLUEVIOL|20$Light_Violet|44$Light Violet|16$Light Violet
+129|Glitter Trans-Purple|#a5a5cb|35|20|2000|2017|129$Tr. Bright Bluish Violet w. Glitter 2%#129$TR.BR.BL.V.G|129$Glitter_Trans_Purple|102$Glitter Trans-Purple|22$Transparent Purple Glitter
+52|Trans-Purple|#a5a5cb|1061|424|2000|2017|126$Tr. Bright bluish violet#126$TR.KL.BL.VIO#236$TR. BR. RED. LI|52$Trans_Purple|51$Trans-Purple|107$Transparent Purple
+1001|Medium Violet|#9391e4|2|2|1999|2005|219$Lilac#112$Medium Bluish Violet|219$Lilac#112$Medium_Violet|73$Medium Violet|78$Medium Violet
+85|Dark Purple|#3f3691|4896|1799|2004|2018|268$Medium Lilac#268$M. LILAC|85$Dark_Purple|89$Dark Purple|55$Dark Purple
+30|Medium Lavender|#ac78ba|2094|841|2005|2018|324$Medium Lavender#324$MEDIUM LAVENDEL|30$Medium_Lavender|157$Medium Lavender|76$Medium Lavender
 31|Lavender|#e1d5ed|934|372|2011|2018|325$Lavender|31$Lavender|154$Lavender|36$Lavender
 76|Speckle DBGray-Silver|#635f61|11|8|2006|2006||76$Speckle_Dark_Bluish_Gray_Silver|117$Speckle DBGray-Silver|134$Speckle Gray
-236|Trans-Light Purple|#96709f|30|17|2005|2017|284$TR. RED-LILAC¤284$, ¤284$TR. RE-LILAC|44$Trans_Light_Purple¤284$Trans_Light_Purple|114$Trans-Light Purple|26$Transparent Light Purple
+236|Trans-Light Purple|#96709f|30|17|2005|2017|284$TR. RED-LILAC#284$TR. RE-LILAC|44$Trans_Light_Purple#284$Trans_Light_Purple|114$Trans-Light Purple|26$Transparent Light Purple
 373|Sand Purple|#845e84|68|18|2001|2002|136$Sand violet|373$Sand_Purple|54$Sand Purple|86$Sand Purple
-22|Purple|#81007b|863|256|1996|2017|104$Bright violet¤104$, ¤104$BR. VIOLET|22$Purple|24$Purple|4$Purple
+22|Purple|#81007b|863|256|1996|2017|104$Bright violet#104$BR. VIOLET|22$Purple|24$Purple|4$Purple
 63|Chrome Pink|#aa4d8e|32|24|2001|2007||63$Chrome_Pink|82$Chrome Pink|114$Chrome Pink
-26|Magenta|#923978|3343|1248|2002|2018|124$Bright reddish violet¤124$, ¤124$BR.RED-VIOL.|26$Magenta|71$Magenta|72$Magenta
-5|Dark Pink|#c870a0|3914|1447|1994|2017|221$Bright Purple¤221$, ¤221$BR. PURPLE|5$Dark_Pink|47$Dark Pink|17$Dark Pink
+26|Magenta|#923978|3343|1248|2002|2018|124$Bright reddish violet#124$BR.RED-VIOL.|26$Magenta|71$Magenta|72$Magenta
+5|Dark Pink|#c870a0|3914|1447|1994|2017|221$Bright Purple#221$BR. PURPLE|5$Dark_Pink|47$Dark Pink|17$Dark Pink
 230|Trans-Pink|#e4adc8|260|102|2003|2006|230$TR. BR. PURPLE|45$Trans_Pink|107$Trans-Pink|106$Transparent Pink
-29|Bright Pink|#e4adc8|3360|1316|1996|2018|222$Light Purple¤222$, ¤222$LGH. PURPLE|29$Bright_Pink|104$Bright Pink|45$Bright Pink
-69|Light Purple|#cd6298|48|16|2005|2016|198$Bright Reddish Lilac¤198$, ¤198$BR. RED. LILAC|69$Light_Purple|93$Light Purple|69$Light Purple
-351|Medium Dark Pink|#f785b1|20|6|1993|1993|22$Medium Reddish Violet¤22$, ¤22$MD.REDVIOL|351$Medium_Dark_Pink|94$Medium Dark Pink|75$Medium Dark Pink
-45|Trans-Dark Pink|#df6695|1971|773|1999|2018|113$Tr. Medi. reddish violet¤113$, ¤113$TR.ML.R.VIOL|37$Trans_Dark_Pink|50$Trans-Dark Pink|99$Transparent Dark Pink
-114|Glitter Trans-Dark Pink|#df6695|181|44|1999|2012|114$Tr. Medium Reddish-Violet w. Glitter 2%¤114$, ¤114$TR.M.R.V.GLI|114$Glitter_Trans_Dark_Pink|100$Glitter Trans-Dark Pink|132$Transparent Pink Glitter
+29|Bright Pink|#e4adc8|3360|1316|1996|2018|222$Light Purple#222$LGH. PURPLE|29$Bright_Pink|104$Bright Pink|45$Bright Pink
+69|Light Purple|#cd6298|48|16|2005|2016|198$Bright Reddish Lilac#198$BR. RED. LILAC|69$Light_Purple|93$Light Purple|69$Light Purple
+351|Medium Dark Pink|#f785b1|20|6|1993|1993|22$Medium Reddish Violet#22$MD.REDVIOL|351$Medium_Dark_Pink|94$Medium Dark Pink|75$Medium Dark Pink
+45|Trans-Dark Pink|#df6695|1971|773|1999|2018|113$Tr. Medi. reddish violet#113$TR.ML.R.VIOL|37$Trans_Dark_Pink|50$Trans-Dark Pink|99$Transparent Dark Pink
+114|Glitter Trans-Dark Pink|#df6695|181|44|1999|2012|114$Tr. Medium Reddish-Violet w. Glitter 2%#114$TR.M.R.V.GLI|114$Glitter_Trans_Dark_Pink|100$Glitter Trans-Dark Pink|132$Transparent Pink Glitter
 13|Pink|#fc97ac|644|323|1991|2006|1007$L.REDVIOL|13$Pink|23$Pink|3$Pink

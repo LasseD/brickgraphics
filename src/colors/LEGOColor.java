@@ -14,16 +14,18 @@ public class LEGOColor implements Comparable<LEGOColor>, Serializable {
 	
 	private static int maxRebrickableId = 0;
 	
-	public LEGOColor(int rgb) {
-		rebrickable = new ColorIdNamePair(rgb, "Pure RGB #" + rgb);
+	public LEGOColor(Color color, int idx, String name) {
+		rebrickable = new ColorIdNamePair(idx, name);
 		sets = Integer.MAX_VALUE;
 		parts = Integer.MAX_VALUE;
 		from = 0;
 		to = Integer.MAX_VALUE;
-		setRGB(new Color(rgb));
+		setRGB(color);
 
-		lego = new ColorIdNamePair[]{new ColorIdNamePair(0, rgb+"")};
-		ldraw = new ColorIdNamePair[]{new ColorIdNamePair(0, rgb+"")};
+		lego = new ColorIdNamePair[]{new ColorIdNamePair(idx, name)};
+		ldraw = new ColorIdNamePair[]{new ColorIdNamePair(idx, name)};
+		bricklink = new ColorIdNamePair[]{new ColorIdNamePair(idx, name)};
+		brickowl = new ColorIdNamePair[]{new ColorIdNamePair(idx, name)};
 		if(maxRebrickableId < rebrickable.getID())
 			maxRebrickableId = rebrickable.getID();
 	}
@@ -99,7 +101,8 @@ public class LEGOColor implements Comparable<LEGOColor>, Serializable {
 		return c;
 	}
 	
-	public String toDelimitedString() {
+	@Override
+	public String toString() {
 		return rebrickable.getID() + 
 				"|" + rebrickable.getName() + 
 				"|#" + Integer.toHexString(rgb.getRGB() & 0xFFFFFF) + 
@@ -111,9 +114,6 @@ public class LEGOColor implements Comparable<LEGOColor>, Serializable {
 				"|" + ColorIdNamePair.toString(ldraw) + 
 				"|" + ColorIdNamePair.toString(bricklink) + 
 				"|" + ColorIdNamePair.toString(brickowl);
-//143|Trans-Medium Blue|#cfe2f7|749|268|2001|2017||143$Tr. Flu. Blue¤143$, ¤143$TR.FL. BLUE|41$|102$Transparent Medium Blue
-// LEGO MISSING!
-
 	}
 	
 	private static int parseInt(String s) {
@@ -279,15 +279,8 @@ public class LEGOColor implements Comparable<LEGOColor>, Serializable {
 			brickowl = pairs;
 	}
 	
-	public static final LEGOColor BLACK = new LEGOColor(0x000000);
-	public static final LEGOColor WHITE = new LEGOColor(0xFFFFFF);
-	static {
-		BLACK.rgb = Color.BLACK;
-		BLACK.rebrickable = new ColorIdNamePair(0, "Black");
-
-		WHITE.rgb = Color.WHITE;
-		WHITE.rebrickable = new ColorIdNamePair(15, "White");
-	}
+	public static final LEGOColor BLACK = new LEGOColor(Color.BLACK, 0, "Black");
+	public static final LEGOColor WHITE = new LEGOColor(Color.WHITE, 15, "White");
 	public static final LEGOColor[] BW = {BLACK, WHITE};
 
 	@Override
