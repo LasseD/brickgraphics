@@ -21,6 +21,12 @@ public class LividTextField extends JTextField {
 	}
 	
 	@Override
+	public void setText(String text) {
+		if(!getText().equals(text))
+			super.setText(text);
+	}
+	
+	@Override
 	public synchronized void addActionListener(final ActionListener l) {
 		super.addActionListener(l);
 		super.addKeyListener(new KeyListener() {			

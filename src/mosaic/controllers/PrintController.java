@@ -42,6 +42,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 	private boolean coverPageShow, coverPageShowFileName, coverPageShowLegend, showLegend, showPageNumber;
 	private float fontSizeMM;
 	private int magnifierSizePercentage;
+	private String rightCountDisplayText, downCountDisplayText;
 	private CoverPagePictureType coverPagePictureType;
 	private ShowPosition showPosition;
 	private Dimension magnifiersPerPage;
@@ -121,6 +122,8 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		magnifiersPerPage = (Dimension)model.get(BrickGraphicsState.PrintMagnifiersPerPage);
 		fontSizeMM = (Float)model.get(BrickGraphicsState.PrintFontSize);
 		magnifierSizePercentage = (Integer)model.get(BrickGraphicsState.PrintMagnifierSizePercentage);
+		downCountDisplayText = (String)model.get(BrickGraphicsState.PrintDisplayTextDown);
+		rightCountDisplayText = (String)model.get(BrickGraphicsState.PrintDisplayTextRight);
 	}
 	
 	public void addChangeListener(ChangeListener l) {
@@ -133,6 +136,14 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		}
 	}
 	
+	public void setDownCountDisplayText(String s, Object caller) {
+		downCountDisplayText = s;
+		notifyListeners(new ChangeEvent(caller));		
+	}
+	public void setRightCountDisplayText(String s, Object caller) {
+		rightCountDisplayText = s;
+		notifyListeners(new ChangeEvent(caller));		
+	}
 	public void setMagnifierSizePercentage(int i, Object caller) {
 		magnifierSizePercentage = i;
 		notifyListeners(new ChangeEvent(caller));		
@@ -204,6 +215,12 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 	}
 	public boolean getShowPageNumber() {
 		return showPageNumber;
+	}
+	public String getDownCountDisplayText() {
+		return downCountDisplayText;
+	}
+	public String getRightCountDisplayText() {
+		return rightCountDisplayText;
 	}
 	public CoverPagePictureType getCoverPagePictureType() {
 		return coverPagePictureType;
@@ -284,7 +301,12 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 			g2.setColor(Color.BLACK);
 			g2.drawRect(xIndent, yIndent, fontSizeIn1_72inches, fontSizeIn1_72inches);
 			
-			g2.drawString(c.cnt + "x " + colorController.getNormalIdentifier(c.c), 
+			String identifier = colorController.getNormalIdentifier(c.c);
+			if(identifier == null)
+				identifier = "";
+			else
+				identifier = "x " + identifier;
+			g2.drawString(c.cnt + identifier, 
 					xMin + x*columnWidth + rowHeight, 
 					yMin + y*rowHeight + fontSizeIn1_72inches*9/10 - (fontSizeIn1_72inches - textHeight)/2);
 
@@ -435,11 +457,12 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		if(showPosition == ShowPosition.None)
 			return 0;
 
-		// Written:
 		int fromLeft = (page % numPagesWidth)+1;
 		int fromTop = (page / numPagesWidth)+1;
-		if(showPosition == ShowPosition.Written) {
-			String pageNumberString = "" + fromLeft + " \u2192     " + fromTop + " \u2193";
+
+		// Written:
+		if(showPosition == ShowPosition.Written) {			
+			String pageNumberString = fromLeft + rightCountDisplayText + fromTop + downCountDisplayText;
 			Rectangle2D pageNumberStringBounds = fm.getStringBounds(pageNumberString, g2);
 			float x = xMin + (float)((xMax-xMin)-pageNumberStringBounds.getWidth())/2;
 			float y = yMin + unit;
@@ -559,6 +582,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		for(int i = 0; i < m.length; ++i)
 			used.add(m[i]);
 		
+		// TODO: Use separation instead to accommodate black/white printers
 		g2.setColor(Color.RED);
 		for(int x = 1; x < magnifiersPerPage.width; ++x) {
 			int xIndent = x*shownMagnifierSize.width/magnifiersPerPage.width;
@@ -712,6 +736,8 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		model.set(BrickGraphicsState.PrintMagnifiersPerPage, magnifiersPerPage);
 		model.set(BrickGraphicsState.PrintFontSize, fontSizeMM);
 		model.set(BrickGraphicsState.PrintMagnifierSizePercentage, magnifierSizePercentage);
+		model.set(BrickGraphicsState.PrintDisplayTextDown, downCountDisplayText);
+		model.set(BrickGraphicsState.PrintDisplayTextRight, rightCountDisplayText);		
 	}
 
 	@Override

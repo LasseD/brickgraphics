@@ -42,6 +42,8 @@ public enum BrickGraphicsState implements ModelState {
 	PrintMagnifiersPerPage(new Dimension(3,3)),
 	PrintFontSize(14f),
 	PrintMagnifierSizePercentage(50),
+	PrintDisplayTextRight("to the right      "),
+	PrintDisplayTextDown("down"),
 	
 	// Magnifier:
 	MagnifierShowLegend(false),

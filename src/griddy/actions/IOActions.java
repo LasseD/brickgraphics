@@ -24,7 +24,7 @@ import java.util.*;
 /**
  * File formats: image.jpg, ...,
  *               image.griddy (real extension of img not shown), use Model.State.ImageType
- * @author ld
+ * @author LD
  */
 public class IOActions {
 	public static final String GRIDDY_SUFFIX = "griddy";

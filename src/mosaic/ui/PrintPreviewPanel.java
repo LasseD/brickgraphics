@@ -169,6 +169,8 @@ public class PrintPreviewPanel extends JPanel implements ChangeListener, Pipelin
 			g2.setTransform(originalTransform);
 			
 			// Draw border:
+			g2.setColor(getBackground());
+			g2.fillRect(pageRect.x+pageRect.width, pageRect.y, getWidth(), pageRect.height); // OK to paint out of border.
 			g2.setColor(Color.BLACK);
 			g2.drawRect(pageRect.x, pageRect.y, pageRect.width, pageRect.height);
 		}		

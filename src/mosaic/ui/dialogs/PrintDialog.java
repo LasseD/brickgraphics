@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.print.PageFormat;
@@ -30,11 +29,14 @@ public class PrintDialog extends JDialog implements ChangeListener {
 	private ColorController cc;
 	private MagnifierController mc;
 	// Input boxes:
-	private LividTextField tfMagnifiersPerPageWidth, tfMagnifiersPerPageHeight, tfMagnifierSizeWidth, tfMagnifierSizeHeight, tfFontSize, tfMagnifierSizePercentage;
-	private JCheckBox cbCoverPageShow, cbCoverPageShowFileName, cbCoverPageShowLegend, cbShowColors, cbShowLegend, cbShowPageNumber;
+	private JTextField tfMagnifiersPerPageWidth, tfMagnifiersPerPageHeight, tfMagnifierSizeWidth, 
+					   tfMagnifierSizeHeight, tfFontSize, tfMagnifierSizePercentage,
+					   tfRightCountDisplayText, tfDownCountDisplayText;
+	private JCheckBox cbCoverPageShow, cbCoverPageShowFileName, cbCoverPageShowLegend, 
+					  cbShowColors, cbShowLegend, cbShowPageNumber;
 	private JRadioButton[] rbCoverPagePictureType, rbShowPosition;
-	private JComboBox<String> cColorName;
 	private JComboBox<ColorController.ShownID> cColorNumber;
+	private JComboBox<String> cColorName;
 	private String[] lastSeenLocalizedNames;
 	private JButton bOK; // With initial focus.
 	
@@ -109,6 +111,8 @@ public class PrintDialog extends JDialog implements ChangeListener {
 	
 	private void buildUI(Pipeline pipeline) {
 		setLayout(new BorderLayout());
+		JTabbedPane tp = new JTabbedPane();
+		
 		{
 			// 1: Common settings
 			JPanel topPanel = new JPanel();
@@ -196,7 +200,6 @@ public class PrintDialog extends JDialog implements ChangeListener {
 		}
 		
 		// Middle: Main components + preview.
-		JPanel midPanel = new JPanel(new GridLayout(2,1));
 		
 		JPanel midTopPanel = new JPanel(new BorderLayout());
 		midTopPanel.setBorder(BorderFactory.createTitledBorder("Cover page"));
@@ -392,9 +395,9 @@ public class PrintDialog extends JDialog implements ChangeListener {
 		pShowPageNumber.add(cbShowPageNumber);
 		midBottomLeftPanel.add(pShowPageNumber);
 		
+		// Position display buttons:
 		JPanel bottomButtonGroupPanel = new JPanel();
 		bottomButtonGroupPanel.setLayout(new BoxLayout(bottomButtonGroupPanel, BoxLayout.Y_AXIS));
-		bottomButtonGroupPanel.setBorder(BorderFactory.createTitledBorder("Position"));
 		ButtonGroup bgShowPosition = new ButtonGroup();
 		rbShowPosition = new JRadioButton[ShowPosition.values().length];
 		i = 0;
@@ -410,14 +413,39 @@ public class PrintDialog extends JDialog implements ChangeListener {
 			bottomButtonGroupPanel.add(rbShowPosition[i]);
 			++i;
 		}
-		JPanel pBottomButtonGroupPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		pBottomButtonGroupPanel.add(bottomButtonGroupPanel);
+		
+		// Position text:
+		tfRightCountDisplayText = new LividTextField(10);		
+		tfRightCountDisplayText.addActionListener(new ActionListener() {				
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				pc.setRightCountDisplayText(tfRightCountDisplayText.getText(), PrintDialog.this);
+			}
+		});
+		tfDownCountDisplayText = new LividTextField(10);		
+		tfDownCountDisplayText.addActionListener(new ActionListener() {				
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				pc.setDownCountDisplayText(tfDownCountDisplayText.getText(), PrintDialog.this);
+			}
+		});
+		JPanel pTextPositionText = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		pTextPositionText.add(new JLabel("X"));
+		pTextPositionText.add(tfRightCountDisplayText);
+		pTextPositionText.add(new JLabel("Y"));
+		pTextPositionText.add(tfDownCountDisplayText);
+		
+		// Position panel:
+		JPanel pBottomButtonGroupPanel = new JPanel(new BorderLayout());
+		pBottomButtonGroupPanel.setBorder(BorderFactory.createTitledBorder("Position"));
+		pBottomButtonGroupPanel.add(bottomButtonGroupPanel, BorderLayout.CENTER);
+		pBottomButtonGroupPanel.add(pTextPositionText, BorderLayout.SOUTH);
 		midBottomLeftPanel.add(pBottomButtonGroupPanel);
 		midBottomPanel.add(midBottomLeftPanel, BorderLayout.WEST);		
 		
-		midPanel.add(midTopPanel);
-		midPanel.add(midBottomPanel);		
-		add(midPanel, BorderLayout.CENTER);
+		tp.addTab("Cover Page", midTopPanel);
+		tp.addTab("Page Setup", midBottomPanel);
+		add(tp, BorderLayout.CENTER);
 		
 		// Bottom: OK/Cancel
 		JPanel bottomPanel = new JPanel(new FlowLayout());
@@ -470,6 +498,8 @@ public class PrintDialog extends JDialog implements ChangeListener {
 		cbShowLegend.setSelected(pc.getShowLegend());
 		cbShowPageNumber.setSelected(pc.getShowPageNumber());
 		rbShowPosition[pc.getShowPosition().ordinal()].setSelected(true);
+		tfRightCountDisplayText.setText(pc.getRightCountDisplayText());
+		tfDownCountDisplayText.setText(pc.getDownCountDisplayText());
 
 		if(cColorNumber.getSelectedIndex() != cc.getShownID().ordinal())
 			cColorNumber.setSelectedItem(cc.getShownID());

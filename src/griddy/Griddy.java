@@ -19,6 +19,23 @@ import griddy.io.GriddyState;
 import griddy.rulers.*;
 import griddy.zoom.Zoom;
 
+/**
+ * 0.9.4 Redesign:
+ * 
+ * Basic functionality:
+ * - One ruler for size setting. Length of ruler set in "Ruler"-panel
+ * - Any number of rulers for measuring.
+ * - Zoom controls
+ * - Load and save (+ auto save on exit)
+ * - Move grid when drag-n-drop'ing.
+ * - Grid Options in top pane - 2 levels.
+ * 
+ * Nice-to-have:
+ * - Scroll bars when zoomed in
+ * - Set 
+ * 
+ * @author LD
+ */
 public class Griddy extends JFrame implements ModelHandler<GriddyState>, WindowListener, ModelChangeListener {
 	public static final String APP_NAME = "Griddy - The grid overlay program";
 	public static final String APP_NAME_SHORT = "Griddy";
@@ -26,7 +43,7 @@ public class Griddy extends JFrame implements ModelHandler<GriddyState>, WindowL
 	public static final String STATE_FILE_NAME = "griddy.kvm";
 	public static final int VERSION_MAJOR = 0;
 	public static final int VERSION_MINOR = 9;
-	public static final int VERSION_MICRO = 3;
+	public static final int VERSION_MICRO = 4;
 	public static final String APP_VERSION = VERSION_MAJOR + "." + VERSION_MINOR + "." + VERSION_MICRO;
 	public static final String HELP_URL = "http://c-mt.dk/software/griddy/help";
 	

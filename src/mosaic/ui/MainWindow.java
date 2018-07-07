@@ -112,12 +112,14 @@ public class MainWindow extends JFrame implements ChangeListener, ModelHandler<B
 			splitPane.setTransferHandler(new TransferHandler() {
 				@Override
 				public boolean canImport(TransferHandler.TransferSupport info) {
+					System.out.println("canImport");
 					return info.isDrop() && (info.isDataFlavorSupported(DataFlavor.imageFlavor) ||
 							info.isDataFlavorSupported(DataFlavor.javaFileListFlavor));
 				}
 
 				@Override
 				public boolean importData(TransferHandler.TransferSupport info) {
+					System.out.println("import");
 					if (!canImport(info))
 						return false;
 
@@ -141,6 +143,7 @@ public class MainWindow extends JFrame implements ChangeListener, ModelHandler<B
 						return true;
 					} 
 					catch (Exception e) { 
+						System.out.println("error");
 						return false; 
 					}
 				}
