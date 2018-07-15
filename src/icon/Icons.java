@@ -500,6 +500,10 @@ public class Icons {
 		};
 	}
 
+	/**
+	 * Currently unused since 3D icon is stepping in for pretty display and 2x2 plate for measures.
+	 */
+	/*
 	public static ToBricksIcon snot() {
 		return new ToBricksIcon() {
 			@Override
@@ -548,7 +552,79 @@ public class Icons {
 			}
 		};
 	}
+	*/
 
+	public static ToBricksIcon elementStudsUp3D(final int studsWide, final int studsDeep, 
+			final int platesHigh, final boolean drawStuds) {
+		return new ToBricksIcon() {
+			@Override
+			public void paint(Graphics2D g2, ToBricksIconType type, int size) {
+				if(type.isMeasure())
+					throw new IllegalArgumentException("type can not be measure for 3D icons!");
+				Color color = type == ToBricksIconType.Enabled ? Color.red : DISABLED_COLOR;
+				
+				BrickIcon3D b = new BrickIcon3D(size, studsWide, studsDeep);
+				int height = b.drawElementStudsUp(null, color, platesHigh, drawStuds);
+				AffineTransform originalTransform = g2.getTransform();
+				if(height <= size) {
+					g2.translate(0, size - (size-height)/2);
+					b.drawElementStudsUp(g2, color, platesHigh, drawStuds);
+				}
+				else {
+					double scale = size / (double)height;
+					b = new BrickIcon3D((int)(size*scale), studsWide, studsDeep);
+					g2.translate((int)((size-scale*size)/2), size);
+					b.drawElementStudsUp(g2, color, platesHigh, drawStuds);
+				}				
+				g2.setTransform(originalTransform);
+			}			
+		};
+	}
+	public static ToBricksIcon elementStudsOut3D(final int studsWide, final int studsDeep, 
+			final int platesHigh, final boolean drawStuds) {		
+		return new ToBricksIcon() {
+
+			@Override
+			public void paint(Graphics2D g2, ToBricksIconType type, int size) {
+				if(type.isMeasure())
+					throw new IllegalArgumentException("type can not be measure for 3D icons!");
+				Color color = type == ToBricksIconType.Enabled ? Color.red : DISABLED_COLOR;
+				
+				BrickIcon3D b = new BrickIcon3D(size, studsWide, studsDeep);
+				int height = b.drawElementStudsOut(null, color, platesHigh, drawStuds);
+				AffineTransform originalTransform = g2.getTransform();
+				if(height <= size) {
+					g2.translate(0, size - (size-height)/2);
+					b.drawElementStudsOut(g2, color, platesHigh, drawStuds);
+				}
+				else {
+					double scale = size / (double)height;
+					b = new BrickIcon3D((int)(size*scale), studsWide, studsDeep);
+					g2.translate((int)((size-scale*size)/2), size);
+					b.drawElementStudsOut(g2, color, platesHigh, drawStuds);
+				}				
+				g2.setTransform(originalTransform);
+			}			
+		};
+	}
+	public static ToBricksIcon snot() {
+		return new ToBricksIcon() {
+			@Override
+			public void paint(Graphics2D g2, ToBricksIconType type, int size) {
+				if(type.isMeasure())
+					throw new IllegalArgumentException("type can not be measure for 3D icons!");
+				Color color = type == ToBricksIconType.Enabled ? Color.red : DISABLED_COLOR;
+				
+				BrickIcon3D b = new BrickIcon3D(size, 2, 1);
+				int height = b.drawSNOT(null, color);
+				AffineTransform originalTransform = g2.getTransform();
+				g2.translate(0, size - (size-height)/2);
+				b.drawSNOT(g2, color);
+				g2.setTransform(originalTransform);
+			}			
+		};
+	}
+	
 	public static Icon filterToBrickTypes(final int size) {
 		return new BrickGraphicsIcon(size) {
 			@Override
@@ -581,6 +657,7 @@ public class Icons {
 		return new BrickGraphicsIcon(size) {
 			@Override
 			public void paint(Graphics2D g2) {
+				Color origColor = g2.getColor();
 				g2.setColor(Color.BLACK);
 				final int headDiam = 4*size/9;
 				g2.fillOval((size-headDiam)/2, size/6, headDiam, headDiam);
@@ -588,6 +665,7 @@ public class Icons {
 				int[] ys = new int[]{size, size/2, size};
 				g2.fillPolygon(xs,  ys, 3);
 				Cropper.drawCropHighlight(g2, new Rectangle(3, 4, size-6, 3*size/5));
+				g2.setColor(origColor);
 			}
 		};
 	}
@@ -598,7 +676,7 @@ public class Icons {
 			public void paint(Graphics2D g2) {
 				if(colorGroups == null)
 					return;
-				
+				Color prevColor = g2.getColor();
 				int w = 8;
 				for(int y = 0; w*y < size; y++) {
 					LEGOColor color = y >= colorGroups.length || colorGroups[y].length == 0 ? LEGOColor.WHITE : colorGroups[y][0];
@@ -610,6 +688,7 @@ public class Icons {
 					g2.setColor(Color.LIGHT_GRAY);
 					g2.fillRect(w + 4, w*y + w/3 + 1, size-w-4, w/2);
 				}
+				g2.setColor(prevColor);
 			}
 		};
 	}

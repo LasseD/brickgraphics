@@ -1,0 +1,55 @@
+#Bricks
+#Bricks 2 x X
+#3006|Brick 2 x 10
+3007|Brick 2 x 8
+2456|Brick 2 x 6
+3001|Brick 2 x 4
+3002|Brick 2 x 3
+3003|Brick 2 x 2
+2357|Brick 2 x 2 Corner
+#Bricks 1 x X
+6111|Brick 1 x 10
+3008|Brick 1 x 8
+3009|Brick 1 x 6
+3010|Brick 1 x 4
+3622|Brick 1 x 3
+3004|Brick 1 x 2
+3005|Brick 1 x 1
+
+#Plates
+#Plates large:
+41539|Plate 8 x 8
+3027|Plate 6 x 16
+3456|Plate 6 x 14
+3028|Plate 6 x 12
+3033|Plate 6 x 10
+3036|Plate 6 x 8
+3958|Plate 6 x 6
+3029|Plate 4 x 12
+3030|Plate 4 x 10
+3035|Plate 4 x 8
+3032|Plate 4 x 6
+3031|Plate 4 x 4
+2639|Plate 4 x 4 Corner
+11212|Plate 3 x 3
+#15397|Plate 3 x 3 Cross DOESN'T WORK YET!
+#Plates 2 x X
+4282|Plate 2 x 16
+91988|Plate 2 x 14
+2445|Plate 2 x 12
+3832|Plate 2 x 10
+3034|Plate 2 x 8
+3795|Plate 2 x 6
+3020|Plate 2 x 4
+3021|Plate 2 x 3
+3022|Plate 2 x 2
+2420|Plate 2 x 2 Corner
+#Plates 1 x X
+60479|Plate 1 x 12
+4477|Plate 1 x 10
+3460|Plate 1 x 8
+3666|Plate 1 x 6
+3710|Plate 1 x 4
+3623|Plate 1 x 3
+3023|Plate 1 x 2
+3024|Plate 1 x 1

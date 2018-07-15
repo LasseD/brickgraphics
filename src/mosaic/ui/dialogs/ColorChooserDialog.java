@@ -266,7 +266,7 @@ public class ColorChooserDialog extends JDialog implements ChangeListener {
 			setHorizontalAlignment(SwingConstants.CENTER);
 			setPreferredSize(new Dimension(size, size));
 			setBackground(color.getRGB());
-			setForeground(color.getRGB());
+			setOpaque(true);
 			
 			setSelected(selected);
 		}

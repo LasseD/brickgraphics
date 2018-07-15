@@ -10,25 +10,36 @@ import transforms.*;
  * @author LD
  */
 public enum ToBricksType {
-	STUD_FROM_TOP(Icons.studsFromTop(1, 1), "1 x 1 plates seen from the top.", SizeInfo.BRICK_WIDTH, SizeInfo.BRICK_WIDTH, 1, 1) {
+	STUD_FROM_TOP(Icons.elementStudsOut3D(1, 1, 1, true), Icons.studsFromTop(1, 1), "1 x 1 plates seen from the top.", 
+			SizeInfo.BRICK_WIDTH, SizeInfo.BRICK_WIDTH, 1, 1, true) {
 		@Override
 		public Transform getPreparationTransform(ToBricksTransform tbt) {
 			return tbt.getBrickFromTopTransform(1, 1);
 		}
 	}, 
-	PLATE_FROM_SIDE(Icons.plateFromSide(1), "1 x 1 plates seen from the side.", SizeInfo.BRICK_WIDTH, SizeInfo.PLATE_HEIGHT, 0, 0) {
+	BRICK_FROM_TOP(Icons.elementStudsOut3D(1, 1, 3, true), Icons.studsFromTop(1, 1), "1 x 1 bricks seen from the top.", 
+			SizeInfo.BRICK_WIDTH, SizeInfo.BRICK_WIDTH, 1, 1, false) {
+		@Override
+		public Transform getPreparationTransform(ToBricksTransform tbt) {
+			return tbt.getBrickFromTopTransform(1, 1);
+		}
+	},
+	PLATE_FROM_SIDE(Icons.elementStudsUp3D(1, 1, 1, true), Icons.plateFromSide(1), "1 x 1 plates seen from the side.", 
+			SizeInfo.BRICK_WIDTH, SizeInfo.PLATE_HEIGHT, 0, 0, true) {
 		@Override
 		public Transform getPreparationTransform(ToBricksTransform tbt) {
 			return tbt.getPlateFromSideTransform(1);
 		}
 	}, 
-	BRICK_FROM_SIDE(Icons.brickFromSide(), "1 x 1 bricks seen from the side.", SizeInfo.BRICK_WIDTH, SizeInfo.BRICK_HEIGHT, 0, 0) {
+	BRICK_FROM_SIDE(Icons.elementStudsUp3D(1, 1, 3, true), Icons.brickFromSide(), "1 x 1 bricks seen from the side.", 
+			SizeInfo.BRICK_WIDTH, SizeInfo.BRICK_HEIGHT, 0, 0, false) {
 		@Override
 		public Transform getPreparationTransform(ToBricksTransform tbt) {
 			return tbt.getBrickFromSideTransform(1);
 		}
 	},
-	SNOT_IN_2_BY_2(Icons.snot(), "1 x 1 plates and tiles placed both studs up and sideways.", SizeInfo.SNOT_BLOCK_WIDTH, SizeInfo.SNOT_BLOCK_WIDTH, 0, 0) {
+	SNOT_IN_2_BY_2(Icons.snot(), Icons.studsFromTop(2, 2), "1 x 1 plates and tiles placed both studs up and sideways.", 
+			SizeInfo.SNOT_BLOCK_WIDTH, SizeInfo.SNOT_BLOCK_WIDTH, 0, 0, true) {
 		@Override
 		public Transform getPreparationTransform(ToBricksTransform tbt) {
 			throw new UnsupportedOperationException();
@@ -55,69 +66,81 @@ public enum ToBricksType {
 			return res;
 		}
 	}, 
-	TILE_FROM_TOP(Icons.tileFromTop(), "1 x 1 tiles seen from the top.", SizeInfo.BRICK_WIDTH, SizeInfo.BRICK_WIDTH, 0, 0) {
+	TILE_FROM_TOP(Icons.elementStudsOut3D(1, 1, 1, false), Icons.tileFromTop(), "1 x 1 tiles seen from the top.", 
+			SizeInfo.BRICK_WIDTH, SizeInfo.BRICK_WIDTH, 0, 0, false) {
 		@Override
 		public Transform getPreparationTransform(ToBricksTransform tbt) {
 			return tbt.getBrickFromTopTransform(1, 1);
 		}
 	}, 
-	PLATE_2_1_FROM_SIDE(Icons.plateFromSide(2), "1 x 2 plates seen from the side.", SizeInfo.BRICK_WIDTH*2, SizeInfo.PLATE_HEIGHT, 0, 0) {
+	PLATE_2_1_FROM_SIDE(Icons.elementStudsUp3D(2, 1, 1, true), Icons.plateFromSide(2), "1 x 2 plates seen from the side.",
+			SizeInfo.BRICK_WIDTH*2, SizeInfo.PLATE_HEIGHT, 0, 0, false) {
 		@Override
 		public Transform getPreparationTransform(ToBricksTransform tbt) {
 			return tbt.getPlateFromSideTransform(2);
 		}
 	}, 
-	PLATE_3_1_FROM_SIDE(Icons.plateFromSide(3), "1 x 3 plates seen from the side.", SizeInfo.BRICK_WIDTH*3, SizeInfo.PLATE_HEIGHT, 0, 0) {
+	PLATE_3_1_FROM_SIDE(Icons.elementStudsUp3D(3, 1, 1, true), Icons.plateFromSide(3), "1 x 3 plates seen from the side.", 
+			SizeInfo.BRICK_WIDTH*3, SizeInfo.PLATE_HEIGHT, 0, 0, false) {
 		@Override
 		public Transform getPreparationTransform(ToBricksTransform tbt) {
 			return tbt.getPlateFromSideTransform(3);
 		}
 	}, 
-	PLATE_4_1_FROM_SIDE(Icons.plateFromSide(4), "1 x 4 plates seen from the side.", SizeInfo.BRICK_WIDTH*4, SizeInfo.PLATE_HEIGHT, 0, 0) {
+	PLATE_4_1_FROM_SIDE(Icons.elementStudsUp3D(4, 1, 1, true), Icons.plateFromSide(4), "1 x 4 plates seen from the side.", 
+			SizeInfo.BRICK_WIDTH*4, SizeInfo.PLATE_HEIGHT, 0, 0, false) {
 		@Override
 		public Transform getPreparationTransform(ToBricksTransform tbt) {
 			return tbt.getPlateFromSideTransform(4);
 		}
 	}, 
-	ONE_BY_TWO_STUDS_FROM_TOP(Icons.studsFromTop(2, 1), "1 x 2 plates seen from the top.", 2*SizeInfo.BRICK_WIDTH, SizeInfo.BRICK_WIDTH, 2, 1) {
+	ONE_BY_TWO_STUDS_FROM_TOP(Icons.elementStudsOut3D(2, 1, 1, true), Icons.studsFromTop(2, 1), "1 x 2 plates seen from the top.", 
+			2*SizeInfo.BRICK_WIDTH, SizeInfo.BRICK_WIDTH, 2, 1, false) {
 		@Override
 		public Transform getPreparationTransform(ToBricksTransform tbt) {
 			return tbt.getBrickFromTopTransform(2, 1);
 		}
 	}, 
-	ONE_BY_THREE_STUDS_FROM_TOP(Icons.studsFromTop(3, 1), "1 x 3 plates seen from the top.", 3*SizeInfo.BRICK_WIDTH, SizeInfo.BRICK_WIDTH, 3, 1) {
+	ONE_BY_THREE_STUDS_FROM_TOP(Icons.elementStudsOut3D(3, 1, 1, true), Icons.studsFromTop(3, 1), "1 x 3 plates seen from the top.", 
+			3*SizeInfo.BRICK_WIDTH, SizeInfo.BRICK_WIDTH, 3, 1, false) {
 		@Override
 		public Transform getPreparationTransform(ToBricksTransform tbt) {
 			return tbt.getBrickFromTopTransform(3, 1);
 		}
 	}, 
-	ONE_BY_FOUR_STUDS_FROM_TOP(Icons.studsFromTop(4, 1), "1 x 4 plates seen from the top.", 4*SizeInfo.BRICK_WIDTH, SizeInfo.BRICK_WIDTH, 4, 1) {
+	ONE_BY_FOUR_STUDS_FROM_TOP(Icons.elementStudsOut3D(4, 1, 1, true), Icons.studsFromTop(4, 1), "1 x 4 plates seen from the top.",
+			4*SizeInfo.BRICK_WIDTH, SizeInfo.BRICK_WIDTH, 4, 1, false) {
 		@Override
 		public Transform getPreparationTransform(ToBricksTransform tbt) {
 			return tbt.getBrickFromTopTransform(4, 1);
 		}
 	}, 
-	TWO_BY_TWO_PLATES_FROM_TOP(Icons.studsFromTop(2, 2), "2 x 2 plates seen from the top.", SizeInfo.SNOT_BLOCK_WIDTH, SizeInfo.SNOT_BLOCK_WIDTH, 2, 2) {
+	TWO_BY_TWO_PLATES_FROM_TOP(Icons.elementStudsOut3D(2, 2, 1, true), Icons.studsFromTop(2, 2), "2 x 2 plates seen from the top.", 
+			SizeInfo.SNOT_BLOCK_WIDTH, SizeInfo.SNOT_BLOCK_WIDTH, 2, 2, false) {
 		@Override
 		public Transform getPreparationTransform(ToBricksTransform tbt) {
 			return tbt.getBrickFromTopTransform(2, 2);
 		}
 	};
 	
-	private ToBricksIcon icon;
+	private ToBricksIcon icon, measureIcon;
 	private String description;
 	/**
 	 * Unit width and height is the indivisible size of the ToBricksType
 	 */
 	private int unitWidth, unitHeight, studsShownWide, studsShownTall;
+	private boolean isDefault;
 
-	private ToBricksType(ToBricksIcon icon, String description, int dw, int dh, int studsShownWide, int studsShownTall) {
+	private ToBricksType(ToBricksIcon icon, ToBricksIcon measureIcon, String description, 
+			int dw, int dh, int studsShownWide, int studsShownTall, boolean isDefault) {
 		this.icon = icon;
+		this.measureIcon = measureIcon;
 		this.description = description;
 		unitWidth = dw;
 		unitHeight = dh;
 		this.studsShownWide = studsShownWide;
 		this.studsShownTall = studsShownTall;
+		this.isDefault = isDefault;
 	}
 
 	/**
@@ -169,6 +192,9 @@ public enum ToBricksType {
 		return ret;
 	}
 	
+	public ToBricksIcon getMeasureIcon() {
+		return measureIcon;
+	}
 	public ToBricksIcon getIcon() {
 		return icon;
 	}
@@ -178,9 +204,12 @@ public enum ToBricksType {
 	}
 	
 	public static boolean[] getDefaultTypes() {
-		boolean[] ret = new boolean[values().length];
-		for(int i = 0; i < 4; ++i) // The first some values are default...
-			ret[i] = true;
+		ToBricksType[] types = values();
+		boolean[] ret = new boolean[types.length];
+		for(int i = 0; i < ret.length; ++i) {
+			if(types[i].isDefault)
+				ret[i] = true;
+		}
 		return ret;
 	}
 	

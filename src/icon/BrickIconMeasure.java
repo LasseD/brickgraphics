@@ -1,5 +1,9 @@
 package icon;
 
+/**
+ * This class is used to get brick information for a given size (set in initializer)
+ * @author LD
+ */
 public class BrickIconMeasure {
 	public final int mid, brickHeight, plateHeight, studHeight, brickWidth, studWidth;
 

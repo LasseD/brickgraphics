@@ -52,6 +52,9 @@ public class LDRPrinter {
 		case STUD_FROM_TOP:
 			buildWithPlatesFromTop(out, 1, 1, LXFPrinter.PLATE_1_X_1);
 			break;
+		case BRICK_FROM_TOP:
+			buildWithBricksFromTop(out);
+			break;
 		case ONE_BY_TWO_STUDS_FROM_TOP:
 			buildWithPlatesFromTop(out, 2, 1, LXFPrinter.PLATE_1_X_2);
 			break;
@@ -102,9 +105,9 @@ public class LDRPrinter {
 				if(!color.isLDraw())
 					return;
 				
-				String part = "3024.DAT";
+				String part = LXFPrinter.PLATE_1_X_1 + ".DAT";
 				if(y%5==0)
-					part = "3070B.DAT";
+					part = LXFPrinter.TILE_1_X_1 + ".DAT";
 				out.printf("1 %d 0 %d %d 0 0 -1 0 1 0 1 0 0 %s\n", color.getLDraw()[0].getID(), 8*y, 20*x, part);
 			}
 
@@ -113,9 +116,9 @@ public class LDRPrinter {
 				if(!color.isLDraw())
 					return;
 
-				String part = "3024.DAT";
-				if(x%5==4)
-					part = "3070B.DAT";
+				String part = LXFPrinter.PLATE_1_X_1 + ".DAT";
+				if(y%5==4)
+					part = LXFPrinter.TILE_1_X_1 + ".DAT";
 				out.printf("1 %d 0 %d %d -1 0 0 0 0 -1 0 -1 0 %s\n", color.getLDraw()[0].getID(), 10+20*y, -2+8*x, part);
 			}
 		};
@@ -130,7 +133,12 @@ public class LDRPrinter {
 	
 	private void buildWithTilesFromTop(PrintWriter out) {
 		// TODO: Add optimization also for this by copying for plates!
-		buildUnoptimized(out, 20, 20, "0 -1 0 0 0 -1 1 0 0 3070B.DAT"); 
+		buildUnoptimized(out, 20, 20, "0 -1 0 0 0 -1 1 0 0 " + LXFPrinter.TILE_1_X_1 + ".DAT"); 
+	}
+
+	private void buildWithBricksFromTop(PrintWriter out) {
+		// TODO: Add optimization also for this by copying for plates!
+		buildUnoptimized(out, 20, 20, "0 -1 0 0 0 -1 1 0 0 " + LXFPrinter.BRICK_1_X_1 + ".DAT"); 
 	}
 
 	private void buildWithPlatesFromTop(PrintWriter out, int elementWidth, int elementDepth, String partNumber) {

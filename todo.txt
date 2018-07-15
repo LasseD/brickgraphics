@@ -1,0 +1,18 @@
+BUGS:
+- Filter menu button text is bold. 1D
+
+TODO:
+- Make all icons generated 1W
+- Show space between building blocks in magnifier and printouts 4D
+- New main icon: painters board + bricks on top 4D
+- Output construction optimization.
+ -- LDD 2W
+ -- Tiles 2D
+ -- SNOT 1W
+- Progress dialogs
+ -- export (relevant because of optimization). ½D
+- Improve color approximation by allowing user to boost colors. 3D
+- Improve concurrency by investigating why pipeline blocks 4D
+
+Remember when generating screenshots in LPub:
+- Sizes: 1200/900/530000

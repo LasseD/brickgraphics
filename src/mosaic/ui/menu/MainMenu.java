@@ -38,8 +38,8 @@ public class MainMenu extends JMenuBar {
 		viewMenu.setDisplayedMnemonicIndex(0);
 		viewMenu.setMnemonic('V');
 		ImagePreparingView ipv = mw.getImagePreparingView();
-		viewMenu.add(new ToggleCrop(ipv));
 		viewMenu.add(new ToggleFilters(ipv));
+		viewMenu.add(new ToggleCrop(ipv));
 		viewMenu.add(new ToggleShowDividerLocationButton(mc.getToBricksController()));
 		viewMenu.addSeparator();
 		viewMenu.add(new ToggleColorChooser(mw.getColorChooser()));

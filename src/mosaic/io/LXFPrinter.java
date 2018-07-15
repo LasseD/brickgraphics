@@ -126,6 +126,9 @@ public class LXFPrinter {
 		case BRICK_FROM_SIDE:
 			buildWith1x1BricksFromSide(out, brickSection);
 			break;
+		case BRICK_FROM_TOP:
+			buildWith1x1BricksFromTop(out, brickSection);
+			break;
 		case TWO_BY_TWO_PLATES_FROM_TOP:
 			buildWith2x2PlatesFromTop(out, brickSection);
 			break;
@@ -175,6 +178,10 @@ public class LXFPrinter {
 
 	private void buildWith1x1TilesFromTop(PrintWriter out, boolean isElementSection) {
 		buildFromTop(out, 1, 1, TILE_1_X_1, isElementSection, true); 
+	}
+
+	private void buildWith1x1BricksFromTop(PrintWriter out, boolean isElementSection) {
+		buildFromTop(out, 1, 1, BRICK_1_X_1, isElementSection, true); 
 	}
 
 	private void buildFromTop(PrintWriter out, int elementWidth, int elementDepth, String element, 

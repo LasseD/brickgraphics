@@ -13,8 +13,6 @@ public class ToggleColorChooser extends AbstractAction {
 	private ColorChooserDialog cs;
 	
 	public ToggleColorChooser(ColorChooserDialog cs) {
-		if(cs == null)
-			throw new IllegalArgumentException();
 		this.cs = cs;
 		putValue(Action.SHORT_DESCRIPTION, "Toggle the color chooser.");
 		putValue(Action.SMALL_ICON, Icons.colorsChooserDialog(Icons.SIZE_SMALL));

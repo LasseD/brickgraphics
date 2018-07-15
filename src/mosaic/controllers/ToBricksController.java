@@ -65,18 +65,15 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 			throw new IllegalStateException();
 		
 		toolBar.add(buttonToggleDividerLocation);	
-		
-		//toolBar.add(Box.createHorizontalStrut(10));
-		
+				
 		for(JButton b : toBricksTypeButtons)
 			toolBar.add(b);
 		//toolBar.add(new ShowToBricksTypeFilterDialog(mc));
-		//toolBar.add(Box.createHorizontalStrut(10));
 		toolBar.add(buttonLessPP);
 		toolBar.add(propagationPercentageField);
 		toolBar.add(labelPercent);
 		toolBar.add(buttonMorePP);		
-		//toolBar.add(Box.createHorizontalStrut(10));
+
 		toolBar.add(sizeFieldWidth);
 		toolBar.add(labelX);
 		toolBar.add(sizeFieldHeight);
@@ -142,7 +139,7 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 		});
 		buttonMorePP.setToolTipText("Increase dithering by 10%");
 
-		sizeFieldWidth = new IconizedTextfield(4, toBricksType.getIcon().get(ToBricksIconType.MeasureWidth, Icons.SIZE_SMALL));
+		sizeFieldWidth = new IconizedTextfield(4, toBricksType.getMeasureIcon().get(ToBricksIconType.MeasureWidth, Icons.SIZE_SMALL));
 		sizeFieldWidth.setMargin(new Insets(PAD, PAD, PAD, Icons.SIZE_SMALL));
 		sizeFieldWidth.addActionListener(new ActionListener() {
 			@Override
@@ -161,7 +158,7 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 			}
 		});
 		sizeFieldWidth.setToolTipText("Set the width.");
-		sizeFieldHeight = new IconizedTextfield(4, toBricksType.getIcon().get(ToBricksIconType.MeasureHeight, Icons.SIZE_SMALL));
+		sizeFieldHeight = new IconizedTextfield(4, toBricksType.getMeasureIcon().get(ToBricksIconType.MeasureHeight, Icons.SIZE_SMALL));
 		sizeFieldHeight.setMargin(new Insets(PAD, PAD, PAD, Icons.SIZE_SMALL));
 		sizeFieldHeight.addActionListener(new ActionListener() {
 			@Override
@@ -268,9 +265,9 @@ public class ToBricksController implements ChangeListener, ModelHandler<BrickGra
 						type.getIcon().get(ToBricksIconType.Disabled, Icons.SIZE_LARGE));					
 			}
 		}
-		sizeFieldWidth.setIcon(toBricksType.getIcon().get(ToBricksIconType.MeasureWidth, Icons.SIZE_SMALL));
+		sizeFieldWidth.setIcon(toBricksType.getMeasureIcon().get(ToBricksIconType.MeasureWidth, Icons.SIZE_SMALL));
 		sizeFieldWidth.setVisible(!uiController.showMagnifier());
-		sizeFieldHeight.setIcon(toBricksType.getIcon().get(ToBricksIconType.MeasureHeight, Icons.SIZE_SMALL));
+		sizeFieldHeight.setIcon(toBricksType.getMeasureIcon().get(ToBricksIconType.MeasureHeight, Icons.SIZE_SMALL));
 		sizeFieldHeight.setVisible(!uiController.showMagnifier());
 		buttonToggleLockSizeRatio.setIcon(sizeRatioLocked ? 
 				Icons.dimensionLockClosed(Icons.SIZE_LARGE) : 
