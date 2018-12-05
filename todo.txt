@@ -11,8 +11,9 @@ TODO:
  -- SNOT 1W
 - Progress dialogs
  -- export (relevant because of optimization). ½D
-- Improve color approximation by allowing user to boost colors. 3D
+- Improve color approximation by allowing user to boost colors 3D
 - Improve concurrency by investigating why pipeline blocks 4D
+- Add option to lock mosaic to ensure that it can't change while building 3D
 
 Remember when generating screenshots in LPub:
 - Sizes: 1200/900/530000

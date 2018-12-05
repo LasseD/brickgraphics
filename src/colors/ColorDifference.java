@@ -54,4 +54,11 @@ public class ColorDifference {
 		           
 		return i < 0 ? 0 : Math.sqrt(i);
 	}
+	
+	public static double diffRGB(int r, int g, int b, Color c) {
+		double R = r-c.getRed();
+		double G = g-c.getGreen();
+		double B = b-c.getBlue();
+		return R*R+G*G+B*B;
+	}
 }

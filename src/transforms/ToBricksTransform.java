@@ -109,6 +109,13 @@ public class ToBricksTransform implements InstructionsTransform {
 		updateBasicTransform();
 	}
 	
+	public Dimension getBasicUnitSize() {
+		if(getToBricksType() == ToBricksType.SNOT_IN_2_BY_2)
+			return new Dimension(width, height);
+		else
+			return new Dimension(width/toBricksType.getUnitWidth(), height/toBricksType.getUnitHeight());
+	}
+	
 	public boolean setColors(LEGOColor[] colors) {
 		if(LEGOColorLookUp.setColors(colors)) {
 			snotOutputTransform.clearBuffer();
@@ -273,6 +280,18 @@ public class ToBricksTransform implements InstructionsTransform {
 				return getMainTransform().drawLastInstructions(g2, basicUnitRect, basicUnitWidth, basicUnitHeight, toSize);
 		}
 	}
+
+	/*public void draw(Graphics2D g2, Dimension toSize) {
+		int basicUnitWidth = getToBricksType().getUnitWidth();
+		int basicUnitHeight = getToBricksType().getUnitHeight();
+		if(getToBricksType() == ToBricksType.SNOT_IN_2_BY_2) {
+			return drawLastColors(g2, basicUnitRect, basicUnitWidth, basicUnitHeight, toSize, 0, 0, false);
+		}
+		else {
+			ToBricksType tbt = getToBricksType();
+			return getMainTransform().drawLastColors(g2, basicUnitRect, basicUnitWidth, basicUnitHeight, toSize, tbt.getStudsShownWide(), tbt.getStudsShownTall(), false);
+		}
+	}*/
 
 	/*
 	 * Only for SNOT

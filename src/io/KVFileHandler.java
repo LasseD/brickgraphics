@@ -22,6 +22,7 @@ public class KVFileHandler<S extends ModelState> {
 		typeSerializers.put(float[].class.getName(), new KV_FloatArray());
 		typeSerializers.put(int[].class.getName(), new KV_IntArray());
 		typeSerializers.put(boolean[].class.getName(), new KV_BoolArray());
+		typeSerializers.put(TreeMap.class.getName(), new KV_DoubleMap());
 		typeSerializers.put(Boolean.class.getName(), new KV_Boolean());
 		typeSerializers.put(Rectangle2D.Double.class.getName(), new KV_Rectangle2DDouble());
 		typeSerializers.put(DataFile.class.getName(), new KV_DataFile());
@@ -134,6 +135,34 @@ public class KVFileHandler<S extends ModelState> {
 			return Float.toString(t);
 		}
 	}
+	
+	private static class KV_DoubleMap implements KVFileValueHandler<TreeMap<Integer,Double> > {
+		@Override
+		public TreeMap<Integer,Double> kl2value(String s) {
+			TreeMap<Integer,Double> m = new TreeMap<Integer,Double>();			
+			Scanner scanner = new Scanner(s);
+			scanner.useLocale(Locale.US);
+			while(scanner.hasNextInt()) {
+				m.put(scanner.nextInt(), scanner.nextDouble());
+			}
+			return m;
+		}
+		@Override
+		public String value2kl(TreeMap<Integer,Double> t) {
+			StringBuffer sb = new StringBuffer();
+			boolean first = true;
+			for(int i : t.keySet()) {
+				if(!first)
+					sb.append(' ');
+				sb.append(i);
+				sb.append(' ');
+				sb.append(t.get(i));
+				first = false;				
+			}
+			return sb.toString();
+		}
+	}
+	
 	private static class KV_FloatArray implements KVFileValueHandler<float[]> {
 		@Override
 		public float[] kl2value(String s) {
@@ -163,6 +192,7 @@ public class KVFileHandler<S extends ModelState> {
 			return sb.toString();
 		}
 	}
+	
 	private static class KV_IntArray implements KVFileValueHandler<int[]> {
 		@Override
 		public int[] kl2value(String s) {

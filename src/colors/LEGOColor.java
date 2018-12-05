@@ -9,6 +9,7 @@ public class LEGOColor implements Comparable<LEGOColor>, Serializable {
 	private int[] lab;
 
 	private int parts, sets, from, to;
+	private double intensity;
 	private ColorIdNamePair rebrickable;
 	private ColorIdNamePair[] lego, ldraw, bricklink, brickowl;
 	
@@ -20,6 +21,7 @@ public class LEGOColor implements Comparable<LEGOColor>, Serializable {
 		parts = Integer.MAX_VALUE;
 		from = 0;
 		to = Integer.MAX_VALUE;
+		intensity = 1;
 		setRGB(color);
 
 		lego = new ColorIdNamePair[]{new ColorIdNamePair(idx, name)};
@@ -32,6 +34,7 @@ public class LEGOColor implements Comparable<LEGOColor>, Serializable {
 	
 	public LEGOColor() {
 		parts = sets = from = to = -1; // Rest null.
+		intensity = 1;
 	}
 	
 	public static int getMaxRebrickableId() {
@@ -165,6 +168,9 @@ public class LEGOColor implements Comparable<LEGOColor>, Serializable {
 	public ColorIdNamePair[] getBrickOwl() {
 		return brickowl;
 	}
+	public double getIntensity() {
+		return intensity;
+	}
 	
 	public boolean isLDD() {
 		return lego.length != 0;
@@ -189,6 +195,10 @@ public class LEGOColor implements Comparable<LEGOColor>, Serializable {
 	public void setRGB(Color color) {
 		this.rgb = color;
 		updateLAB();
+	}
+
+	public void setIntensity(double i) {
+		intensity = i;
 	}
 	
 	private void updateLAB() {

@@ -548,6 +548,16 @@ public class ColorController implements ModelHandler<BrickGraphicsState> {
 			this.colorChooserSelectedColors = selectedColorList.toArray(new LEGOColor[selectedColorList.size()]);
 		}
 		
+		// Intensities:
+		Map<Integer,Double> m = (Map<Integer,Double>)model.get(BrickGraphicsState.ColorsIntensities);
+		for(LEGOColor color : colorsFromDisk) {
+			int id = color.getIDRebrickable();
+			if(m.containsKey(id))
+				color.setIntensity(m.get(color.getIDRebrickable()));
+			else
+				color.setIntensity(1);
+		}
+
 		notifyListeners(null);		
 	}
 	@Override
@@ -574,6 +584,13 @@ public class ColorController implements ModelHandler<BrickGraphicsState> {
 			sc[i++] = color.getIDRebrickable();
 		}
 		model.set(BrickGraphicsState.SelectedColors, sc);
+		
+		// Intensities:
+		Map<Integer,Double> m = new TreeMap<Integer,Double>();
+		for(LEGOColor color : colorsFromDisk) {
+			m.put(color.getIDRebrickable(), color.getIntensity());
+		}
+		model.set(BrickGraphicsState.ColorsIntensities, m);
 	}
 
 	public static enum ShownID {

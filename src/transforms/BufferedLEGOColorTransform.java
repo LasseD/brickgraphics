@@ -160,8 +160,10 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform, 
 		int h = unitBounds.height / blockHeight;
 		double scaleW = toSize.width / (double)w;
 		double scaleH = toSize.height / (double)h;
-		int cellW = (int) Math.ceil(scaleW);
-		int cellH = (int) Math.ceil(scaleH);
+		//int cellW = (int)Math.round(scaleW);
+		//int cellH = (int)Math.round(scaleH);
+		int cellW = (int)Math.ceil(scaleW);
+		int cellH = (int)Math.ceil(scaleH);
 
 		// draw colors and studs:
 		if(lastIndex == -1 || sets[lastIndex] == null)
@@ -174,7 +176,7 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform, 
 			int yIndent = (int) Math.round(scaleH * y);
 			int iy = unitBounds.y / blockHeight + y;
 			if (iy >= transformedColors.getHeight())
-				continue;
+				break;
 			LEGOColor[] row = transformedColors.getRow(iy);
 
 			for (int x = 0; x < w; x++) {
@@ -182,31 +184,32 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform, 
 				Rectangle r = new Rectangle(xIndent, yIndent, cellW, cellH);
 
 				int ix = unitBounds.x / blockWidth + x;
-				if (ix < transformedColors.getWidth()) {
-					LEGOColor color = row[ix];
-					int idx = color.getIDRebrickable();
-					if(m[idx] == null) {
-						m[idx] = new LEGOColor.CountingLEGOColor(color, 1);
-						++cnt;
-					}
-					else {
-						m[idx].cnt++;
-					}
-					g2.setColor(color.getRGB());
-					g2.fill(r);
+				if (ix >= transformedColors.getWidth())
+					break;
+					
+				LEGOColor color = row[ix];
+				int idx = color.getIDRebrickable();
+				if(m[idx] == null) {
+					m[idx] = new LEGOColor.CountingLEGOColor(color, 1);
+					++cnt;
+				}
+				else {
+					m[idx].cnt++;
+				}
+				g2.setColor(color.getRGB());
+				g2.fill(r);
 
-					if (numStudsWide > 0 && drawOutlines) {
-						g2.setColor(color.getRGB() == Color.BLACK ? Color.WHITE
-								: Color.BLACK);
-						// Draw studs:s
-						final int cell = cellW / numStudsWide;
-						final int stud = cellW * 2 / 3 / numStudsWide;
-						final int gap = cellW / 6 / numStudsWide;
-						for (int xx = 0; xx < numStudsWide; ++xx) {
-							for (int yy = 0; yy < numStudsTall; ++yy) {
-								g2.drawOval(xIndent + cell * xx + gap, yIndent
-										+ cell * yy + gap, stud, stud);
-							}
+				if (numStudsWide > 0 && drawOutlines) {
+					g2.setColor(color.getRGB().equals(Color.BLACK) ? Color.WHITE
+							: Color.BLACK);
+					// Draw studs:
+					final int cell = cellW / numStudsWide;
+					final int stud = cellW * 2 / 3 / numStudsWide;
+					final int gap = cellW / 6 / numStudsWide;
+					for (int xx = 0; xx < numStudsWide; ++xx) {
+						for (int yy = 0; yy < numStudsTall; ++yy) {
+							g2.drawOval(xIndent + cell * xx + gap, yIndent
+								+ cell * yy + gap, stud, stud);
 						}
 					}
 				}
@@ -217,7 +220,7 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform, 
 			return trim(m, cnt);
 
 		// Draw lines:
-		// Draw upper and left lines as the others will be drawn brick by brick:
+		// Draw black lines:
 		g2.setColor(Color.BLACK);
 		for (int x = 0; x <= w; x++) {
 			int xIndent = (int) Math.round(scaleW * x);
@@ -228,8 +231,31 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform, 
 			g2.drawLine(0, yIndent, toSize.width, yIndent);
 		}
 
-		// Draw lines around black bricks:
+		// Draw white lines around black bricks:
 		g2.setColor(Color.WHITE);
+
+		for (int y = 0; y < h; y++) {
+			int yIndent = (int) Math.round(scaleH * y);
+			int iy = unitBounds.y / blockHeight + y;
+			if (iy >= transformedColors.getHeight())
+				break;
+			LEGOColor[] row = transformedColors.getRow(iy);
+
+			for (int x = 0; x < w; x++) {
+				int xIndent = (int) Math.round(scaleW * x);
+				int ix = unitBounds.x / blockWidth + x;
+				if (ix >= transformedColors.getWidth())
+					break;
+					
+				// Draw outline:
+				LEGOColor color = row[ix];
+				g2.setColor(color.getRGB().equals(Color.BLACK) ? Color.WHITE : Color.BLACK);
+				Rectangle r = new Rectangle(xIndent, yIndent, cellW, cellH);
+				g2.draw(r);
+			}
+		}
+		
+		/*
 		for (int y = 0; y < h; y++) {
 			int yIndent = (int) Math.round(scaleH * y);
 			int iy = unitBounds.y / blockHeight + y;
@@ -244,11 +270,11 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform, 
 				int ix = unitBounds.x / blockWidth + x;
 				if (ix < transformedColors.getWidth()) {
 					LEGOColor color = row[ix];
-					if (color.getRGB() == Color.BLACK)
+					if (color.getRGB().equals(Color.BLACK))
 						g2.draw(r);
 				}
 			}
-		}
+		}*/
 
 		return trim(m, cnt);
 	}

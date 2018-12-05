@@ -3,7 +3,7 @@ package colors;
 /**
  * Mapping for quick lookup discards the lower 2 bits from each color component. 
  * Effectively reducing the size of the color space from 16.777.216 to 262.144
- * @author ld
+ * @author LD
  */
 public class LEGOColorLookUp {
 	public static final int COMPONENT_SIZE = 64;
@@ -71,24 +71,25 @@ public class LEGOColorLookUp {
 	}
 
     public static LEGOColor lookUp(int r, int g, int b) {
-    	r = truncate(r);
+    	/*r = truncate(r);
     	g = truncate(g);
-    	b = truncate(b);
+    	b = truncate(b);//*/ // Uncommented for now as it seems to bother the dithering algorithm
 		int indexInMap = (r>>2)*64*64 + (g>>2)*64 + (b>>2);
 		
 		if(map[indexInMap] == -1) {
 			int[] labInput = new int[3]; 
-			CIELab.rgb2lab(r,  g, b, labInput);
+			CIELab.rgb2lab(r, g, b, labInput);
 			
 			double minDiff = Double.MAX_VALUE;
 			byte minDiffIndex = -1;
 			for(byte i = 0; i < legoColors.length; ++i) {
-				double diffI = ColorDifference.diffCIE94(labInput, legoColors[i].getLAB());
-				if(diffI < minDiff) {
-					minDiff = diffI;
+				LEGOColor c = legoColors[i];
+				double diff = ColorDifference.diffCIE94(labInput, c.getLAB());
+				//double diff = ColorDifference.diffRGB(r, g, b, legoColors[i].getRGB());
+				diff /= c.getIntensity();
+				if(diff < minDiff) {
+					minDiff = diff;
 					minDiffIndex = i;
-					//if(minDiff < 1)
-					//	break; // quick break for super close color match!
 				}
 			}
 			map[indexInMap] = minDiffIndex;

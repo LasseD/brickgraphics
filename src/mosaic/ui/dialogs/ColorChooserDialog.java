@@ -11,6 +11,7 @@ import java.util.*;
 import java.util.List;
 
 import javax.swing.event.*;
+
 import mosaic.controllers.*;
 import mosaic.rendering.Pipeline;
 import mosaic.ui.ColorDistributionChart;
@@ -143,7 +144,7 @@ public class ColorChooserDialog extends JDialog implements ChangeListener {
 	}
 	
 	private class ColorGroupPanel extends JPanel implements ActionListener {
-		private List<ColorCheckBox> boxes;
+		private List<ColorSelector> boxes;
 		private Set<LEGOColor> mixChoosen;
 		private boolean ignoreEvents;
 		
@@ -160,19 +161,19 @@ public class ColorChooserDialog extends JDialog implements ChangeListener {
 					ignoreEvents = true;
 					
 					Set<LEGOColor> choosen = new TreeSet<LEGOColor>();
-					for(ColorCheckBox box : boxes) {
+					for(ColorSelector box : boxes) {
 						if(box.isSelected())
 							choosen.add(box.color);
 					}
 					
 					if(choosen.size() == boxes.size()) {
-						for(ColorCheckBox box : boxes)
+						for(ColorSelector box : boxes)
 							box.setSelected(mixChoosen.contains(box.color));						
 					}
 					else {
 						if(!choosen.isEmpty())
 							mixChoosen = choosen;
-						for(ColorCheckBox box : boxes)
+						for(ColorSelector box : boxes)
 							box.setSelected(true);						
 					}
 					
@@ -189,19 +190,19 @@ public class ColorChooserDialog extends JDialog implements ChangeListener {
 					ignoreEvents = true;
 
 					Set<LEGOColor> choosen = new TreeSet<LEGOColor>();
-					for(ColorCheckBox box : boxes) {
+					for(ColorSelector box : boxes) {
 						if(box.isSelected())
 							choosen.add(box.color);
 					}
 					
 					if(choosen.isEmpty()) {
-						for(ColorCheckBox box : boxes)
+						for(ColorSelector box : boxes)
 							box.setSelected(mixChoosen.contains(box.color));						
 					}
 					else {
 						if(choosen.size() != boxes.size())
 							mixChoosen = choosen;
-						for(ColorCheckBox box : boxes)
+						for(ColorSelector box : boxes)
 							box.setSelected(false);						
 					}
 					
@@ -221,16 +222,16 @@ public class ColorChooserDialog extends JDialog implements ChangeListener {
 			add(buttonAll);
 			add(buttonNone);
 
-			boxes = new LinkedList<ColorCheckBox>();
+			boxes = new LinkedList<ColorSelector>();
 			for(LEGOColor color : remainingColors) {
 				if(group.containsColor(color)) {
-					ColorCheckBox box = new ColorCheckBox(colorChooserSelectedColors.contains(color), color, cc);
+					ColorSelector box = new ColorSelector(colorChooserSelectedColors.contains(color), color, cc);
 					boxes.add(box);
 					add(box);
 					box.addActionListener(this);					
 				}					
 			}
-			for(ColorCheckBox box : boxes) {
+			for(ColorSelector box : boxes) {
 				remainingColors.remove(box.color);
 			}
 
@@ -249,26 +250,104 @@ public class ColorChooserDialog extends JDialog implements ChangeListener {
 		}
 		
 		public void getSelected(Set<LEGOColor> selectedColors) {
-			for(ColorCheckBox box : boxes) {
+			for(ColorSelector box : boxes) {
 				if(box.isSelected())
 					selectedColors.add(box.getColor());
 			}
 		}
 	}
 
-	private static class ColorCheckBox extends JCheckBox {
+	/*
+	 * Value 0 for unselected.
+	 */
+	private static class ColorSelector extends JPanel {
 		private LEGOColor color;
+		private JCheckBox cb;
+		private JSpinner spinner;
 		
-		public ColorCheckBox(boolean selected, LEGOColor color, ColorController cc) {
+		public ColorSelector(boolean selected, final LEGOColor color, ColorController cc) {
+			super(new FlowLayout());
+			this.setBackground(color.getRGB());
 			this.color = color;
 			int size = getPreferredSize().width*2;
-			setToolTipText(ColorController.getLongIdentifier(color));
-			setHorizontalAlignment(SwingConstants.CENTER);
-			setPreferredSize(new Dimension(size, size));
-			setBackground(color.getRGB());
-			setOpaque(true);
+			
+			cb = new JCheckBox();
+			cb.setToolTipText(ColorController.getLongIdentifier(color));
+			cb.setHorizontalAlignment(SwingConstants.CENTER);
+			cb.setPreferredSize(new Dimension(size, size));
+			cb.setBackground(color.getRGB());
+			cb.setOpaque(true);
+			
+			spinner = new JSpinner(new SpinnerModel() {
+				private ArrayList<ChangeListener> listeners = new ArrayList<ChangeListener>();
+				
+				@Override
+				public void setValue(Object v) {
+					if(v.equals(color.getIntensity()))
+						return;
+					color.setIntensity((Double)v);
+					for(ChangeListener l : listeners) {
+						l.stateChanged(null); // null OK since argument is ignored.
+					}
+				}
+				
+				@Override
+				public void removeChangeListener(ChangeListener l) {
+					throw new UnsupportedOperationException();
+				}
+				
+				@Override
+				public Object getValue() {
+					return color.getIntensity();
+				}
+				
+				@Override
+				public Object getPreviousValue() {
+					return color.getIntensity()/1.1;
+				}
+				
+				@Override
+				public Object getNextValue() {
+					return color.getIntensity()*1.1;
+				}
+				
+				@Override
+				public void addChangeListener(ChangeListener l) {
+					listeners.add(l);
+				}
+			});
+			spinner.setPreferredSize(new Dimension(60, spinner.getPreferredSize().height));
+			spinner.setValue(color.getIntensity());
+			
+			this.add(cb);
+			this.add(spinner);
+			
+			cb.addActionListener(new ActionListener() {				
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					spinner.setEnabled(cb.isSelected());
+				}
+			});
 			
 			setSelected(selected);
+		}
+		
+		public void setSelected(boolean selected) {
+			cb.setSelected(selected);
+			spinner.setEnabled(selected);
+		}
+		public boolean isSelected() {
+			return cb.isSelected();
+		}
+		
+		public void addActionListener(final ActionListener a) {
+			cb.addActionListener(a);
+			spinner.addChangeListener(new ChangeListener(){
+				@Override
+				public void stateChanged(ChangeEvent ignore) {
+					a.actionPerformed(new ActionEvent(color, color.getIDRebrickable(), "Change color intensity"));
+				}
+			});
 		}
 		
 		public LEGOColor getColor() {

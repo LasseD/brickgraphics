@@ -629,6 +629,7 @@ public class Icons {
 		return new BrickGraphicsIcon(size) {
 			@Override
 			public void paint(Graphics2D g2) {
+				AffineTransform originalTransform = g2.getTransform();
 				ToBricksIcon i1 = studsFromTop(1, 1);
 				ToBricksIcon i2 = plateFromSide(1);
 				i1.paint(g2, ToBricksIconType.Enabled, size/2);
@@ -639,6 +640,7 @@ public class Icons {
 				drawChecked(g2);
 				g2.translate(0, -size/2);
 				drawChecked(g2);
+				g2.setTransform(originalTransform);
 			}
 			
 			private void drawChecked(Graphics2D g2) {

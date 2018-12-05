@@ -30,6 +30,7 @@ public enum BrickGraphicsState implements ModelState {
 	ColorsMinSets(100),
 	ColorsLoadRebrickableURL("https://rebrickable.com/colors/"),
 	ColorsLoadRebrickableFile(""),
+	ColorsIntensities(new java.util.TreeMap<Integer,Double>()),
 	
 	// Printing:
 	PrintCoverPageShow(true),
