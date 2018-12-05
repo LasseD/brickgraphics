@@ -116,10 +116,17 @@ public enum ToBricksType {
 		}
 	}, 
 	TWO_BY_TWO_PLATES_FROM_TOP(Icons.elementStudsOut3D(2, 2, 1, true), Icons.studsFromTop(2, 2), "2 x 2 plates seen from the top.", 
-			SizeInfo.SNOT_BLOCK_WIDTH, SizeInfo.SNOT_BLOCK_WIDTH, 2, 2, false) {
+			2*SizeInfo.BRICK_WIDTH, 2*SizeInfo.BRICK_WIDTH, 2, 2, false) {
 		@Override
 		public Transform getPreparationTransform(ToBricksTransform tbt) {
 			return tbt.getBrickFromTopTransform(2, 2);
+		}
+	},
+	TWO_BY_FOUR_BRICKS_FROM_TOP(Icons.elementStudsOut3D(4, 2, 3, true), Icons.studsFromTop(4, 2), "2 x 4 bricks seen from the top.", 
+			4*SizeInfo.BRICK_WIDTH, 2*SizeInfo.BRICK_WIDTH, 4, 2, false) {
+		@Override
+		public Transform getPreparationTransform(ToBricksTransform tbt) {
+			return tbt.getBrickFromTopTransform(4, 2);
 		}
 	};
 	
@@ -234,6 +241,11 @@ public enum ToBricksType {
 		in = getPreparationTransform(tbt).transform(in);
 		in = tbt.getMainTransform().transform(in);
 		in = tbt.getRTransform().transform(in);
+		return in;
+	}
+	public BufferedImage transformNoResize(BufferedImage in, ToBricksTransform tbt) {
+		in = getPreparationTransform(tbt).transform(in);
+		in = tbt.getMainTransform().transform(in);
 		return in;
 	}
 	public Dimension getTransformedSize(Dimension in, ToBricksTransform tbt) {

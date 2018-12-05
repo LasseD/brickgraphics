@@ -30,6 +30,7 @@ public class LXFPrinter {
 	public static final String BRICK_1_X_1 = "3005";
 	public static final String TILE_1_X_1 = "3070";
 	public static final String PLATE_2_X_2 = "3022";
+	public static final String BRICK_2_X_4 = "3001";
 
 	public static final double PLATE_HALF_WIDTH = 0.4;//0000000596046448;
 	public static final double PLATE_HEIGHT = 0.32;//1999999284744263;
@@ -130,10 +131,13 @@ public class LXFPrinter {
 			buildWith1x1BricksFromTop(out, brickSection);
 			break;
 		case TWO_BY_TWO_PLATES_FROM_TOP:
-			buildWith2x2PlatesFromTop(out, brickSection);
+			buildWith2xXFromTop(2, out, brickSection, PLATE_2_X_2);
 			break;
 		case SNOT_IN_2_BY_2:
 			buildSnot(out, brickSection);
+			break;
+		case TWO_BY_FOUR_BRICKS_FROM_TOP:
+			buildWith2xXFromTop(4, out, brickSection, BRICK_2_X_4);
 			break;
 		default: 
 			throw new IllegalStateException("Enum broken: " + type);
@@ -172,8 +176,8 @@ public class LXFPrinter {
 		buildFromTop(out, width, 1, partNumber, isElementSection, false); 
 	}
 
-	private void buildWith2x2PlatesFromTop(PrintWriter out, boolean isElementSection) {
-		buildFromTop(out, 2, 2, PLATE_2_X_2, isElementSection, false); 
+	private void buildWith2xXFromTop(int x, PrintWriter out, boolean isElementSection, String partNumber) {
+		buildFromTop(out, x, 2, partNumber, isElementSection, false); 
 	}
 
 	private void buildWith1x1TilesFromTop(PrintWriter out, boolean isElementSection) {

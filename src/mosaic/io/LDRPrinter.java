@@ -53,7 +53,7 @@ public class LDRPrinter {
 			buildWithPlatesFromTop(out, 1, 1, LXFPrinter.PLATE_1_X_1);
 			break;
 		case BRICK_FROM_TOP:
-			buildWithBricksFromTop(out);
+			buildWithBricksFromTop(out, 1, 1, LXFPrinter.BRICK_1_X_1);
 			break;
 		case ONE_BY_TWO_STUDS_FROM_TOP:
 			buildWithPlatesFromTop(out, 2, 1, LXFPrinter.PLATE_1_X_2);
@@ -84,6 +84,9 @@ public class LDRPrinter {
 			break;
 		case TWO_BY_TWO_PLATES_FROM_TOP:
 			buildWithPlatesFromTop(out, 2, 2, LXFPrinter.PLATE_2_X_2);
+			break;
+		case TWO_BY_FOUR_BRICKS_FROM_TOP:
+			buildWithBricksFromTop(out, 4, 2, LXFPrinter.BRICK_2_X_4);
 			break;
 		case SNOT_IN_2_BY_2:
 			buildSnot(out);
@@ -136,9 +139,9 @@ public class LDRPrinter {
 		buildUnoptimized(out, 20, 20, "0 -1 0 0 0 -1 1 0 0 " + LXFPrinter.TILE_1_X_1 + ".DAT"); 
 	}
 
-	private void buildWithBricksFromTop(PrintWriter out) {
+	private void buildWithBricksFromTop(PrintWriter out, int elementWidth, int elementDepth, String partNumber) {
 		// TODO: Add optimization also for this by copying for plates!
-		buildUnoptimized(out, 20, 20, "0 -1 0 0 0 -1 1 0 0 " + LXFPrinter.BRICK_1_X_1 + ".DAT"); 
+		buildUnoptimized(out, 20*elementWidth, 20*elementDepth, "0 -1 0 0 0 -1 1 0 0 " + partNumber + ".DAT"); 
 	}
 
 	private void buildWithPlatesFromTop(PrintWriter out, int elementWidth, int elementDepth, String partNumber) {

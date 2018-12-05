@@ -256,7 +256,7 @@ public class MosaicIO {
 				if(file == null) 
 					return;
 				try {
-					Dimension d = mw.getBrickedView().getShownImageSize();
+					Dimension d = mw.getBrickedView().getToBricksTransform().getBasicUnitSize();
 					BufferedImage image = new BufferedImage(d.width, d.height, BufferedImage.TYPE_INT_RGB);
 					Graphics2D g2 = (Graphics2D)image.getGraphics();
 					mw.getBrickedView().getToBricksTransform().drawAll(g2, d);
