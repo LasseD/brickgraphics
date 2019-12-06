@@ -337,8 +337,9 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 	}
 	
 	private void drawCoverPicture(Graphics2D g2, int xMin, int xMax, int yMin, int yMax) {
-		if(coverPagePictureType == CoverPagePictureType.None)
+		if(coverPagePictureType == CoverPagePictureType.None) {
 			return;
+		}
 		if(coverPagePictureType == CoverPagePictureType.Both) {
 			BufferedImage left = lastPreparedImage;
 			drawImage(g2, xMin, xMin + (xMax-xMin)*9/20, yMin, yMax, left);
@@ -461,13 +462,15 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		int fromTop = (page / numPagesWidth)+1;
 
 		// Written:
-		if(showPosition == ShowPosition.Written) {			
+		if(showPosition == ShowPosition.Written || showPosition == ShowPosition.TextAndBox) {
 			String pageNumberString = fromLeft + rightCountDisplayText + fromTop + downCountDisplayText;
 			Rectangle2D pageNumberStringBounds = fm.getStringBounds(pageNumberString, g2);
 			float x = xMin + (float)((xMax-xMin)-pageNumberStringBounds.getWidth())/2;
 			float y = yMin + unit;
 			g2.drawString(pageNumberString, x, y);
-			return unit*1.2; // 1.2 to make a little bit of space above the letters
+			if(showPosition == ShowPosition.Written)
+				return unit*1.2; // 1.2 to make a little bit of space above the letters
+			yMin += unit*2;
 		}
 		
 		// Boxes:
@@ -517,8 +520,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 			int grayWidth = (int)Math.round(outerBoxWidth * coreImageInCoreUnits.width/((double)pageSizeInCoreUnits.width*numPagesWidth));
 			int grayHeight = (int)Math.round(outerBoxHeight * coreImageInCoreUnits.height/((double)pageSizeInCoreUnits.height*numPagesHeight));
 			g2.translate(outerBoxX, yMin);
-			mw.getBrickedView().getToBricksTransform().drawAll(new GrayScaleGraphics2D(g2), 
-					new Dimension(grayWidth, grayHeight));
+			mw.getBrickedView().getToBricksTransform().drawAll(new GrayScaleGraphics2D(g2), new Dimension(grayWidth, grayHeight));
 			g2.translate(-outerBoxX, -yMin);
 			
 			g2.drawRect(outerBoxX, yMin, outerBoxWidth, outerBoxHeight);
@@ -529,6 +531,11 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 			g2.setColor(Color.RED);
 			g2.fillRect(xLeft, yTop, (int)innerBoxWidth+1, (int)innerBoxHeight+1);
 			g2.setColor(Color.BLACK);
+			
+			if(showPosition == ShowPosition.TextAndBox) {
+				g2.drawRect(xLeft, yTop, (int)innerBoxWidth+1, (int)innerBoxHeight+1);
+				return outerHeight + 2.2*unit;
+			}
 			g2.drawLine(outerBoxX, yTop, outerBoxX+outerBoxWidth, yTop);
 			g2.drawLine(outerBoxX, yBottom, outerBoxX+outerBoxWidth, yBottom);
 			g2.drawLine(xLeft, yMin, xLeft, yMin+outerBoxHeight);
@@ -556,7 +563,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		}
 	}
 	
-	private int drawMagnifier(Graphics2D g2, int page, int numPagesWidth, int xMin, int xMax, int yMin, int yMax, int pageSizeInCoreUnitsW, int pageSizeInCoreUnitsH, PageFormat pf, Set<LEGOColor.CountingLEGOColor> used) {
+	private int drawMagnifier(Graphics2D g2, int page, int numPagesWidth, int numPagesHeight, int xMin, int xMax, int yMin, int yMax, int pageSizeInCoreUnitsW, int pageSizeInCoreUnitsH, PageFormat pf, Set<LEGOColor.CountingLEGOColor> used) {
 		// Find out how big each page is (compared to full image):
 		Dimension shownMagnifierSize = new Dimension((int)pf.getImageableWidth(), (int)((pf.getImageableWidth() * pageSizeInCoreUnitsH) / pageSizeInCoreUnitsW));
 		int indentX = xMin;
@@ -567,30 +574,36 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 			indentX = (xMax+xMin-shownMagnifierSize.width)/2;
 			indentY = yMax - shownMagnifierSize.height;
 		}
-		
+		Dimension smallMagnifierSize;
+		if(shownMagnifierSize.width == 1 && shownMagnifierSize.height == 1) {
+			smallMagnifierSize = shownMagnifierSize;
+		}
+		else {
+			smallMagnifierSize = new Dimension((int)(shownMagnifierSize.width / magnifiersPerPage.width*0.95), 
+													 (int)(shownMagnifierSize.height / magnifiersPerPage.height*0.95));
+		}
+
 		// draw magnified:
-		g2.setColor(Color.BLACK);
 		g2.translate(indentX, indentY);
 		ToBricksTransform tbTransform = magnifierController.getTBTransform();
+
 		Rectangle basicUnitRect = magnifierController.getCoreRect();
-		basicUnitRect.width *= magnifiersPerPage.width;
-		basicUnitRect.height *= magnifiersPerPage.height;
-		basicUnitRect.x = (page % numPagesWidth)*basicUnitRect.width;
-		basicUnitRect.y = (page / numPagesWidth)*basicUnitRect.height;
-		
-		LEGOColor.CountingLEGOColor[] m = tbTransform.draw(g2, basicUnitRect, shownMagnifierSize, uiController.showColors(), true);
-		for(int i = 0; i < m.length; ++i)
-			used.add(m[i]);
-		
-		// TODO: Use separation instead to accommodate black/white printers
-		g2.setColor(Color.RED);
-		for(int x = 1; x < magnifiersPerPage.width; ++x) {
+		for(int x = 0; x < magnifiersPerPage.width; ++x) {
 			int xIndent = x*shownMagnifierSize.width/magnifiersPerPage.width;
-			g2.drawLine(xIndent, 0, xIndent, shownMagnifierSize.height);
-		}
-		for(int y = 1; y < magnifiersPerPage.height; ++y) {			
-			int yIndent = y*shownMagnifierSize.height/magnifiersPerPage.height;
-			g2.drawLine(0, yIndent, shownMagnifierSize.width, yIndent);
+			g2.translate(xIndent, 0);
+			for(int y = 0; y < magnifiersPerPage.height; ++y) {
+				int yIndent = y*shownMagnifierSize.height/magnifiersPerPage.height;
+				
+				basicUnitRect.x = ((page % numPagesWidth)*magnifiersPerPage.width + x)*basicUnitRect.width;
+				basicUnitRect.y = (/*numPagesHeight-1-*/ (page / numPagesWidth) * magnifiersPerPage.height + y)*basicUnitRect.height; // Add numPagesHeight-1- in first parenthesis to start from bottom.
+
+				g2.translate(0, yIndent);
+				LEGOColor.CountingLEGOColor[] m = tbTransform.draw(g2, basicUnitRect, smallMagnifierSize, uiController.showColors(), true);
+				g2.translate(0, -yIndent);
+				for(int i = 0; i < m.length; ++i)
+					used.add(m[i]);				
+			}
+			g2.translate(-xIndent, 0);
 		}
 		
 		g2.translate(-indentX, -indentY);		
@@ -648,7 +661,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 	
 	@Override
 	public int print(Graphics g, PageFormat pf, int page) throws PrinterException {
-		Graphics2D g2 = (Graphics2D)g;		
+		Graphics2D g2 = (Graphics2D)g;
 		
 		// Find out how big the magnifier is:
 		final int coreImageInCoreUnitsW = magnifierController.getCoreImageSizeInCoreUnits().width;
@@ -704,7 +717,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		
 		// magnifier:
 		Set<LEGOColor.CountingLEGOColor> used = new TreeSet<LEGOColor.CountingLEGOColor>();
-		yMax = drawMagnifier(g2, page, numPagesWidth, xMin, xMax, yMin, yMax, pageSizeInCoreUnitsW, pageSizeInCoreUnitsH, pf, used);
+		yMax = drawMagnifier(g2, page, numPagesWidth, numPagesHeight, xMin, xMax, yMin, yMax, pageSizeInCoreUnitsW, pageSizeInCoreUnitsH, pf, used);
 		
 		// Legend:
 		g2.setFont(font);
@@ -717,7 +730,11 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		Original, Mosaic, Both, None;
 	}
 	public static enum ShowPosition {
-		MiddleBox("Box with placement written inside"), SmartBox("Box with placement written outside"), Written("Text only"), None("None");
+		MiddleBox("Box with placement written inside"),
+		SmartBox("Box with placement written outside"),
+		Written("Text only"),
+		TextAndBox("Text and box with location"),
+		None("None");
 		public String title;
 		private ShowPosition(String title) {
 			this.title = title;

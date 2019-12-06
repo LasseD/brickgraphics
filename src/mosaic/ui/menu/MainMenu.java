@@ -21,6 +21,7 @@ public class MainMenu extends JMenuBar {
 		fileMenu.add(MosaicIO.createSaveAsAction(mc, mw));
 		fileMenu.add(new ExportLDR(mc, mw));
 		fileMenu.add(new ExportLXF(mc, mw));
+		fileMenu.add(new ExportCSV(mc, mw));
 		fileMenu.add(MosaicIO.createSaveMosaicSnapshotAction(mc, mw));
 		fileMenu.add(PrintController.createPrintAction(mc.getPrintDialog()));
 		fileMenu.addSeparator();

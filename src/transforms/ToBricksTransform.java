@@ -262,6 +262,11 @@ public class ToBricksTransform implements InstructionsTransform {
 		return draw(g2, basicUnitRect, toSize, true, false);
 	}
 	
+	public void drawAllSpaced(Graphics2D g2, Dimension toSize) {
+		Rectangle basicUnitRect = new Rectangle(0, 0, width, height);
+		draw(g2, basicUnitRect, toSize, true, true);
+	}
+	
 	public LEGOColor.CountingLEGOColor[] draw(Graphics2D g2, Rectangle basicUnitRect, Dimension toSize, boolean showColors, boolean showOutlines) {
 		int basicUnitWidth = getToBricksType().getUnitWidth();
 		int basicUnitHeight = getToBricksType().getUnitHeight();

@@ -389,7 +389,7 @@ public class ColorController implements ModelHandler<BrickGraphicsState> {
 		if(s == null && t == null)
 			return null;
 		if(s == null)
-			return t;
+			return t;// + " = " + c.getLEGO()[0].getName();
 		if(t == null)
 			return s;
 		return s + ", " + t;

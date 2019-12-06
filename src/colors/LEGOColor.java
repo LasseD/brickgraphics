@@ -8,7 +8,7 @@ public class LEGOColor implements Comparable<LEGOColor>, Serializable {
 	private Color rgb;
 	private int[] lab;
 
-	private int parts, sets, from, to;
+	private int parts, sets, from, to, plate1x1;
 	private double intensity;
 	private ColorIdNamePair rebrickable;
 	private ColorIdNamePair[] lego, ldraw, bricklink, brickowl;
@@ -72,12 +72,12 @@ public class LEGOColor implements Comparable<LEGOColor>, Serializable {
 		if(s == null)
 			return null;
 		String[] parts = s.split("[|]", -1);
-		if(parts.length < 11 || parts.length > 12)
-			throw new IllegalArgumentException("Expected color line to contain 11 or 12 sections. Contained " + parts.length + ": " + s);
+		if(parts.length != 12)
+			throw new IllegalArgumentException("Expected color line to contain 12 sections. Contained " + parts.length + ": " + s);
 		for(int i = 0; i < 11; ++i) 
 			parts[i] = parts[i].trim();
-		if(parts.length == 12)
-			return parseOldFile(parts);
+		//if(parts.length == 12)
+		//	return parseOldFile(parts);
 		
 		LEGOColor c = new LEGOColor();
 		
@@ -101,6 +101,7 @@ public class LEGOColor implements Comparable<LEGOColor>, Serializable {
 		c.ldraw = ColorIdNamePair.parse(parts[8]);
 		c.bricklink = ColorIdNamePair.parse(parts[9]);
 		c.brickowl = ColorIdNamePair.parse(parts[10]);
+		c.plate1x1 = parseInt(parts[11]);
 		return c;
 	}
 	
@@ -134,6 +135,9 @@ public class LEGOColor implements Comparable<LEGOColor>, Serializable {
 	}
 	public int getIDLEGO() {
 		return lego[0].getID();
+	}
+	public int getPlate1x1() {
+		return plate1x1;
 	}
 	public String getName() {
 		return rebrickable.getName();
