@@ -272,10 +272,9 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 	}
 	
 	private int drawbom(Graphics2D g2, int xMin, int xMax, int yMin, int yMax, int fontSizeIn1_72inches) {
-		if(mw == null)
-			return yMin;
-		if(!coverPageShowLegend)
-			return yMin;
+		if(mw == null || !coverPageShowLegend)
+			return 0;
+		
 		if(coverPagePictureType != CoverPagePictureType.None) {
 			yMax = yMin + (yMax-yMin)/2;
 		}
@@ -336,10 +335,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		g2.translate(-x, -yMin);		
 	}
 	
-	private void drawCoverPicture(Graphics2D g2, int xMin, int xMax, int yMin, int yMax) {
-		if(coverPagePictureType == CoverPagePictureType.None) {
-			return;
-		}
+	private void drawCoverPicture(Graphics2D g2, PageFormat pf, int xMin, int xMax, int yMin, int yMax) {
 		if(coverPagePictureType == CoverPagePictureType.Both) {
 			BufferedImage left = lastPreparedImage;
 			drawImage(g2, xMin, xMin + (xMax-xMin)*9/20, yMin, yMax, left);
@@ -349,17 +345,31 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 			g2.translate(drawRect.x, drawRect.y);
 			mw.getBrickedView().getToBricksTransform().drawAll(g2, new Dimension(drawRect.width, drawRect.height));
 			g2.translate(-drawRect.x, -drawRect.y);
-			return;
 		}
-		
-		if(coverPagePictureType == CoverPagePictureType.Original) {
+		else if(coverPagePictureType == CoverPagePictureType.Original) {
 			drawImage(g2, xMin, xMax, yMin, yMax, lastPreparedImage);
 		}
-		else {
+		else if(coverPagePictureType == CoverPagePictureType.Mosaic) {
 			Rectangle drawRect = getSizeOfDrawnImage(xMin, xMax, yMin, yMax, lastMosaicSize);
 			g2.translate(xMin, yMin);
 			mw.getBrickedView().getToBricksTransform().drawAll(g2, new Dimension(drawRect.width, drawRect.height));
 			g2.translate(-xMin, -yMin);
+		}
+		else if(coverPagePictureType == CoverPagePictureType.Overview) {
+			//g2.translate(xMin, yMin);
+			//g2.translate(-xMin, -yMin);
+			
+			Dimension coreImage = magnifierController.getCoreImageSizeInCoreUnits();
+			Dimension magnifierSizeInCoreUnits = magnifierController.getSizeInUnits();
+
+			Dimension oldMagnifiersPerPage = magnifiersPerPage;
+			magnifiersPerPage = new Dimension(coreImage.width / magnifierSizeInCoreUnits.width, 
+											  coreImage.height / magnifierSizeInCoreUnits.height);
+			int pageSizeInCoreUnitsW = magnifierSizeInCoreUnits.width * magnifiersPerPage.width;
+			int pageSizeInCoreUnitsH = magnifierSizeInCoreUnits.height * magnifiersPerPage.height;
+			
+			drawMagnifier(g2, 0, 1, 1, xMin, xMax, yMin, yMax, pageSizeInCoreUnitsW, pageSizeInCoreUnitsH, pf, null);		
+			magnifiersPerPage = oldMagnifiersPerPage;
 		}
 	}
 	
@@ -384,7 +394,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		yMin = drawbom(g2, xMin, xMax, yMin, yMax, fontSizeIn1_72inches);
 		
 		// Cover picture:
-		drawCoverPicture(g2, xMin, xMax, yMin, yMax);
+		drawCoverPicture(g2, pf, xMin, xMax, yMin, yMax);
 	}
 	
 	private int getFontSizeIn1_72inches(PageFormat pf) {
@@ -598,10 +608,12 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 				basicUnitRect.y = (/*numPagesHeight-1-*/ (page / numPagesWidth) * magnifiersPerPage.height + y)*basicUnitRect.height; // Add numPagesHeight-1- in first parenthesis to start from bottom.
 
 				g2.translate(0, yIndent);
-				LEGOColor.CountingLEGOColor[] m = tbTransform.draw(g2, basicUnitRect, smallMagnifierSize, uiController.showColors(), true);
+				LEGOColor.CountingLEGOColor[] m = tbTransform.draw(g2, basicUnitRect, smallMagnifierSize, uiController.showColors(), used != null);
 				g2.translate(0, -yIndent);
-				for(int i = 0; i < m.length; ++i)
-					used.add(m[i]);				
+				if(used != null) {
+					for(int i = 0; i < m.length; ++i)
+						used.add(m[i]);					
+				}
 			}
 			g2.translate(-xIndent, 0);
 		}
@@ -727,7 +739,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 	}
 	
 	public static enum CoverPagePictureType {
-		Original, Mosaic, Both, None;
+		Original, Mosaic, Both, None, Overview;
 	}
 	public static enum ShowPosition {
 		MiddleBox("Box with placement written inside"),
