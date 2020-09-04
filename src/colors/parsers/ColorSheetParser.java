@@ -18,7 +18,7 @@ public class ColorSheetParser {
 	public static final String BACKUP_COLORS_FILE = "backup_colors.txt";
 	private static ColorSheetParserI htmlParser = new RebrickableColorSheetParser();
 	
-	public static void saveFromWeb(String uri, ColorController cc) throws MalformedURLException, IOException, ParseException {
+	/*public static void saveFromWeb(String uri, ColorController cc) throws MalformedURLException, IOException, ParseException {
 		InputStream is = null;
 		try {
 	    	URL url = new URL(uri.trim());
@@ -30,7 +30,7 @@ public class ColorSheetParser {
 	        if (is != null)
 	        	is.close();
 	    }
-	}
+	}*/
 	
 	public static void saveFromRebrickableFile(String file) throws MalformedURLException, IOException, ParseException {
 		InputStream is = null;

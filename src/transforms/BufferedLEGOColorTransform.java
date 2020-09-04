@@ -1,12 +1,6 @@
 package transforms;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.*;
 import mosaic.controllers.ColorController;
@@ -171,7 +165,7 @@ public abstract class BufferedLEGOColorTransform implements LEGOColorTransform, 
 		LEGOColor.CountingLEGOColor[] m = new LEGOColor.CountingLEGOColor[LEGOColor.getMaxRebrickableId()+1];
 		int cnt = 0;
 
-		LEGOColorGrid transformedColors = sets[lastIndex].colors;		
+		LEGOColorGrid transformedColors = sets[lastIndex].colors;
 		for (int y = 0; y < h; y++) {
 			int yIndent = (int)Math.round(scaleH * y);
 			int iy = unitBounds.y / blockHeight + y;

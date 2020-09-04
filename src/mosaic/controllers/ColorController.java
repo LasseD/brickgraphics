@@ -134,7 +134,7 @@ public class ColorController implements ModelHandler<BrickGraphicsState> {
 		if(!file.createNewFile())
 			throw new IOException("Unable to create the file " + name + ".");
 		
-		FileOutputStream os = new FileOutputStream(file, false);
+		FileOutputStream os = new FileOutputStream(file, false);		
 		BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(os));
 		for(LEGOColor c : colorsFromDisk) {
 			bw.write(c.getName() + " = ");
@@ -142,6 +142,7 @@ public class ColorController implements ModelHandler<BrickGraphicsState> {
 		}
 		bw.flush();
 		os.flush();
+		os.close();
 	}
 	
 	public boolean reloadColorGroups() {

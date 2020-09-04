@@ -335,7 +335,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		g2.translate(-x, -yMin);		
 	}
 	
-	private void drawCoverPicture(Graphics2D g2, PageFormat pf, int xMin, int xMax, int yMin, int yMax) {
+	private void drawCoverPicture(Graphics2D g2, PageFormat pf, FontMetrics fm, int xMin, int xMax, int yMin, int yMax) {
 		if(coverPagePictureType == CoverPagePictureType.Both) {
 			BufferedImage left = lastPreparedImage;
 			drawImage(g2, xMin, xMin + (xMax-xMin)*9/20, yMin, yMax, left);
@@ -368,7 +368,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 			int pageSizeInCoreUnitsW = magnifierSizeInCoreUnits.width * magnifiersPerPage.width;
 			int pageSizeInCoreUnitsH = magnifierSizeInCoreUnits.height * magnifiersPerPage.height;
 			
-			drawMagnifier(g2, 0, 1, 1, xMin, xMax, yMin, yMax, pageSizeInCoreUnitsW, pageSizeInCoreUnitsH, pf, null);		
+			drawMagnifier(g2, 0, 1, 1, xMin, xMax, yMin, yMax, pageSizeInCoreUnitsW, pageSizeInCoreUnitsH, pf, fm, null);		
 			magnifiersPerPage = oldMagnifiersPerPage;
 		}
 	}
@@ -394,7 +394,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		yMin = drawbom(g2, xMin, xMax, yMin, yMax, fontSizeIn1_72inches);
 		
 		// Cover picture:
-		drawCoverPicture(g2, pf, xMin, xMax, yMin, yMax);
+		drawCoverPicture(g2, pf, fm, xMin, xMax, yMin, yMax);
 	}
 	
 	private int getFontSizeIn1_72inches(PageFormat pf) {
@@ -573,7 +573,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		}
 	}
 	
-	private int drawMagnifier(Graphics2D g2, int page, int numPagesWidth, int numPagesHeight, int xMin, int xMax, int yMin, int yMax, int pageSizeInCoreUnitsW, int pageSizeInCoreUnitsH, PageFormat pf, Set<LEGOColor.CountingLEGOColor> used) {
+	private int drawMagnifier(Graphics2D g2, int page, int numPagesWidth, int numPagesHeight, int xMin, int xMax, int yMin, int yMax, int pageSizeInCoreUnitsW, int pageSizeInCoreUnitsH, PageFormat pf, FontMetrics fm, Set<LEGOColor.CountingLEGOColor> used) {
 		// Find out how big each page is (compared to full image):
 		Dimension shownMagnifierSize = new Dimension((int)pf.getImageableWidth(), (int)((pf.getImageableWidth() * pageSizeInCoreUnitsH) / pageSizeInCoreUnitsW));
 		int indentX = xMin;
@@ -590,7 +590,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		}
 		else {
 			smallMagnifierSize = new Dimension((int)(shownMagnifierSize.width / magnifiersPerPage.width*0.95), 
-													 (int)(shownMagnifierSize.height / magnifiersPerPage.height*0.95));
+											   (int)(shownMagnifierSize.height / magnifiersPerPage.height*0.95));
 		}
 
 		// draw magnified:
@@ -598,24 +598,53 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		ToBricksTransform tbTransform = magnifierController.getTBTransform();
 
 		Rectangle basicUnitRect = magnifierController.getCoreRect();
-		for(int x = 0; x < magnifiersPerPage.width; ++x) {
-			int xIndent = x*shownMagnifierSize.width/magnifiersPerPage.width;
-			g2.translate(xIndent, 0);
-			for(int y = 0; y < magnifiersPerPage.height; ++y) {
-				int yIndent = y*shownMagnifierSize.height/magnifiersPerPage.height;
+		int smallPage = 1;
+		for(int y = 0; y < magnifiersPerPage.height; ++y) {
+			int yIndent = y*shownMagnifierSize.height/magnifiersPerPage.height;
+			g2.translate(0, yIndent);
+
+			for(int x = 0; x < magnifiersPerPage.width; ++x) {
+				int xIndent = x*shownMagnifierSize.width/magnifiersPerPage.width;
 				
 				basicUnitRect.x = ((page % numPagesWidth)*magnifiersPerPage.width + x)*basicUnitRect.width;
 				basicUnitRect.y = (/*numPagesHeight-1-*/ (page / numPagesWidth) * magnifiersPerPage.height + y)*basicUnitRect.height; // Add numPagesHeight-1- in first parenthesis to start from bottom.
 
-				g2.translate(0, yIndent);
-				LEGOColor.CountingLEGOColor[] m = tbTransform.draw(g2, basicUnitRect, smallMagnifierSize, uiController.showColors(), used != null);
-				g2.translate(0, -yIndent);
+				g2.translate(xIndent, 0);
+				LEGOColor.CountingLEGOColor[] m = tbTransform.draw(g2, basicUnitRect, smallMagnifierSize, uiController.showColors(), false);//used != null); // TODO set last parameter false for an overview on each magnifier
+				
+				
+				
+				/*
+				
+				String ss = "" + smallPage++;
+				Rectangle2D stringBounds = fm.getStringBounds(ss, g2);
+				Rectangle2D stringBounds3 = fm.getStringBounds("abc", g2);
+				int boxWidth = (int)(1.3*stringBounds3.getWidth());
+				int boxHeight = (int)(1.1*stringBounds.getHeight());
+				//g2.drawString(leftText, xMid - 4*unit + (int)(3*unit-leftTextStringBounds.getWidth())/2, horizontalArrowY + arrowSize + unit);
+				int ww = smallMagnifierSize.width/2;
+				int hh = smallMagnifierSize.height/2;
+				int xx = ww - boxWidth/2;
+				int yy = hh - boxHeight/2;
+				g2.setColor(Color.WHITE);
+				g2.fillRect(xx, yy, boxWidth, boxHeight);
+				g2.setColor(Color.BLACK);
+				g2.drawRect(xx, yy, boxWidth, boxHeight);
+				g2.drawString(""+ss, (int)(ww-stringBounds.getWidth()/2), (int)(hh+stringBounds.getHeight()*0.38));//*/
+				
+				
+				
+				
+				
+				
+				
+				g2.translate(-xIndent, 0);
 				if(used != null) {
 					for(int i = 0; i < m.length; ++i)
 						used.add(m[i]);					
 				}
 			}
-			g2.translate(-xIndent, 0);
+			g2.translate(0, -yIndent);
 		}
 		
 		g2.translate(-indentX, -indentY);		
@@ -729,7 +758,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		
 		// magnifier:
 		Set<LEGOColor.CountingLEGOColor> used = new TreeSet<LEGOColor.CountingLEGOColor>();
-		yMax = drawMagnifier(g2, page, numPagesWidth, numPagesHeight, xMin, xMax, yMin, yMax, pageSizeInCoreUnitsW, pageSizeInCoreUnitsH, pf, used);
+		yMax = drawMagnifier(g2, page, numPagesWidth, numPagesHeight, xMin, xMax, yMin, yMax, pageSizeInCoreUnitsW, pageSizeInCoreUnitsH, pf, fm, used);
 		
 		// Legend:
 		g2.setFont(font);
