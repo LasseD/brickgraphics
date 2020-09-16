@@ -598,7 +598,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 		ToBricksTransform tbTransform = magnifierController.getTBTransform();
 
 		Rectangle basicUnitRect = magnifierController.getCoreRect();
-		int smallPage = 1;
+		//int smallPage = 1;
 		for(int y = 0; y < magnifiersPerPage.height; ++y) {
 			int yIndent = y*shownMagnifierSize.height/magnifiersPerPage.height;
 			g2.translate(0, yIndent);
@@ -610,7 +610,7 @@ public class PrintController implements Printable, ModelHandler<BrickGraphicsSta
 				basicUnitRect.y = (/*numPagesHeight-1-*/ (page / numPagesWidth) * magnifiersPerPage.height + y)*basicUnitRect.height; // Add numPagesHeight-1- in first parenthesis to start from bottom.
 
 				g2.translate(xIndent, 0);
-				LEGOColor.CountingLEGOColor[] m = tbTransform.draw(g2, basicUnitRect, smallMagnifierSize, uiController.showColors(), false);//used != null); // TODO set last parameter false for an overview on each magnifier
+				LEGOColor.CountingLEGOColor[] m = tbTransform.draw(g2, basicUnitRect, smallMagnifierSize, uiController.showColors(), used != null); // TODO set last parameter false for an overview on each magnifier
 				
 				
 				
