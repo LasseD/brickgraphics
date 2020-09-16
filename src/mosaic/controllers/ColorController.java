@@ -251,7 +251,7 @@ public class ColorController implements ModelHandler<BrickGraphicsState> {
 	public String getLoadRebrickableURL() {
 		return loadRebrickableURL;
 	}
-	public boolean loadColorsFromURL(String url, JDialog toModalizeOnError) {
+	/*public boolean loadColorsFromURL(String url, JDialog toModalizeOnError) {
 		try {
 			ColorSheetParser.saveFromWeb(url, this);
 		} catch (IOException e) {
@@ -267,7 +267,7 @@ public class ColorController implements ModelHandler<BrickGraphicsState> {
 		reloadColorsFile(toModalizeOnError);
 		reloadColorGroups(true); // Current implementation requires the groups to be reloaded.
 		return true;
-	}
+	}*/
 	public String getLoadRebrickableFile() {
 		return loadRebrickableFile;
 	}

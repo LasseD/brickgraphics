@@ -2,13 +2,15 @@ package colors;
 
 import java.awt.*;
 import java.io.*;
+import java.util.Calendar;
+
 import mosaic.controllers.ColorController;
 
 public class LEGOColor implements Comparable<LEGOColor>, Serializable {
 	private Color rgb;
 	private int[] lab;
 
-	private int parts, sets, from, to, plate1x1;
+	private int parts, sets, from, to;
 	private double intensity;
 	private ColorIdNamePair rebrickable;
 	private ColorIdNamePair[] lego, ldraw, bricklink, brickowl;
@@ -40,44 +42,15 @@ public class LEGOColor implements Comparable<LEGOColor>, Serializable {
 	public static int getMaxRebrickableId() {
 		return maxRebrickableId;
 	}
-	
-	private static LEGOColor parseOldFile(String[] parts) {
-		LEGOColor c = new LEGOColor();
-		
-		// Rebrickable:
-		int idR = parseInt(parts[0]);
-		if(maxRebrickableId < idR)
-			maxRebrickableId = idR;
-		c.rebrickable = new ColorIdNamePair(idR, parts[1]);
-
-		// RGB:
-		c.setRGB(new Color(parseInt(parts[2])));
-
-		// various numbers:
-		c.parts = parseInt(parts[3]);
-		c.sets = parseInt(parts[4]);
-		c.from = parseInt(parts[5]);
-		c.to = parseInt(parts[6]);
-		
-		int idLEGO = parseInt(parts[11]);
-		c.lego = ColorIdNamePair.parseOld(idLEGO, parts[7], parts[1]);
-		c.ldraw = ColorIdNamePair.parseOld(parts[8], parts[1]);
-		c.bricklink = ColorIdNamePair.parseOld(parts[9], parts[1]);
-
-		c.brickowl = new ColorIdNamePair[]{};
-		return c;
-	}
 		
 	public static LEGOColor parse(String s) {
 		if(s == null)
 			return null;
 		String[] parts = s.split("[|]", -1);
-		if(parts.length != 12)
-			throw new IllegalArgumentException("Expected color line to contain 12 sections. Contained " + parts.length + ": " + s);
+		if(parts.length != 11)
+			throw new IllegalArgumentException("Expected color line to contain 11 sections. Contained " + parts.length + ": " + s);
 		for(int i = 0; i < 11; ++i) 
 			parts[i] = parts[i].trim();
-		//if(parts.length == 12)
-		//	return parseOldFile(parts);
 		
 		LEGOColor c = new LEGOColor();
 		
@@ -101,7 +74,6 @@ public class LEGOColor implements Comparable<LEGOColor>, Serializable {
 		c.ldraw = ColorIdNamePair.parse(parts[8]);
 		c.bricklink = ColorIdNamePair.parse(parts[9]);
 		c.brickowl = ColorIdNamePair.parse(parts[10]);
-		c.plate1x1 = parseInt(parts[11]);
 		return c;
 	}
 	
@@ -135,9 +107,6 @@ public class LEGOColor implements Comparable<LEGOColor>, Serializable {
 	}
 	public int getIDLEGO() {
 		return lego[0].getID();
-	}
-	public int getPlate1x1() {
-		return plate1x1;
 	}
 	public String getName() {
 		return rebrickable.getName();
@@ -247,7 +216,7 @@ public class LEGOColor implements Comparable<LEGOColor>, Serializable {
 	}
 	
 	/* 
-	 * For loading from 2017 version of Rebrickable colors file:
+	 * For loading from 2020 version of Rebrickable colors file:
 	 */
 	public void loadRebrickableData(String s) {
 		if(rebrickable == null) {
@@ -265,18 +234,26 @@ public class LEGOColor implements Comparable<LEGOColor>, Serializable {
 				setRGB(new Color(parseInt("#" + s)));
 		}
 		else if(parts == -1) {
-			s = s.substring(s.indexOf(">")+1);
-			s = s.substring(0, s.length()-4);
 			parts = Integer.parseInt(s);
 		}
 		else if(sets == -1) {
 			sets = Integer.parseInt(s);
 		}
 		else if(from == -1) {
-			from = Integer.parseInt(s);
+			if(s.isEmpty()) {
+				from = 1949;
+			}
+			else {
+				from = Integer.parseInt(s);				
+			}
 		}
 		else if(to == -1) {
-			to = Integer.parseInt(s);
+			if(s.isEmpty()) {
+				to = Calendar.getInstance().get(Calendar.YEAR);
+			}
+			else {
+				to = Integer.parseInt(s);				
+			}
 		}
 	}
 	public void loadRebrickableData(ColorIdNamePair[] pairs) {

@@ -9,7 +9,7 @@ import java.text.ParseException;
 import java.util.LinkedList;
 import java.util.List;
 
-import mosaic.controllers.ColorController;
+//import mosaic.controllers.ColorController;
 
 import colors.LEGOColor;
 
@@ -58,6 +58,7 @@ public class ColorSheetParser {
 			}
 			bw.flush();
 			os.flush();
+			os.close();
 		}
 		finally {
 			if(os != null)

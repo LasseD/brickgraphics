@@ -19,7 +19,7 @@ import mosaic.io.MosaicIO;
  */
 public class ColorSettingsDialog extends JDialog implements ChangeListener {
 	private ColorController cc;
-	private JTextField tfLoadRebrickableURL, tfLoadRebrickableFile;
+	private JTextField /*tfLoadRebrickableURL,*/ tfLoadRebrickableFile;
 	private LividTextField tfFromYear, tfToYear, tfMinSets, tfMinParts;
 	private JCheckBox cbShowMetallic, cbShowTransparent, cbShowOnlyLDD, cbShowOtherColorsGroup;
 	private static final String DIALOG_TITLE = "Color Settings";
@@ -45,7 +45,7 @@ public class ColorSettingsDialog extends JDialog implements ChangeListener {
 		filterPanel.setLayout(new BoxLayout(filterPanel, BoxLayout.Y_AXIS));
 		
 		// Load options:
-		{
+		/*{
 			// Rebrickable URL:
 			JPanel titlePanel = new JPanel(new FlowLayout());
 			titlePanel.setBorder(BorderFactory.createTitledBorder("Update colors using Rebrickable.com"));
@@ -62,11 +62,11 @@ public class ColorSettingsDialog extends JDialog implements ChangeListener {
 			titlePanel.add(tfLoadRebrickableURL);
 			titlePanel.add(loadURLButton);
 			setupPanel.add(titlePanel);
-		}
+		}*/
 		{
 			// Rebrickable File:
 			JPanel titlePanel = new JPanel(new FlowLayout());
-			titlePanel.setBorder(BorderFactory.createTitledBorder("Update colors using a colors file downloaded from Rebrickable.com"));
+			titlePanel.setBorder(BorderFactory.createTitledBorder("Update colors using a colors file downloaded from https://rebrickable.com/colors"));
 			tfLoadRebrickableFile = new JTextField(40);
 			JButton findButton = new JButton("...");
 			findButton.addActionListener(MosaicIO.createHtmlFileOpenAction(this, tfLoadRebrickableFile));
@@ -317,7 +317,7 @@ public class ColorSettingsDialog extends JDialog implements ChangeListener {
 		if(e != null && e.getSource() == this)
 			return;
 		
-		tfLoadRebrickableURL.setText(cc.getLoadRebrickableURL());
+		//tfLoadRebrickableURL.setText(cc.getLoadRebrickableURL());
 		tfLoadRebrickableFile.setText(cc.getLoadRebrickableFile());
 		
 		String fy = "" + cc.getFromYear();

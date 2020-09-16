@@ -38,9 +38,16 @@ public class RebrickableColorSheetParser implements ColorSheetParserI {
 					throw new ParseException("Expected </tr> before end of file", data.size());
 				line = line.trim();
 				if(line.startsWith("<td>") && line.endsWith("</td>")) {
-					c.loadRebrickableData(line.substring(4, line.length()-5));
+					String a = line.substring(4, line.length()-5);
+					// Trim the anchor tag:
+					if(a.startsWith("<a href")) {
+						a = a.substring(a.indexOf('>')+1); // Trim <a href=...
+						a = a.substring(0, a.length()-4); // Trim ...</a>
+					}
+					
+					c.loadRebrickableData(a);
 				}
-				else if(line.startsWith("<span")) { // ID,name pairs line.
+				else if(line.startsWith("<span") && !line.contains("display:none")) { // ID,name pairs line.
 					line = line.substring(line.indexOf(">")+1);
 					int id = Integer.parseInt(line.substring(0, line.indexOf(" "))); // int before ' '
 					int indexOfSemiColon;
@@ -61,6 +68,7 @@ public class RebrickableColorSheetParser implements ColorSheetParserI {
 					data.clear();
 				}
 			}
+			//System.out.println("Added color: " + c);
 			out.add(c.toString());
 		}				
 		return out;
