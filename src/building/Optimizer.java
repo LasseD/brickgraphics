@@ -26,7 +26,7 @@ public class Optimizer {
 	
 	public Optimizer(LEGOColor[][][] oneByOnePlatePositions) {
 		placedParts = new LinkedList<Part>();
-		rebrickableIdToLEGOColor = new LEGOColor[1000];
+		rebrickableIdToLEGOColor = new LEGOColor[2000];
 		
 		checkInputAndSetDimensions(oneByOnePlatePositions);
 		setLdrawIdToLEGOColor(oneByOnePlatePositions);
