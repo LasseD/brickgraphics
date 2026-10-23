@@ -3,7 +3,8 @@ package io;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.file.*;
-
+import java.util.Base64;
+    
 import javax.imageio.ImageIO;
 
 import sun.misc.*;
@@ -16,7 +17,7 @@ public class DataFile {
 	}
 	
 	public DataFile(String base64) throws IOException {
-		data = new BASE64Decoder().decodeBuffer(base64);
+	    data = Base64.getDecoder().decode(base64.getBytes());
 	}
 	
 	public DataFile(BufferedImage image) throws IOException {
@@ -36,8 +37,8 @@ public class DataFile {
 	public String toBase64() {
 		if(!isValid())
 			return "";
-		BASE64Encoder encoder = new BASE64Encoder();
-		String out = encoder.encode(data);
+		Base64.Encoder encoder = Base64.getEncoder();
+		String out = encoder.encodeToString(data);
 		return '"'+out+'"';
 	}
 	

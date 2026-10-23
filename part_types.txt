@@ -8,6 +8,8 @@
 3003|Brick 2 x 2
 2357|Brick 2 x 2 Corner
 #Bricks 1 x X
+2465|Brick 1 x 16
+6112|Brick 1 x 12
 6111|Brick 1 x 10
 3008|Brick 1 x 8
 3009|Brick 1 x 6
